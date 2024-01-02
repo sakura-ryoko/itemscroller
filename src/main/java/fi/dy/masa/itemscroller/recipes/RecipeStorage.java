@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtTagSizeTracker;
+import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.screen.slot.Slot;
 
 import fi.dy.masa.itemscroller.ItemScroller;
@@ -207,7 +207,7 @@ public class RecipeStorage
                 if (file.exists() && file.isFile() && file.canRead())
                 {
                     FileInputStream is = new FileInputStream(file);
-                    this.readFromNBT(NbtIo.readCompressed(is, NbtTagSizeTracker.ofUnlimitedBytes()));
+                    this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
                     is.close();
                     //ItemScroller.logger.info("Read recipes from file '{}'", file.getPath());
                 }
