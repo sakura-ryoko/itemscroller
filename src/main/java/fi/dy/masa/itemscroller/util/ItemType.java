@@ -48,7 +48,8 @@ public class ItemType
 
         ItemType other = (ItemType) obj;
 
-        return ItemStack.canCombine(this.stack, other.stack);
+        //return ItemStack.canCombine(this.stack, other.stack);
+        return ItemStack.areItemsAndNbtEqual(this.stack, other.stack);
     }
 
     /**
@@ -64,7 +65,7 @@ public class ItemType
         {
             ItemStack stack = stacks[i];
 
-            if (InventoryUtils.isStackEmpty(stack) == false)
+            if (!InventoryUtils.isStackEmpty(stack))
             {
                 ItemType item = new ItemType(stack);
                 IntArrayList slots = mapSlots.computeIfAbsent(item, k -> new IntArrayList());

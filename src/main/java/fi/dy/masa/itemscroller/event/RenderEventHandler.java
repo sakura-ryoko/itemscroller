@@ -19,6 +19,7 @@ import fi.dy.masa.itemscroller.util.AccessorUtils;
 import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 import fi.dy.masa.itemscroller.util.InputUtils;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
+import org.joml.Matrix4fStack;
 
 public class RenderEventHandler
 {
@@ -52,8 +53,10 @@ public class RenderEventHandler
 
             this.calculateRecipePositions(gui);
 
-            MatrixStack matrixStack = RenderSystem.getModelViewStack();
-            matrixStack.push();
+            //MatrixStack matrixStack = RenderSystem.getModelViewStack();
+            //matrixStack.push();
+            Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+            matrixStack.pushMatrix();
             matrixStack.translate(this.recipeListX, this.recipeListY, 0);
             matrixStack.scale((float) this.scale, (float) this.scale, 1);
 
@@ -81,7 +84,8 @@ public class RenderEventHandler
                 this.renderRecipeItems(recipe, recipes.getRecipeCountPerPage(), gui, drawContext);
             }
 
-            matrixStack.pop();
+            //matrixStack.pop();
+            matrixStack.popMatrix();
             RenderSystem.applyModelViewMatrix();
             RenderSystem.enableBlend(); // Fixes the crafting book icon rendering
         }
@@ -102,7 +106,7 @@ public class RenderEventHandler
                 drawContext.drawText(mc.textRenderer, "Buffered slot clicks: " + bufferedCount, 10, 10, 0xFFD0D0D0, false);
             }
 
-            if (InputUtils.isRecipeViewOpen() == false)
+            if (!InputUtils.isRecipeViewOpen())
             {
                 return;
             }
@@ -114,8 +118,10 @@ public class RenderEventHandler
             final int recipeId = this.getHoveredRecipeId(mouseX, mouseY, recipes, gui);
 
             float offset = 300f;
-            MatrixStack matrixStack = RenderSystem.getModelViewStack();
-            matrixStack.push();
+            //MatrixStack matrixStack = RenderSystem.getModelViewStack();
+            //matrixStack.push();
+            Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+            matrixStack.pushMatrix();
             matrixStack.translate(0, 0, offset);
 
             if (recipeId >= 0)
@@ -128,13 +134,14 @@ public class RenderEventHandler
                 RecipePattern recipe = recipes.getSelectedRecipe();
                 ItemStack stack = this.getHoveredRecipeIngredient(mouseX, mouseY, recipe, recipes.getRecipeCountPerPage(), gui);
 
-                if (InventoryUtils.isStackEmpty(stack) == false)
+                if (!InventoryUtils.isStackEmpty(stack))
                 {
                     InventoryOverlay.renderStackToolTip(mouseX, mouseY, stack, this.mc, drawContext);
                 }
             }
 
-            matrixStack.pop();
+            //matrixStack.pop();
+            matrixStack.popMatrix();
             RenderSystem.applyModelViewMatrix();
         }
     }
@@ -174,7 +181,7 @@ public class RenderEventHandler
     {
         ItemStack stack = recipe.getResult();
 
-        if (InventoryUtils.isStackEmpty(stack) == false)
+        if (!InventoryUtils.isStackEmpty(stack))
         {
             InventoryOverlay.renderStackToolTip(mouseX, mouseY, stack, this.mc, drawContext);
         }
@@ -296,7 +303,7 @@ public class RenderEventHandler
 
         RenderUtils.drawRect(x, y, w, w, 0x20FFFFFF); // light background for the item
 
-        if (InventoryUtils.isStackEmpty(stack) == false)
+        if (!InventoryUtils.isStackEmpty(stack))
         {
             DiffuseLighting.enableGuiDepthLighting();
 
