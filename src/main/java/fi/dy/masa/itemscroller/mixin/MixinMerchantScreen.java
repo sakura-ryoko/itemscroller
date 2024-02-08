@@ -3,6 +3,7 @@ package fi.dy.masa.itemscroller.mixin;
 import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,9 +32,11 @@ import fi.dy.masa.malilib.render.RenderUtils;
 @Mixin(MerchantScreen.class)
 public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHandler>
 {
+    @Unique
     @Nullable private FavoriteData favoriteData;
     @Shadow private int selectedIndex;
     @Shadow int indexStartOffset;
+    @Unique
     private int indexStartOffsetLast = -1;
 
     @Shadow protected abstract boolean canScroll(int listSize);
@@ -117,7 +120,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
                     this.favoriteData = null; // Force a re-build of the list
 
                     // Rebuild the custom list based on the new favorites (See the Mixin for MerchantScreenHandler#setOffers())
-                    this.handler.setOffers(((IMerchantScreenHandler) this.handler).getOriginalList());
+                    this.handler.setOffers(((IMerchantScreenHandler) this.handler).itemscroller$getOriginalList());
 
                     cir.setReturnValue(true);
                 }
@@ -175,12 +178,14 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
         }
     }
 
+    @Unique
     private int getClampedIndex(int index)
     {
         int listSize = this.handler.getRecipes().size();
         return Math.max(0, Math.min(index, listSize - 7));
     }
 
+    @Unique
     private int getHoveredTradeButtonIndex(double mouseX, double mouseY)
     {
         int screenX = (this.width - this.backgroundWidth) / 2;

@@ -107,7 +107,7 @@ public class VillagerDataStorage
 
     public FavoriteData getFavoritesForCurrentVillager(MerchantScreenHandler handler)
     {
-        return this.getFavoritesForCurrentVillager(((IMerchantScreenHandler) handler).getOriginalList());
+        return this.getFavoritesForCurrentVillager(((IMerchantScreenHandler) handler).itemscroller$getOriginalList());
     }
 
     public FavoriteData getFavoritesForCurrentVillager(TradeOfferList originalTrades)

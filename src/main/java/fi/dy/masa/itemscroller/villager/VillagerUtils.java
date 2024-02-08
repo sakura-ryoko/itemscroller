@@ -3,6 +3,8 @@ package fi.dy.masa.itemscroller.villager;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
@@ -19,9 +21,8 @@ public class VillagerUtils
     {
         Screen screen = GuiUtils.getCurrentScreen();
 
-        if (screen instanceof MerchantScreen)
+        if (screen instanceof MerchantScreen merchantScreen)
         {
-            MerchantScreen merchantScreen = (MerchantScreen) screen;
             MerchantScreenHandler handler = merchantScreen.getScreenHandler();
 
             int realIndex = getRealTradeIndexFor(visibleIndex, handler);
@@ -35,7 +36,7 @@ public class VillagerUtils
                 handler.switchTo(visibleIndex);
 
                 // Use the real (server-side) index
-                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(realIndex));
+                Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).sendPacket(new SelectMerchantTradeC2SPacket(realIndex));
 
                 return true;
             }
@@ -48,7 +49,7 @@ public class VillagerUtils
     {
         if (handler instanceof IMerchantScreenHandler)
         {
-            TradeOfferList originalList = ((IMerchantScreenHandler) handler).getOriginalList();
+            TradeOfferList originalList = ((IMerchantScreenHandler) handler).itemscroller$getOriginalList();
             TradeOfferList customList = handler.getRecipes();
 
             if (originalList != null && customList != null &&

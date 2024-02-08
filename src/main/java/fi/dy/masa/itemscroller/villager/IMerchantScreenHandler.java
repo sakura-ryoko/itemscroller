@@ -4,5 +4,5 @@ import net.minecraft.village.TradeOfferList;
 
 public interface IMerchantScreenHandler
 {
-    TradeOfferList getOriginalList();
+    TradeOfferList itemscroller$getOriginalList();
 }
