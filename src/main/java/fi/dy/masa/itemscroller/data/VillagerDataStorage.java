@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.villager;
+package fi.dy.masa.itemscroller.data;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import fi.dy.masa.itemscroller.villager.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import net.minecraft.nbt.NbtCompound;
@@ -30,7 +32,6 @@ import fi.dy.masa.malilib.util.StringUtils;
 public class VillagerDataStorage
 {
     private static final VillagerDataStorage INSTANCE = new VillagerDataStorage();
-
     private final Map<UUID, VillagerData> data = new HashMap<>();
     private final List<TradeType> globalFavorites = new ArrayList<>();
     private UUID lastInteractedUUID;
@@ -40,6 +41,19 @@ public class VillagerDataStorage
     {
         return INSTANCE;
     }
+
+    public void reset(boolean isLogout)
+    {
+        if (isLogout)
+        {
+            //ItemScroller.printDebug("VillagerDataStorage#reset() - log-out");
+        }
+        else
+        {
+            //ItemScroller.printDebug("VillagerDataStorage#reset() - dimension change or log-in");
+        }
+    }
+
 
     public void setLastInteractedUUID(UUID uuid)
     {
@@ -115,7 +129,7 @@ public class VillagerDataStorage
         VillagerData data = this.getDataFor(this.lastInteractedUUID, false);
         IntArrayList favorites = data != null ? data.getFavorites() : null;
 
-        if (favorites != null && favorites.isEmpty() == false)
+        if (favorites != null && !favorites.isEmpty())
         {
             return new FavoriteData(favorites, false);
         }
@@ -130,7 +144,7 @@ public class VillagerDataStorage
 
     private void readFromNBT(NbtCompound nbt)
     {
-        if (nbt == null || nbt.contains("VillagerData", Constants.NBT.TAG_LIST) == false)
+        if (nbt == null || !nbt.contains("VillagerData", Constants.NBT.TAG_LIST))
         {
             return;
         }
@@ -219,6 +233,7 @@ public class VillagerDataStorage
                 FileInputStream is = new FileInputStream(file);
                 this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
                 is.close();
+                ItemScroller.printDebug("VillagerDataStorage#readFromDisk(): Read villager data from file '{}'", file.getPath());
             }
         }
         catch (Exception e)
@@ -235,7 +250,7 @@ public class VillagerDataStorage
             {
                 File saveDir = this.getSaveDir();
 
-                if (saveDir.exists() == false && saveDir.mkdirs() == false)
+                if (!saveDir.exists() && !saveDir.mkdirs())
                 {
                     ItemScroller.logger.warn("Failed to create the data storage directory '{}'", saveDir.getPath());
                     return;
@@ -249,10 +264,16 @@ public class VillagerDataStorage
 
                 if (fileReal.exists())
                 {
-                    fileReal.delete();
+                    if (!fileReal.delete())
+                    {
+                        ItemScroller.logger.warn("VillagerDataStorage#writeToDisk(): failed to delete file {} ", fileReal.getName());
+                    }
                 }
 
-                fileTmp.renameTo(fileReal);
+                if (fileTmp.renameTo(fileReal))
+                {
+                    ItemScroller.logger.warn("VillagerDataStorage#writeToDisk(): failed to delete file {} ", fileTmp.getName());
+                }
                 this.dirty = false;
             }
             catch (Exception e)

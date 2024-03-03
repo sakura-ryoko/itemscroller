@@ -30,6 +30,7 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean CARPET_CTRL_Q_CRAFTING                = new ConfigBoolean("carpetCtrlQCraftingEnabledOnServer",   false, "Set to true if the server is running the Carpet mod,\nand has the ctrlQCrafting option enabled.\nThis just changes which method Item Scroller uses\nfor the Drop key + Shift + Right click crafting.");
         public static final ConfigBoolean CLIENT_CRAFTING_FIX                   = new ConfigBoolean("clientCraftingFixOn1.12",              true, "Enable updating the crafting recipe output directly on the client side.\nThis fixes the quick/mass crafting and right-click-to-craft-a-stack\nfeatures othrwise being broken in 1.12.");
         public static final ConfigBoolean CRAFTING_RENDER_RECIPE_ITEMS          = new ConfigBoolean("craftingRenderRecipeItems",            true, "If enabled, then the recipe items are also rendered\nin the crafting recipe view.");
+        public static final ConfigBoolean DEBUG_MESSAGES                        = new ConfigBoolean("debugMessages",                        false, "Enables some debug messages in the game console");
         public static final ConfigBoolean MOD_MAIN_TOGGLE                       = new ConfigBoolean("modMainToggle",                        true, "Can disable all the functionality of the entire mod");
         public static final ConfigBoolean MASS_CRAFT_INHIBIT_MID_UPDATES        = new ConfigBoolean("massCraftInhibitMidUpdates",           true, "Prevent recipe output slot updates in the middle of moving items\nto the crafting grid. This should reduce CPU usage\nbecause of not constantly querying the recipe after every grid change.");
         public static final ConfigInteger MASS_CRAFT_INTERVAL                   = new ConfigInteger("massCraftInterval",                    2, 1, 60, "The interval in game ticks the massCraft operation is repeated at");
@@ -50,6 +51,7 @@ public class Configs implements IConfigHandler
                 CARPET_CTRL_Q_CRAFTING,
                 CLIENT_CRAFTING_FIX,
                 CRAFTING_RENDER_RECIPE_ITEMS,
+                DEBUG_MESSAGES,
                 MASS_CRAFT_INHIBIT_MID_UPDATES,
                 MASS_CRAFT_INTERVAL,
                 MASS_CRAFT_ITERATIONS,
@@ -180,7 +182,7 @@ public class Configs implements IConfigHandler
 
     private static void writeStrings(JsonObject obj, Set<String> inputSet, String arrayName)
     {
-        if (inputSet.isEmpty() == false)
+        if (!inputSet.isEmpty())
         {
             JsonArray arr = new JsonArray();
 

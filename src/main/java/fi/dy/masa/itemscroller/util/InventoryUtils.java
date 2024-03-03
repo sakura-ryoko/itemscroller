@@ -7,7 +7,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import fi.dy.masa.itemscroller.data.DataManager;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
 
@@ -25,6 +28,7 @@ import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
@@ -48,8 +52,8 @@ import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.recipes.RecipeStorage;
-import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
+import fi.dy.masa.itemscroller.data.RecipeDataStorage;
+import fi.dy.masa.itemscroller.data.VillagerDataStorage;
 import fi.dy.masa.itemscroller.villager.VillagerUtils;
 import fi.dy.masa.malilib.util.GuiUtils;
 
@@ -115,7 +119,7 @@ public class InventoryUtils
 
             if (recipe == null || !recipe.matches(craftMatrix, world))
             {
-                Optional<RecipeEntry<CraftingRecipe>> optional = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, craftMatrix, world);
+                Optional<RecipeEntry<CraftingRecipe>> optional = DataManager.getInstance().getWorldRecipeManager().getFirstMatch(RecipeType.CRAFTING, craftMatrix, world);
                 recipe = optional.map(RecipeEntry::value).orElse(null);
                 recipeEntry = optional.orElse(null);
             }
@@ -127,7 +131,7 @@ public class InventoryUtils
                      ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
-                    stack = recipe.craft(craftMatrix, Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).getRegistryManager());
+                    stack = recipe.craft(craftMatrix, DataManager.getInstance().getWorldRegistryManager());
                 }
 
                 if (setEmptyStack || !stack.isEmpty())
@@ -148,7 +152,7 @@ public class InventoryUtils
             Identifier rl = Registries.ITEM.getId(stack.getItem());
             String idStr = rl != null ? rl.toString() : "null";
             String displayName = stack.getName().getString();
-            String nbtStr = stack.getNbt() != null ? stack.getNbt().toString() : "<no NBT>";
+            String nbtStr = stack.getComponents() != null ? stack.getComponents().toString() : "<no NBT>";
 
             return String.format("[%s - display: %s - NBT: %s] (%s)", idStr, displayName, nbtStr, stack);
         }
@@ -160,7 +164,7 @@ public class InventoryUtils
     {
         if (slot == null)
         {
-            ItemScroller.logger.info("slot was null");
+            ItemScroller.printDebug("slot was null");
             return;
         }
 
@@ -168,7 +172,7 @@ public class InventoryUtils
         Object inv = slot.inventory;
         String stackStr = InventoryUtils.getStackString(slot.getStack());
 
-        ItemScroller.logger.info(String.format("slot: slotNumber: %d, getSlotIndex(): %d, getHasStack(): %s, " +
+        ItemScroller.printDebug(String.format("slot: slotNumber: %d, getSlotIndex(): %d, getHasStack(): %s, " +
                 "slot class: %s, inv class: %s, Container's slot list has slot: %s, stack: %s, numSlots: %d",
                 slot.id, AccessorUtils.getSlotIndex(slot), slot.hasStack(), slot.getClass().getName(),
                 inv != null ? inv.getClass().getName() : "<null>", hasSlot ? " true" : "false", stackStr,
@@ -217,7 +221,7 @@ public class InventoryUtils
     }
 
     public static boolean tryMoveItems(HandledScreen<? extends ScreenHandler> gui,
-                                       RecipeStorage recipes,
+                                       RecipeDataStorage recipes,
                                        boolean scrollingUp)
     {
         Slot slot = AccessorUtils.getSlotUnderMouse(gui);
@@ -666,19 +670,21 @@ public class InventoryUtils
         if (slot != null)
         {
             ItemStack stackCursor = gui.getScreenHandler().getCursorStack();
-            ItemStack stack = EMPTY_STACK;
 
             if (!isStackEmpty(stackCursor))
             {
                 // Do a cheap copy without NBT data
-                stack = new ItemStack(stackCursor.getItem(), getStackSize(stackCursor));
-            }
+                stackInCursorLast = new ItemStack(stackCursor.getItem(), getStackSize(stackCursor));
 
-            // Store the candidate
-            // NOTE: This method is called BEFORE the stack has been picked up to the cursor!
-            // Thus we can't check that there is an item already in the cursor, and that's why this is just a "candidate"
+                // Store the candidate
+                // NOTE: This method is called BEFORE the stack has been picked up to the cursor!
+                // Thus we can't check that there is an item already in the cursor, and that's why this is just a "candidate"
+            }
+            else
+            {
+                stackInCursorLast = EMPTY_STACK;
+            }
             sourceSlotCandidate = new WeakReference<>(slot);
-            stackInCursorLast = stack;
         }
     }
 
@@ -816,7 +822,7 @@ public class InventoryUtils
     private static void tryMoveSingleItemToOtherInventory(Slot slot,
                                                           HandledScreen<? extends ScreenHandler> gui)
     {
-        ItemStack stackOrig = slot.getStack();
+        ItemStack stackOrig = slot.getStack().copy();
         ScreenHandler container = gui.getScreenHandler();
         MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -1109,8 +1115,8 @@ public class InventoryUtils
             return;
         }
 
-        ItemStack buy1 = recipe.getAdjustedFirstBuyItem();
-        ItemStack buy2 = recipe.getSecondBuyItem();
+        ItemStack buy1 = recipe.getDisplayedFirstBuyItem();
+        ItemStack buy2 = recipe.getDisplayedSecondBuyItem();
 
         if (!isStackEmpty(buy1))
         {
@@ -1149,7 +1155,7 @@ public class InventoryUtils
 
     public static void handleRecipeClick(HandledScreen<? extends ScreenHandler> gui,
                                          MinecraftClient mc,
-                                         RecipeStorage recipes,
+                                         RecipeDataStorage recipes,
                                          int hoveredRecipeId,
                                          boolean isLeftClick,
                                          boolean isRightClick,
@@ -1245,7 +1251,7 @@ public class InventoryUtils
         }
     }
 
-    private static boolean tryMoveItemsCrafting(RecipeStorage recipes,
+    private static boolean tryMoveItemsCrafting(RecipeDataStorage recipes,
                                                 Slot slot,
                                                 HandledScreen<? extends ScreenHandler> gui,
                                                 boolean moveToOtherInventory,
@@ -1360,7 +1366,7 @@ public class InventoryUtils
             Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
 
             if (slotTmp != null && slotTmp.hasStack() &&
-                (!clearNonMatchingOnly || !areStacksEqual(recipe.getRecipeItems()[i], slotTmp.getStack())))
+                (!clearNonMatchingOnly || !areStacksEqual(recipe.getRecipeItems()[i].getStack(), slotTmp.getStack())))
             {
                 shiftClickSlot(gui, slotNum);
 
@@ -1638,7 +1644,7 @@ public class InventoryUtils
         if (outputSlot != null && !isStackEmpty(recipe.getResult()))
         {
             SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
-            ItemStack[] recipeItems = recipe.getRecipeItems();
+            ItemType[] recipeItems = recipe.getRecipeItems();
             final int invSlots = gui.getScreenHandler().slots.size();
             assert range != null;
             final int rangeSlots = Math.min(range.getSlotCount(), recipeItems.length);
@@ -1648,7 +1654,7 @@ public class InventoryUtils
                 Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
                 ItemStack stack = slotTmp.getStack();
 
-                if (!stack.isEmpty() && !areStacksEqual(stack, recipeItems[i]))
+                if (!stack.isEmpty() && !areStacksEqual(stack, recipeItems[i].getStack()))
                 {
                     dropAllMatchingStacks(gui, stack);
                 }
@@ -1665,7 +1671,7 @@ public class InventoryUtils
 
         if (range != null && !isStackEmpty(recipe.getResult()))
         {
-            ItemStack[] recipeItems = recipe.getRecipeItems();
+            ItemType[] recipeItems = recipe.getRecipeItems();
             final int invSlots = gui.getScreenHandler().slots.size();
             final int rangeSlots = Math.min(range.getSlotCount(), recipeItems.length);
             IntArrayList toRemove = new IntArrayList();
@@ -1676,11 +1682,11 @@ public class InventoryUtils
             for (int i = 0, slotNum = range.getFirst(); i < rangeSlots && slotNum < invSlots; i++, slotNum++)
             {
                 Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
-                ItemStack recipeStack = recipeItems[i];
+                ItemType recipeStack = recipeItems[i];
                 ItemStack slotStack = slotTmp.getStack();
-                boolean recipeHasItem = !isStackEmpty(recipeStack);
+                boolean recipeHasItem = !isStackEmpty(recipeStack.getStack());
 
-                if (!areStacksEqual(recipeStack, slotStack))
+                if (!areStacksEqual(recipeStack.getStack(), slotStack))
                 {
                     if (!recipeHasItem)
                     {
@@ -1688,7 +1694,7 @@ public class InventoryUtils
                     }
                     else
                     {
-                        int index = getPlayerInventoryIndexWithItem(recipeStack, inv);
+                        int index = getPlayerInventoryIndexWithItem(recipeStack.getStack(), inv);
 
                         if (index >= 0)
                         {
@@ -2075,7 +2081,7 @@ public class InventoryUtils
     public static boolean areStacksEqual(ItemStack stack1, ItemStack stack2)
     {
         //return ItemStack.canCombine(stack1, stack2);
-        return ItemStack.areItemsAndNbtEqual(stack1, stack2);
+        return ItemStack.areItemsAndComponentsEqual(stack1, stack2);
     }
 
     private static boolean areSlotsInSameInventory(Slot slot1, Slot slot2)
@@ -2593,6 +2599,138 @@ public class InventoryUtils
         return activeMoveAction;
     }
 
+
+    public static ItemType recipeResultReadNbt(@Nonnull NbtCompound nbt)
+    {
+        String idString;
+        int count;
+
+        if (nbt.contains("id"))
+        {
+            idString = nbt.getString("id");
+            if (nbt.contains("Count")) {
+                count = nbt.getByte("Count");
+                if (count < 0)
+                {
+                    count = 1;
+                }
+                else if (count > 64)
+                {
+                    count = 64;
+                }
+            }
+            else
+            {
+                count = 1;
+            }
+
+            ItemStack stackIn = fi.dy.masa.malilib.util.InventoryUtils.getItemStackFromString(idString, count);
+            ItemType result = new ItemType(stackIn);
+
+            if (!stackIn.isEmpty())
+            {
+                result.setId();
+                return result;
+            }
+        }
+
+        return ItemType.EMPTY;
+    }
+
+    public static NbtCompound recipeResultWriteNbt(@Nonnull ItemType itemType)
+    {
+        NbtCompound result = new NbtCompound();
+
+        if (!itemType.isEmpty())
+        {
+            if (itemType.getId() != null)
+            {
+                String idString = itemType.getId().toString();
+                int count = itemType.getStack().getCount();
+
+                if (idString != null && !idString.isEmpty())
+                {
+                    result.putString("id", idString);
+                    if (count < 0)
+                    {
+                        count = 0;
+                    }
+                    else if (count > 64)
+                    {
+                        count = 64;
+                    }
+                    result.putByte("Count", (byte) count);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static ItemType recipeSlotReadNbt(@Nonnull NbtCompound nbt)
+    {
+        String idString;
+        int count = -1;
+
+        if (nbt.contains("id"))
+        {
+            idString = nbt.getString("id");
+            if (nbt.contains("Count"))
+            {
+                count = nbt.getByte("Count");
+                if (count < 0)
+                {
+                    count = 1;
+                }
+                else if (count > 64)
+                {
+                    count = 64;
+                }
+            }
+
+            ItemStack stackIn = fi.dy.masa.malilib.util.InventoryUtils.getItemStackFromString(idString, count);
+            ItemType result = new ItemType(stackIn);
+
+            if (!stackIn.isEmpty())
+            {
+                result.setId();
+                return result;
+            }
+        }
+
+        return ItemType.EMPTY;
+    }
+
+    public static NbtCompound recipeSlotWriteNbt(@Nonnull ItemType itemType)
+    {
+        NbtCompound result = new NbtCompound();
+
+        if (!itemType.isEmpty())
+        {
+            if (itemType.getId() != null)
+            {
+                String id = itemType.getId().toString();
+                int count = itemType.getStack().getCount();
+
+                if (!(id == null) && !id.isEmpty())
+                {
+                    result.putString("id", id);
+                    if (count < 0)
+                    {
+                        count = 1;
+                    }
+                    else if (count > 64)
+                    {
+                        count = 64;
+                    }
+                    result.putByte("Count", (byte) count);
+                }
+            }
+        }
+
+        return result;
+    }
+
     /*
     private static class SlotVerticalSorterSlots implements Comparator<Slot>
     {
@@ -2799,5 +2937,13 @@ public class InventoryUtils
     public static void setStackSize(ItemStack stack, int size)
     {
         stack.setCount(size);
+    }
+
+    public static ItemStack copyStack(ItemStack stack, boolean empty)
+    {
+        if (empty)
+            return stack.copyAndEmpty();
+        else
+            return stack.copy();
     }
 }

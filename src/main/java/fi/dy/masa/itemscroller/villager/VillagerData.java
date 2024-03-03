@@ -14,7 +14,7 @@ public class VillagerData
     private final IntArrayList favorites = new IntArrayList();
     private int tradeListPosition;
 
-    VillagerData(UUID uuid)
+    public VillagerData(UUID uuid)
     {
         this.uuid = uuid;
     }
@@ -29,12 +29,12 @@ public class VillagerData
         return this.tradeListPosition;
     }
 
-    void setTradeListPosition(int position)
+    public void setTradeListPosition(int position)
     {
         this.tradeListPosition = position;
     }
 
-    void toggleFavorite(int tradeIndex)
+    public void toggleFavorite(int tradeIndex)
     {
         if (this.favorites.contains(tradeIndex))
         {
@@ -46,7 +46,7 @@ public class VillagerData
         }
     }
 
-    IntArrayList getFavorites()
+    public IntArrayList getFavorites()
     {
         return this.favorites;
     }

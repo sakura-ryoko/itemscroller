@@ -19,7 +19,7 @@ import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.GuiConfigs;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.recipes.RecipeStorage;
+import fi.dy.masa.itemscroller.data.RecipeDataStorage;
 import fi.dy.masa.itemscroller.util.AccessorUtils;
 import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 import fi.dy.masa.itemscroller.util.InputUtils;
@@ -100,7 +100,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
         HandledScreen<?> gui = (HandledScreen<?>) GuiUtils.getCurrentScreen();
         Slot slot = AccessorUtils.getSlotUnderMouse(gui);
-        RecipeStorage recipes = RecipeStorage.getInstance();
+        RecipeDataStorage recipes = RecipeDataStorage.getInstance();
         MoveAction moveAction = InputUtils.getDragMoveAction(key);
 
         if (slot != null)
@@ -206,7 +206,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                     ClickPacketBuffer.setShouldBufferClickPackets(true);
                 }
 
-                RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
+                RecipePattern recipe = RecipeDataStorage.getInstance().getSelectedRecipe();
                 int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
 
                 if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())

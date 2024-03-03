@@ -1,10 +1,11 @@
-package fi.dy.masa.itemscroller.recipes;
+package fi.dy.masa.itemscroller.data;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import javax.annotation.Nonnull;
 
+import fi.dy.masa.itemscroller.recipes.RecipePattern;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -19,23 +20,36 @@ import fi.dy.masa.itemscroller.util.Constants;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 
-public class RecipeStorage
+public class RecipeDataStorage
 {
-    private static final RecipeStorage INSTANCE = new RecipeStorage(8 * 18);
-
+    private static final int MAX_RECIPES = 18;
+    private static final RecipeDataStorage INSTANCE = new RecipeDataStorage(MAX_RECIPES);
     private final RecipePattern[] recipes;
     private int selected;
     private boolean dirty;
 
-    public static RecipeStorage getInstance()
+    public static RecipeDataStorage getInstance()
     {
         return INSTANCE;
     }
 
-    public RecipeStorage(int recipeCount)
+    public RecipeDataStorage(int recipeCount)
     {
         this.recipes = new RecipePattern[recipeCount];
         this.initRecipes();
+    }
+
+    public void reset(boolean isLogout)
+    {
+        if (isLogout)
+        {
+            //ItemScroller.printDebug("RecipeDataStorage#reset() - log-out");
+            this.clearRecipes();
+        }
+        else
+        {
+            //ItemScroller.printDebug("RecipeDataStorage#reset() - dimension change or log-in");
+        }
     }
 
     private void initRecipes()
@@ -43,6 +57,14 @@ public class RecipeStorage
         for (int i = 0; i < this.recipes.length; i++)
         {
             this.recipes[i] = new RecipePattern();
+        }
+    }
+
+    private void clearRecipes()
+    {
+        for (int i = 0; i < this.recipes.length; i++)
+        {
+            this.clearRecipe(i);
         }
     }
 
@@ -77,7 +99,7 @@ public class RecipeStorage
 
     public int getRecipeCountPerPage()
     {
-        return 18;
+        return this.recipes.length;
     }
 
     public int getCurrentRecipePage()
@@ -125,7 +147,7 @@ public class RecipeStorage
 
     private void readFromNBT(NbtCompound nbt)
     {
-        if (nbt == null || nbt.contains("Recipes", Constants.NBT.TAG_LIST) == false)
+        if (nbt == null || !nbt.contains("Recipes", Constants.NBT.TAG_LIST))
         {
             return;
         }
@@ -153,17 +175,18 @@ public class RecipeStorage
         this.changeSelectedRecipe(nbt.getByte("Selected"));
     }
 
-    private NbtCompound writeToNBT(@Nonnull NbtCompound nbt)
+    private NbtCompound writeToNBT()
     {
         NbtList tagRecipes = new NbtList();
+        NbtCompound nbt = new NbtCompound();
 
         for (int i = 0; i < this.recipes.length; i++)
         {
             if (this.recipes[i].isValid())
             {
-                NbtCompound tag = new NbtCompound();
+
+                NbtCompound tag = this.recipes[i].writeToNBT();
                 tag.putByte("RecipeIndex", (byte) i);
-                this.recipes[i].writeToNBT(tag);
                 tagRecipes.add(tag);
             }
         }
@@ -176,7 +199,7 @@ public class RecipeStorage
 
     private String getFileName()
     {
-        if (Configs.Generic.SCROLL_CRAFT_RECIPE_FILE_GLOBAL.getBooleanValue() == false)
+        if (!Configs.Generic.SCROLL_CRAFT_RECIPE_FILE_GLOBAL.getBooleanValue())
         {
             String worldName = StringUtils.getWorldOrServerName();
 
@@ -206,16 +229,18 @@ public class RecipeStorage
 
                 if (file.exists() && file.isFile() && file.canRead())
                 {
+                    this.initRecipes();
+
                     FileInputStream is = new FileInputStream(file);
                     this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
                     is.close();
-                    //ItemScroller.logger.info("Read recipes from file '{}'", file.getPath());
+                    ItemScroller.printDebug("RecipeDataStorage#readFromDisk(): Read recipes from file '{}'", file.getPath());
                 }
             }
         }
         catch (Exception e)
         {
-            ItemScroller.logger.warn("Failed to read recipes from file", e);
+            ItemScroller.logger.warn("RecipeDataStorage#readFromDisk(): Failed to read recipes from file", e);
         }
     }
 
@@ -227,11 +252,11 @@ public class RecipeStorage
             {
                 File saveDir = this.getSaveDir();
 
-                if (saveDir.exists() == false)
+                if (!saveDir.exists())
                 {
-                    if (saveDir.mkdirs() == false)
+                    if (!saveDir.mkdirs())
                     {
-                        ItemScroller.logger.warn("Failed to create the recipe storage directory '{}'", saveDir.getPath());
+                        ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): Failed to create the recipe storage directory '{}'", saveDir.getPath());
                         return;
                     }
                 }
@@ -239,20 +264,26 @@ public class RecipeStorage
                 File fileTmp  = new File(saveDir, this.getFileName() + ".tmp");
                 File fileReal = new File(saveDir, this.getFileName());
                 FileOutputStream os = new FileOutputStream(fileTmp);
-                NbtIo.writeCompressed(this.writeToNBT(new NbtCompound()), os);
+                NbtIo.writeCompressed(this.writeToNBT(), os);
                 os.close();
 
                 if (fileReal.exists())
                 {
-                    fileReal.delete();
+                    if (!fileReal.delete())
+                    {
+                        ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): failed to delete file {} ", fileReal.getName());
+                    }
                 }
 
-                fileTmp.renameTo(fileReal);
+                if (!fileTmp.renameTo(fileReal))
+                {
+                    ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): failed to rename file {} ", fileTmp.getName());
+                }
                 this.dirty = false;
             }
             catch (Exception e)
             {
-                ItemScroller.logger.warn("Failed to write recipes to file!", e);
+                ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): Failed to write recipes to file!", e);
             }
         }
     }

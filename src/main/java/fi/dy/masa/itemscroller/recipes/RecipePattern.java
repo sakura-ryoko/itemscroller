@@ -2,6 +2,8 @@ package fi.dy.masa.itemscroller.recipes;
 
 import java.util.Arrays;
 import javax.annotation.Nonnull;
+
+import fi.dy.masa.itemscroller.util.ItemType;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -14,26 +16,27 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 public class RecipePattern
 {
-    private ItemStack result = InventoryUtils.EMPTY_STACK;
-    private ItemStack[] recipe = new ItemStack[9];
+    private static final int MAX_SLOTS = 9;
+    private ItemType result = ItemType.EMPTY;
+    private ItemType[] recipe = new ItemType[MAX_SLOTS];
 
     public RecipePattern()
     {
-        this.ensureRecipeSizeAndClearRecipe(9);
+        this.ensureRecipeSizeAndClearRecipe(MAX_SLOTS);
     }
 
     public void ensureRecipeSize(int size)
     {
         if (this.getRecipeLength() != size)
         {
-            this.recipe = new ItemStack[size];
+            this.recipe = new ItemType[size];
         }
     }
 
     public void clearRecipe()
     {
-        Arrays.fill(this.recipe, InventoryUtils.EMPTY_STACK);
-        this.result = InventoryUtils.EMPTY_STACK;
+        Arrays.fill(this.recipe, ItemType.EMPTY);
+        this.result = ItemType.EMPTY;
     }
 
     public void ensureRecipeSizeAndClearRecipe(int size)
@@ -58,10 +61,10 @@ public class RecipePattern
                 for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlots; i++, s++)
                 {
                     Slot slotTmp = gui.getScreenHandler().getSlot(s);
-                    this.recipe[i] = slotTmp.hasStack() ? slotTmp.getStack().copy() : InventoryUtils.EMPTY_STACK;
+                    this.recipe[i] = new ItemType(slotTmp);
                 }
 
-                this.result = slot.getStack().copy();
+                this.result = new ItemType(slot);
             }
             else if (clearIfEmpty)
             {
@@ -73,16 +76,16 @@ public class RecipePattern
     public void copyRecipeFrom(RecipePattern other)
     {
         int size = other.getRecipeLength();
-        ItemStack[] otherRecipe = other.getRecipeItems();
+        ItemType[] otherRecipe = other.getRecipeItems();
 
         this.ensureRecipeSizeAndClearRecipe(size);
 
         for (int i = 0; i < size; i++)
         {
-            this.recipe[i] = InventoryUtils.isStackEmpty(otherRecipe[i]) == false ? otherRecipe[i].copy() : InventoryUtils.EMPTY_STACK;
+            this.recipe[i] = new ItemType(otherRecipe[i].getStack());
         }
 
-        this.result = InventoryUtils.isStackEmpty(other.getResult()) == false ? other.getResult().copy() : InventoryUtils.EMPTY_STACK;
+        this.result = !InventoryUtils.isStackEmpty(other.getResult()) ? new ItemType(other.getResult()) : ItemType.EMPTY;
     }
 
     public void readFromNBT(@Nonnull NbtCompound nbt)
@@ -105,21 +108,23 @@ public class RecipePattern
 
                 if (slot >= 0 && slot < this.recipe.length)
                 {
-                    this.recipe[slot] = ItemStack.fromNbt(tag);
+                    this.recipe[slot] = InventoryUtils.recipeSlotReadNbt(tag);
                 }
             }
 
-            this.result = ItemStack.fromNbt(nbt.getCompound("Result"));
+            // this.result = ItemStack.fromNbt(nbt.getCompound("Result"));
+            this.result = InventoryUtils.recipeResultReadNbt(nbt.getCompound("Result"));
         }
     }
 
     @Nonnull
-    public NbtCompound writeToNBT(@Nonnull NbtCompound nbt)
+    public NbtCompound writeToNBT()
     {
-        if (this.isValid())
+        NbtCompound nbt = new NbtCompound();
+
+        if (this.result.isValid())
         {
-            NbtCompound tag = new NbtCompound();
-            this.result.writeNbt(tag);
+            NbtCompound tag = InventoryUtils.recipeResultWriteNbt(this.result);
 
             nbt.putInt("Length", this.recipe.length);
             nbt.put("Result", tag);
@@ -128,11 +133,12 @@ public class RecipePattern
 
             for (int i = 0; i < this.recipe.length; i++)
             {
-                if (InventoryUtils.isStackEmpty(this.recipe[i]) == false)
+                if (!this.recipe[i].isEmpty() && this.recipe[i].hasId())
                 {
                     tag = new NbtCompound();
+                    tag.copyFrom(InventoryUtils.recipeSlotWriteNbt(this.recipe[i]));
+
                     tag.putInt("Slot", i);
-                    this.recipe[i].writeNbt(tag);
                     tagIngredients.add(tag);
                 }
             }
@@ -145,7 +151,14 @@ public class RecipePattern
 
     public ItemStack getResult()
     {
-        return this.result;
+        if (this.result.isValid())
+        {
+            return this.result.getStack();
+        }
+        else
+        {
+            return InventoryUtils.EMPTY_STACK;
+        }
     }
 
     public int getRecipeLength()
@@ -153,13 +166,21 @@ public class RecipePattern
         return this.recipe.length;
     }
 
-    public ItemStack[] getRecipeItems()
+    public ItemType[] getRecipeItems()
     {
         return this.recipe;
     }
 
     public boolean isValid()
     {
-        return InventoryUtils.isStackEmpty(this.getResult()) == false;
+        if (!this.result.isEmpty())
+        {
+            if (this.result.hasId())
+            {
+                return this.result.isValid();
+            }
+        }
+
+        return false;
     }
 }

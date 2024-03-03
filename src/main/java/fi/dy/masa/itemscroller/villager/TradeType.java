@@ -26,7 +26,7 @@ public class TradeType
     public boolean matchesTrade(TradeOffer trade)
     {
         ItemStack stackBuyItem1 = trade.getOriginalFirstBuyItem();
-        ItemStack stackBuyItem2 = trade.getSecondBuyItem();
+        ItemStack stackBuyItem2 = trade.getDisplayedSecondBuyItem();
         ItemStack stackSellItem = trade.getSellItem();
         Item buyItem1 = stackBuyItem1.getItem();
         Item buyItem2 = stackBuyItem2.getItem();
@@ -111,7 +111,7 @@ public class TradeType
     public static TradeType of(TradeOffer trade)
     {
         ItemStack stackBuyItem1 = trade.getOriginalFirstBuyItem();
-        ItemStack stackBuyItem2 = trade.getSecondBuyItem();
+        ItemStack stackBuyItem2 = trade.getDisplayedSecondBuyItem();
         ItemStack stackSellItem = trade.getSellItem();
         Item buyItem1 = stackBuyItem1.getItem();
         Item buyItem2 = stackBuyItem2.getItem();

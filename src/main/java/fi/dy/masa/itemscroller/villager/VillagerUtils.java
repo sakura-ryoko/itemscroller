@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import fi.dy.masa.itemscroller.data.VillagerDataStorage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
@@ -80,7 +81,7 @@ public class VillagerUtils
         //System.out.printf("build - fav: %s (%s), or: %d\n", favorites, data.isGlobal, originalList.size());
 
         // Some favorites defined
-        if (favorites.isEmpty() == false)
+        if (!favorites.isEmpty())
         {
             TradeOfferList list = new TradeOfferList();
             int originalListSize = originalList.size();
@@ -97,7 +98,7 @@ public class VillagerUtils
             // Then add the rest of the recipes in their original order
             for (int i = 0; i < originalListSize; ++i)
             {
-                if (favorites.contains(i) == false)
+                if (!favorites.contains(i))
                 {
                     list.add(originalList.get(i));
                 }
