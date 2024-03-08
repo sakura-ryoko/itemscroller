@@ -22,8 +22,9 @@ import fi.dy.masa.malilib.util.StringUtils;
 
 public class RecipeDataStorage
 {
-    private static final int MAX_RECIPES = 18;
-    private static final RecipeDataStorage INSTANCE = new RecipeDataStorage(MAX_RECIPES);
+    private static final int MAX_PAGES = 8;         // 8 Pages of 18 = 144 total slots
+    private static final int MAX_RECIPES = 18;      // 8 Pages of 18 = 144 total slots
+    private static final RecipeDataStorage INSTANCE = new RecipeDataStorage(MAX_RECIPES * MAX_PAGES);
     private final RecipePattern[] recipes;
     private int selected;
     private boolean dirty;
@@ -99,7 +100,7 @@ public class RecipeDataStorage
 
     public int getRecipeCountPerPage()
     {
-        return this.recipes.length;
+        return MAX_RECIPES;
     }
 
     public int getCurrentRecipePage()
