@@ -287,5 +287,9 @@ public class RecipeDataStorage
                 ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): Failed to write recipes to file!", e);
             }
         }
+        else
+        {
+            ItemScroller.printDebug("RecipeDataStorage#writeToDisk(): File marked as clean, skipping output to disk.");
+        }
     }
 }

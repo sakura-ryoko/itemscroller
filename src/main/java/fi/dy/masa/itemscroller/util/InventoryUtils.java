@@ -1961,7 +1961,9 @@ public class InventoryUtils
                                                                boolean treatHotbarAsDifferent,
                                                                boolean reverse)
     {
-        IntArrayList slots = new IntArrayList(64);
+        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+        //  but not go over 99.
+        IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
 
@@ -1992,7 +1994,9 @@ public class InventoryUtils
                                                                ItemStack stackReference,
                                                                boolean preferPartial)
     {
-        IntArrayList slots = new IntArrayList(64);
+        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+        //  but not go over 99.
+        IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
 
         for (int i = 0; i <= maxSlot; ++i)
@@ -2039,7 +2043,9 @@ public class InventoryUtils
                                                            boolean treatHotbarAsDifferent,
                                                            boolean reverse)
     {
-        IntArrayList slots = new IntArrayList(64);
+        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+        //  but not go over 99.
+        IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
 
@@ -2061,7 +2067,9 @@ public class InventoryUtils
     private static IntArrayList getSlotNumbersOfEmptySlotsInPlayerInventory(ScreenHandler container,
                                                                             boolean reverse)
     {
-        IntArrayList slots = new IntArrayList(64);
+        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+        //  but not go over 99.
+        IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
 
@@ -2330,6 +2338,8 @@ public class InventoryUtils
         if (slotNum >= 0 && slotNum < gui.getScreenHandler().slots.size())
         {
             Slot slot = gui.getScreenHandler().getSlot(slotNum);
+            // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+            //  but not go over 99, but does this matter for item slots?
             int failsafe = 64;
 
             while (failsafe-- > 0 && slot.hasStack())
@@ -2614,9 +2624,11 @@ public class InventoryUtils
                 {
                     count = 1;
                 }
-                else if (count > 64)
+                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+                //  but not go over 99.
+                else if (count > 99)
                 {
-                    count = 64;
+                    count = 99;
                 }
             }
             else
@@ -2647,6 +2659,7 @@ public class InventoryUtils
             {
                 String idString = itemType.getId().toString();
                 int count = itemType.getStack().getCount();
+                int maxCount = itemType.getStack().getMaxCount();
 
                 if (idString != null && !idString.isEmpty())
                 {
@@ -2655,9 +2668,11 @@ public class InventoryUtils
                     {
                         count = 0;
                     }
-                    else if (count > 64)
+                    // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+                    //  but not go over 99.
+                    else if (count > maxCount)
                     {
-                        count = 64;
+                        count = maxCount;
                     }
                     result.putByte("Count", (byte) count);
                 }
@@ -2682,9 +2697,11 @@ public class InventoryUtils
                 {
                     count = 1;
                 }
-                else if (count > 64)
+                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+                //  but not go over 99.
+                else if (count > 99)
                 {
-                    count = 64;
+                    count = 99;
                 }
             }
 
@@ -2711,6 +2728,7 @@ public class InventoryUtils
             {
                 String id = itemType.getId().toString();
                 int count = itemType.getStack().getCount();
+                int maxCount = itemType.getStack().getMaxCount();
 
                 if (!(id == null) && !id.isEmpty())
                 {
@@ -2719,9 +2737,11 @@ public class InventoryUtils
                     {
                         count = 1;
                     }
-                    else if (count > 64)
+                    // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+                    //  but not go over 99.
+                    else if (count > maxCount)
                     {
-                        count = 64;
+                        count = maxCount;
                     }
                     result.putByte("Count", (byte) count);
                 }
