@@ -155,10 +155,13 @@ public class VillagerDataStorage
         for (int i = 0; i < count; i++)
         {
             NbtCompound tag = tagList.getCompound(i);
+
             VillagerData data = VillagerData.fromNBT(tag);
 
             if (data != null)
             {
+                //ItemScroller.printDebug("VillagerDataStorage#readFromNBT(): read VillagerData[{}] from NBT UUID ({})", i, data.getUUID());
+
                 this.data.put(data.getUUID(), data);
             }
         }
@@ -173,6 +176,8 @@ public class VillagerDataStorage
 
             if (type != null)
             {
+                //ItemScroller.printDebug("VillagerDataStorage#readFromNBT(): read GlobalFavorites[{}] sell {} from NBT", i, type.sellItem.getName().getLiteralString());
+
                 this.globalFavorites.add(type);
             }
         }
@@ -185,11 +190,15 @@ public class VillagerDataStorage
 
         for (VillagerData data : this.data.values())
         {
+            //ItemScroller.printDebug("VillagerDataStorage#writeToNBT(): VillagerData[] UUID {} to file", data.getUUID());
+
             favoriteListData.add(data.toNBT());
         }
 
         for (TradeType type : this.globalFavorites)
         {
+            //ItemScroller.printDebug("VillagerDataStorage#writeToNBT(): GlobalFavorites[] sell {} to file", type.sellItem.getName().getLiteralString());
+
             globalFavoriteData.add(type.toTag());
         }
 
@@ -275,11 +284,17 @@ public class VillagerDataStorage
                     ItemScroller.logger.warn("VillagerDataStorage#writeToDisk(): failed to delete file {} ", fileTmp.getName());
                 }
                 this.dirty = false;
+
+                ItemScroller.printDebug("VillagerDataStorage#writeToDisk(): Wrote villager data to file '{}'", fileReal.getPath());
             }
             catch (Exception e)
             {
                 ItemScroller.logger.warn("Failed to write villager data to file!", e);
             }
+        }
+        else
+        {
+            ItemScroller.printDebug("VillagerDataStorage#writeToDisk(): File marked as clean, skipping output to disk.");
         }
     }
 }
