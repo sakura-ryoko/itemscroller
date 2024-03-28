@@ -104,9 +104,11 @@ public class VillagerUtils
                 }
             }
 
+            //ItemScroller.printDebug("buildCustomTradeList(): originalList size {} : list size {}", originalList.size(), list.size());
             return list;
         }
 
+        //ItemScroller.printDebug("buildCustomTradeList(): originalList size {}", originalList.size());
         return originalList;
     }
 
