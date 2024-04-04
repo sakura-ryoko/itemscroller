@@ -254,7 +254,7 @@ public class InventoryUtils
         }
 
         // Check that the slot is valid, (don't require items in case of the villager output slot or a crafting slot)
-        if (isValidSlot(slot, gui, !villagerHandling && !craftingHandling) == false)
+        if (isValidSlot(slot, gui, villagerHandling == false && craftingHandling == false) == false)
         {
             return false;
         }
@@ -1540,7 +1540,7 @@ public class InventoryUtils
         ItemStack stackCursor = gui.getScreenHandler().getCursorStack();
 
         if (slot == null || slot.hasStack() == false ||
-            (isStackEmpty(stackCursor)) == false && areStacksEqual(slot.getStack(), stackCursor) == false)
+            (isStackEmpty(stackCursor) == false) && areStacksEqual(slot.getStack(), stackCursor) == false)
         {
             return;
         }
@@ -1709,7 +1709,7 @@ public class InventoryUtils
             {
                 shiftClickSlot(gui, slotNum);
 
-                if (!isStackEmpty(gui.getScreenHandler().getSlot(slotNum).getStack()))
+                if (isStackEmpty(gui.getScreenHandler().getSlot(slotNum).getStack()) == false)
                 {
                     dropStack(gui, slotNum);
                 }
@@ -1767,7 +1767,7 @@ public class InventoryUtils
         {
             IntArrayList slots = getSlotNumbersOfMatchingStacks(gui.getScreenHandler(), slot, false, stackCursor, true, true, false);
 
-            if (!moveItemFromCursorToSlots(gui, slots))
+            if (moveItemFromCursorToSlots(gui, slots) == false)
             {
                 slots = getSlotNumbersOfEmptySlotsInPlayerInventory(gui.getScreenHandler(), false);
                 moveItemFromCursorToSlots(gui, slots);
@@ -2148,8 +2148,8 @@ public class InventoryUtils
             ItemStack stackOrig = originalStacks[i];
             ItemStack stackNew = slots.get(i).getStack();
 
-            if ((isStackEmpty(stackOrig) && !isStackEmpty(stackNew)) ||
-               (!isStackEmpty(stackOrig) && !isStackEmpty(stackNew) &&
+            if ((isStackEmpty(stackOrig) && isStackEmpty(stackNew) == false) ||
+               (isStackEmpty(stackOrig) == false && isStackEmpty(stackNew) == false &&
                getStackSize(stackNew) == (getStackSize(stackOrig) + 1)))
             {
                 return i;

@@ -159,8 +159,6 @@ public class VillagerDataStorage
 
             if (data != null)
             {
-                //ItemScroller.printDebug("VillagerDataStorage#readFromNBT(): read VillagerData[{}] from NBT UUID ({})", i, data.getUUID());
-
                 this.data.put(data.getUUID(), data);
             }
         }
@@ -175,8 +173,6 @@ public class VillagerDataStorage
 
             if (type != null)
             {
-                //ItemScroller.printDebug("VillagerDataStorage#readFromNBT(): read GlobalFavorites[{}] sell {} from NBT", i, type.sellItem.getName().getLiteralString());
-
                 this.globalFavorites.add(type);
             }
         }
@@ -189,15 +185,11 @@ public class VillagerDataStorage
 
         for (VillagerData data : this.data.values())
         {
-            //ItemScroller.printDebug("VillagerDataStorage#writeToNBT(): VillagerData[] UUID {} to file", data.getUUID());
-
             favoriteListData.add(data.toNBT());
         }
 
         for (TradeType type : this.globalFavorites)
         {
-            //ItemScroller.printDebug("VillagerDataStorage#writeToNBT(): GlobalFavorites[] sell {} to file", type.sellItem.getName().getLiteralString());
-
             globalFavoriteData.add(type.toTag());
         }
 

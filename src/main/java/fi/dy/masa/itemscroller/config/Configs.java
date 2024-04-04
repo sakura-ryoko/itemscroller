@@ -182,7 +182,7 @@ public class Configs implements IConfigHandler
 
     private static void writeStrings(JsonObject obj, Set<String> inputSet, String arrayName)
     {
-        if (!inputSet.isEmpty())
+        if (inputSet.isEmpty() == false)
         {
             JsonArray arr = new JsonArray();
 
