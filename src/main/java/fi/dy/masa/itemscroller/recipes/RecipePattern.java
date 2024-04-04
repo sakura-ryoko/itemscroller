@@ -2,7 +2,6 @@ package fi.dy.masa.itemscroller.recipes;
 
 import java.util.Arrays;
 import javax.annotation.Nonnull;
-
 import fi.dy.masa.itemscroller.util.ItemType;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
@@ -85,7 +84,7 @@ public class RecipePattern
             this.recipe[i] = new ItemType(otherRecipe[i].getStack());
         }
 
-        this.result = !InventoryUtils.isStackEmpty(other.getResult()) ? new ItemType(other.getResult()) : ItemType.EMPTY;
+        this.result = InventoryUtils.isStackEmpty(other.getResult()) == false ? new ItemType(other.getResult()) : ItemType.EMPTY;
     }
 
     public void readFromNBT(@Nonnull NbtCompound nbt)
@@ -133,7 +132,7 @@ public class RecipePattern
 
             for (int i = 0; i < this.recipe.length; i++)
             {
-                if (!this.recipe[i].isEmpty() && this.recipe[i].hasId())
+                if (this.recipe[i].isEmpty() == false && this.recipe[i].hasId())
                 {
                     tag = new NbtCompound();
                     tag.copyFrom(InventoryUtils.recipeSlotWriteNbt(this.recipe[i]));
@@ -173,7 +172,7 @@ public class RecipePattern
 
     public boolean isValid()
     {
-        if (!this.result.isEmpty())
+        if (this.result.isEmpty() == false)
         {
             if (this.result.hasId())
             {

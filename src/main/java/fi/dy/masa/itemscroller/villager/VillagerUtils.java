@@ -3,7 +3,6 @@ package fi.dy.masa.itemscroller.villager;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import fi.dy.masa.itemscroller.data.VillagerDataStorage;
 import net.minecraft.client.MinecraftClient;
@@ -37,7 +36,7 @@ public class VillagerUtils
                 handler.switchTo(visibleIndex);
 
                 // Use the real (server-side) index
-                Objects.requireNonNull(MinecraftClient.getInstance().getNetworkHandler()).sendPacket(new SelectMerchantTradeC2SPacket(realIndex));
+                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(realIndex));
 
                 return true;
             }
@@ -81,7 +80,7 @@ public class VillagerUtils
         //System.out.printf("build - fav: %s (%s), or: %d\n", favorites, data.isGlobal, originalList.size());
 
         // Some favorites defined
-        if (!favorites.isEmpty())
+        if (favorites.isEmpty() == false)
         {
             TradeOfferList list = new TradeOfferList();
             int originalListSize = originalList.size();
@@ -98,17 +97,15 @@ public class VillagerUtils
             // Then add the rest of the recipes in their original order
             for (int i = 0; i < originalListSize; ++i)
             {
-                if (!favorites.contains(i))
+                if (favorites.contains(i) == false)
                 {
                     list.add(originalList.get(i));
                 }
             }
 
-            //ItemScroller.printDebug("buildCustomTradeList(): originalList size {} : list size {}", originalList.size(), list.size());
             return list;
         }
 
-        //ItemScroller.printDebug("buildCustomTradeList(): originalList size {}", originalList.size());
         return originalList;
     }
 

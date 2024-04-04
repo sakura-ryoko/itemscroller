@@ -9,5 +9,5 @@ import net.minecraft.screen.slot.CraftingResultSlot;
 public interface IMixinCraftingResultSlot
 {
     @Accessor("input")
-    RecipeInputInventory itemscroller_getCraftingInventory();
+    RecipeInputInventory itemscroller$getCraftingInventory();
 }

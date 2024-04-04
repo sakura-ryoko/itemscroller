@@ -8,5 +8,5 @@ import net.minecraft.screen.slot.Slot;
 public interface IMixinSlot
 {
     @Accessor("index")
-    int itemscroller_getSlotIndex();
+    int itemscroller$getSlotIndex();
 }

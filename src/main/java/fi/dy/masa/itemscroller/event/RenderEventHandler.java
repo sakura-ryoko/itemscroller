@@ -101,7 +101,7 @@ public class RenderEventHandler
                 drawContext.drawText(mc.textRenderer, "Buffered slot clicks: " + bufferedCount, 10, 10, 0xFFD0D0D0, false);
             }
 
-            if (!InputUtils.isRecipeViewOpen())
+            if (InputUtils.isRecipeViewOpen() == false)
             {
                 return;
             }
@@ -129,7 +129,7 @@ public class RenderEventHandler
                 RecipePattern recipe = recipes.getSelectedRecipe();
                 ItemStack stack = this.getHoveredRecipeIngredient(mouseX, mouseY, recipe, recipes.getRecipeCountPerPage(), gui);
 
-                if (!InventoryUtils.isStackEmpty(stack))
+                if (InventoryUtils.isStackEmpty(stack) == false)
                 {
                     InventoryOverlay.renderStackToolTip(mouseX, mouseY, stack, this.mc, drawContext);
                 }
@@ -175,7 +175,7 @@ public class RenderEventHandler
     {
         ItemStack stack = recipe.getResult();
 
-        if (!InventoryUtils.isStackEmpty(stack))
+        if (InventoryUtils.isStackEmpty(stack) == false)
         {
             InventoryOverlay.renderStackToolTip(mouseX, mouseY, stack, this.mc, drawContext);
         }
@@ -300,7 +300,7 @@ public class RenderEventHandler
 
         RenderUtils.drawRect(x, y, w, w, 0x20FFFFFF); // light background for the item
 
-        if (!InventoryUtils.isStackEmpty(stack))
+        if (InventoryUtils.isStackEmpty(stack) == false)
         {
             DiffuseLighting.enableGuiDepthLighting();
 

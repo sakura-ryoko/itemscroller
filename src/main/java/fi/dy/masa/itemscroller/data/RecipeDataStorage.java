@@ -148,7 +148,7 @@ public class RecipeDataStorage
 
     private void readFromNBT(NbtCompound nbt)
     {
-        if (nbt == null || !nbt.contains("Recipes", Constants.NBT.TAG_LIST))
+        if (nbt == null || nbt.contains("Recipes", Constants.NBT.TAG_LIST) == false)
         {
             return;
         }
@@ -200,7 +200,7 @@ public class RecipeDataStorage
 
     private String getFileName()
     {
-        if (!Configs.Generic.SCROLL_CRAFT_RECIPE_FILE_GLOBAL.getBooleanValue())
+        if (Configs.Generic.SCROLL_CRAFT_RECIPE_FILE_GLOBAL.getBooleanValue() == false)
         {
             String worldName = StringUtils.getWorldOrServerName();
 
@@ -253,9 +253,9 @@ public class RecipeDataStorage
             {
                 File saveDir = this.getSaveDir();
 
-                if (!saveDir.exists())
+                if (saveDir.exists() == false)
                 {
-                    if (!saveDir.mkdirs())
+                    if (saveDir.mkdirs() == false)
                     {
                         ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): Failed to create the recipe storage directory '{}'", saveDir.getPath());
                         return;
@@ -270,13 +270,13 @@ public class RecipeDataStorage
 
                 if (fileReal.exists())
                 {
-                    if (!fileReal.delete())
+                    if (fileReal.delete() == false)
                     {
                         ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): failed to delete file {} ", fileReal.getName());
                     }
                 }
 
-                if (!fileTmp.renameTo(fileReal))
+                if (fileTmp.renameTo(fileReal) == false)
                 {
                     ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): failed to rename file {} ", fileTmp.getName());
                 }

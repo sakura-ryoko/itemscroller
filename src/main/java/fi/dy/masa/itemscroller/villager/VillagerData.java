@@ -2,7 +2,6 @@ package fi.dy.masa.itemscroller.villager;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
@@ -67,9 +66,6 @@ public class VillagerData
             tagList.add(NbtInt.of(val));
         }
 
-        //ItemScroller.printDebug("VillagerData#toNBT(): tag[basic]: {}", tag.toString());
-        //ItemScroller.printDebug("VillagerData#toNBT(): tagList[fav]: {}", tagList.toString());
-
         tag.put("Favorites", tagList);
 
         return tag;
@@ -78,8 +74,6 @@ public class VillagerData
     @Nullable
     public static VillagerData fromNBT(NbtCompound tag)
     {
-        //ItemScroller.printDebug("VillagerData#fromNBT(): tag {}", tag.toString());
-
         if (tag.contains("UUIDM", Constants.NBT.TAG_LONG) && tag.contains("UUIDL", Constants.NBT.TAG_LONG))
         {
             VillagerData data = new VillagerData(new UUID(tag.getLong("UUIDM"), tag.getLong("UUIDL")));

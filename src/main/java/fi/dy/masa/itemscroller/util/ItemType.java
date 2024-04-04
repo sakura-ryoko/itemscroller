@@ -2,7 +2,6 @@ package fi.dy.masa.itemscroller.util;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import net.minecraft.item.ItemStack;

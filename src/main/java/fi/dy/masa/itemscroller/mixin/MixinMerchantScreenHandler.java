@@ -31,14 +31,12 @@ public abstract class MixinMerchantScreenHandler extends ScreenHandler implement
     }
 
     @Inject(method = "getRecipes", at = @At("HEAD"), cancellable = true)
-    private void replaceTradeList(CallbackInfoReturnable<TradeOfferList> cir)
+    private void itemscroller$replaceTradeList(CallbackInfoReturnable<TradeOfferList> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
             if (this.customList != null)
             {
-                //ItemScroller.printDebug("onTradeListSet(): this.customList.size(): {}", this.customList.size());
-
                 cir.setReturnValue(this.customList);
             }
             /*
@@ -62,24 +60,17 @@ public abstract class MixinMerchantScreenHandler extends ScreenHandler implement
     }
 
     @Inject(method = "setOffers", at = @At("HEAD"))
-    private void onTradeListSet(TradeOfferList offers, CallbackInfo ci)
+    private void itemscroller$onTradeListSet(TradeOfferList offers, CallbackInfo ci)
     {
-        //ItemScroller.printDebug("onTradeListSet(): offers.size(): {}", offers.size());
-
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
             if (this.customList == null || this.customList.isEmpty())
             {
                 this.customList = VillagerUtils.buildCustomTradeList(offers);
-                //ItemScroller.printDebug("onTradeListSet(): [NEW] this.customList.size(): {}", this.customList.size());
             }
             else if (this.customList.size() != offers.size())
             {
-                //ItemScroller.printDebug("onTradeListSet(): this.customList.size() != offers.size() --> REBUILD");
-
                 this.customList = VillagerUtils.buildCustomTradeList(offers);
-
-                //ItemScroller.printDebug("onTradeListSet(): [REBUILD] this.customList.size(): {}", this.customList.size());
             }
         }
     }

@@ -43,8 +43,6 @@ public class TradeType
         tag.putString("Buy2", getNameForItem(this.buyItem2));
         tag.putString("Sell", getNameForItem(this.sellItem));
 
-        //ItemScroller.printDebug("TradeType#toTag(): sell tag {} // item name {}", tag.getString("Sell"), this.sellItem.getName().getLiteralString());
-
         return tag;
     }
 
@@ -54,8 +52,6 @@ public class TradeType
         Item buy1 = getItemForName(tag.getString("Buy1"));
         Item buy2 = getItemForName(tag.getString("Buy2"));
         Item sell = getItemForName(tag.getString("Sell"));
-
-        //ItemScroller.printDebug("TradeType#fromTag(): sell tag {} // item name {}", tag.getString("Sell"), sell.getName().getLiteralString());
 
         if (buy1 != Items.AIR || buy2 != Items.AIR || sell != Items.AIR)
         {

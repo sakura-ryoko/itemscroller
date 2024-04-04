@@ -8,5 +8,5 @@ import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 public interface IMixinMerchantScreen
 {
     @Accessor("selectedIndex")
-    int itemscroller_getSelectedMerchantRecipe();
+    int itemscroller$getSelectedMerchantRecipe();
 }

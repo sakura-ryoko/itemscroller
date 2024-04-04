@@ -129,7 +129,7 @@ public class VillagerDataStorage
         VillagerData data = this.getDataFor(this.lastInteractedUUID, false);
         IntArrayList favorites = data != null ? data.getFavorites() : null;
 
-        if (favorites != null && !favorites.isEmpty())
+        if (favorites != null && favorites.isEmpty() == false)
         {
             return new FavoriteData(favorites, false);
         }
@@ -144,7 +144,7 @@ public class VillagerDataStorage
 
     private void readFromNBT(NbtCompound nbt)
     {
-        if (nbt == null || !nbt.contains("VillagerData", Constants.NBT.TAG_LIST))
+        if (nbt == null || nbt.contains("VillagerData", Constants.NBT.TAG_LIST) == false)
         {
             return;
         }
@@ -155,7 +155,6 @@ public class VillagerDataStorage
         for (int i = 0; i < count; i++)
         {
             NbtCompound tag = tagList.getCompound(i);
-
             VillagerData data = VillagerData.fromNBT(tag);
 
             if (data != null)
@@ -259,7 +258,7 @@ public class VillagerDataStorage
             {
                 File saveDir = this.getSaveDir();
 
-                if (!saveDir.exists() && !saveDir.mkdirs())
+                if (saveDir.exists() == false && saveDir.mkdirs() == false)
                 {
                     ItemScroller.logger.warn("Failed to create the data storage directory '{}'", saveDir.getPath());
                     return;
@@ -273,13 +272,13 @@ public class VillagerDataStorage
 
                 if (fileReal.exists())
                 {
-                    if (!fileReal.delete())
+                    if (fileReal.delete() == false)
                     {
                         ItemScroller.logger.warn("VillagerDataStorage#writeToDisk(): failed to delete file {} ", fileReal.getName());
                     }
                 }
 
-                if (fileTmp.renameTo(fileReal))
+                if (fileTmp.renameTo(fileReal) == false)
                 {
                     ItemScroller.logger.warn("VillagerDataStorage#writeToDisk(): failed to delete file {} ", fileTmp.getName());
                 }
