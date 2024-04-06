@@ -19,7 +19,7 @@ public class GuiConfigs extends GuiConfigsBase
 
     public GuiConfigs()
     {
-        super(10, 50, Reference.MOD_ID, null, "itemscroller.gui.title.configs", Reference.MOD_VERSION);
+        super(10, 50, Reference.MOD_ID, null, "itemscroller.gui.title.configs", String.format("%s", Reference.MOD_VERSION));
     }
 
     @Override
