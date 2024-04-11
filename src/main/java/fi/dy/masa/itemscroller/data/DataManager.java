@@ -2,6 +2,8 @@ package fi.dy.masa.itemscroller.data;
 
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.recipes.RecipeDataStorage;
+import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
 

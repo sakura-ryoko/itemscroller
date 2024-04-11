@@ -15,7 +15,7 @@ import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.data.RecipeDataStorage;
+import fi.dy.masa.itemscroller.recipes.RecipeDataStorage;
 import org.joml.Matrix4fStack;
 
 public class RenderEventHandler

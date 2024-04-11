@@ -111,7 +111,6 @@ public class RecipePattern
                 }
             }
 
-            // this.result = ItemStack.fromNbt(nbt.getCompound("Result"));
             this.result = InventoryUtils.recipeResultReadNbt(nbt.getCompound("Result"));
         }
     }

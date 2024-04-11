@@ -126,7 +126,6 @@ public class ItemType
 
         ItemType other = (ItemType) obj;
 
-        //return ItemStack.canCombine(this.stack, other.stack);
         return ItemStack.areItemsAndComponentsEqual(this.stack, other.stack);
     }
 

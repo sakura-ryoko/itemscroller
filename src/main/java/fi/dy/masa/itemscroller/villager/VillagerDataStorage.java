@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.data;
+package fi.dy.masa.itemscroller.villager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +11,6 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import fi.dy.masa.itemscroller.villager.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import net.minecraft.nbt.NbtCompound;
@@ -228,17 +227,28 @@ public class VillagerDataStorage
             File saveDir = this.getSaveDir();
             File file = new File(saveDir, this.getFileName());
 
-            if (file.exists() && file.isFile() && file.canRead())
+            if (file.exists())
             {
-                FileInputStream is = new FileInputStream(file);
-                this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
-                is.close();
-                ItemScroller.printDebug("VillagerDataStorage#readFromDisk(): Read villager data from file '{}'", file.getPath());
+                if (file.isFile() && file.canRead())
+                {
+                    FileInputStream is = new FileInputStream(file);
+                    this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
+                    is.close();
+                    ItemScroller.printDebug("VillagerDataStorage#readFromDisk(): Read villager data from file '{}'", file.getPath());
+                }
+                else
+                {
+                    ItemScroller.logger.error("VillagerDataStorage#readFromDisk(): Error reading villager data from file '{}'", file.getPath());
+                }
+            }
+            else
+            {
+                ItemScroller.logger.warn("VillagerDataStorage#readFromDisk(): File '{}' does not exist.", file.getPath());
             }
         }
         catch (Exception e)
         {
-            ItemScroller.logger.warn("Failed to read villager data from file", e);
+            ItemScroller.logger.error("Failed to read villager data from file", e);
         }
     }
 

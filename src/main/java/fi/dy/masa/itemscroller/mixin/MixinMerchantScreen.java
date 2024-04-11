@@ -24,7 +24,7 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 import fi.dy.masa.itemscroller.villager.FavoriteData;
 import fi.dy.masa.itemscroller.villager.IMerchantScreenHandler;
 import fi.dy.masa.itemscroller.villager.VillagerData;
-import fi.dy.masa.itemscroller.data.VillagerDataStorage;
+import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 import fi.dy.masa.itemscroller.villager.VillagerUtils;
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.render.RenderUtils;

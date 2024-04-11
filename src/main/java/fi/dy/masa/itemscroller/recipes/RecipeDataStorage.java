@@ -1,11 +1,10 @@
-package fi.dy.masa.itemscroller.data;
+package fi.dy.masa.itemscroller.recipes;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import javax.annotation.Nonnull;
 
-import fi.dy.masa.itemscroller.recipes.RecipePattern;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -22,8 +21,8 @@ import fi.dy.masa.malilib.util.StringUtils;
 
 public class RecipeDataStorage
 {
-    private static final int MAX_PAGES = 8;         // 8 Pages of 18 = 144 total slots
-    private static final int MAX_RECIPES = 18;      // 8 Pages of 18 = 144 total slots
+    private static final int MAX_PAGES   = 8;           // 8 Pages of 18 = 144 total slots
+    private static final int MAX_RECIPES = 18;          // 8 Pages of 18 = 144 total slots
     private static final RecipeDataStorage INSTANCE = new RecipeDataStorage(MAX_RECIPES * MAX_PAGES);
     private final RecipePattern[] recipes;
     private int selected;
@@ -208,6 +207,10 @@ public class RecipeDataStorage
             {
                 return "recipes_" + worldName + ".nbt";
             }
+            else
+            {
+                return "recipes_unknown.nbt";
+            }
         }
 
         return "recipes.nbt";
@@ -228,20 +231,31 @@ public class RecipeDataStorage
             {
                 File file = new File(saveDir, this.getFileName());
 
-                if (file.exists() && file.isFile() && file.canRead())
+                if (file.exists())
                 {
-                    this.initRecipes();
+                    if (file.isFile() && file.canRead())
+                    {
+                        this.initRecipes();
 
-                    FileInputStream is = new FileInputStream(file);
-                    this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
-                    is.close();
-                    ItemScroller.printDebug("RecipeDataStorage#readFromDisk(): Read recipes from file '{}'", file.getPath());
+                        FileInputStream is = new FileInputStream(file);
+                        this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
+                        is.close();
+                        ItemScroller.printDebug("RecipeDataStorage#readFromDisk(): Read recipes from file '{}'", file.getPath());
+                    }
+                    else
+                    {
+                        ItemScroller.logger.error("RecipeDataStorage#readFromDisk(): Error reading recipes from file '{}'", file.getPath());
+                    }
+                }
+                else
+                {
+                    ItemScroller.logger.warn("RecipeDataStorage#readFromDisk(): File '{}' does not exist.", file.getPath());
                 }
             }
         }
         catch (Exception e)
         {
-            ItemScroller.logger.warn("RecipeDataStorage#readFromDisk(): Failed to read recipes from file", e);
+            ItemScroller.logger.error("RecipeDataStorage#readFromDisk(): Failed to read recipes from file", e);
         }
     }
 
@@ -257,7 +271,7 @@ public class RecipeDataStorage
                 {
                     if (saveDir.mkdirs() == false)
                     {
-                        ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): Failed to create the recipe storage directory '{}'", saveDir.getPath());
+                        ItemScroller.logger.error("RecipeDataStorage#writeToDisk(): Failed to create the recipe storage directory '{}'", saveDir.getPath());
                         return;
                     }
                 }
@@ -284,7 +298,7 @@ public class RecipeDataStorage
             }
             catch (Exception e)
             {
-                ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): Failed to write recipes to file!", e);
+                ItemScroller.logger.error("RecipeDataStorage#writeToDisk(): Failed to write recipes to file!", e);
             }
         }
         else
