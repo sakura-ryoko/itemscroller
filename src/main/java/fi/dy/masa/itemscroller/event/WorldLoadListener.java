@@ -1,7 +1,7 @@
 package fi.dy.masa.itemscroller.event;
 
 import javax.annotation.Nullable;
-import fi.dy.masa.itemscroller.data.DataManager;
+import fi.dy.masa.itemscroller.util.DataManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import fi.dy.masa.itemscroller.util.ClickPacketBuffer;

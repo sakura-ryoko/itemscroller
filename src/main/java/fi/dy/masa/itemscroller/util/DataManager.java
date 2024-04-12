@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.data;
+package fi.dy.masa.itemscroller.util;
 
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
@@ -8,7 +8,7 @@ import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
 
 /**
- * New ItemScroller Data Storage Manager
+ * New ItemScroller Data Manager
  * Manages both Villager and Recipe Data Storage components in a similar manner
  * to Masa's other mods.
  */
