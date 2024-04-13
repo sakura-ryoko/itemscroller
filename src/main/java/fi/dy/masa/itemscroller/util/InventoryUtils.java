@@ -206,7 +206,7 @@ public class InventoryUtils
 
         // The target slot needs to be an empty, valid slot, and there needs to be items in the cursor
         return slot != null && isStackEmpty(stackCursor) == false && isValidSlot(slot, gui, false) &&
-                slot.hasStack() == false && slot.canInsert(stackCursor);
+               slot.hasStack() == false && slot.canInsert(stackCursor);
     }
 
     public static boolean tryMoveItems(HandledScreen<? extends ScreenHandler> gui,
@@ -659,21 +659,20 @@ public class InventoryUtils
         if (slot != null)
         {
             ItemStack stackCursor = gui.getScreenHandler().getCursorStack();
+            ItemStack stack = EMPTY_STACK;
 
             if (isStackEmpty(stackCursor) == false)
             {
                 // Do a cheap copy without NBT data
-                stackInCursorLast = new ItemStack(stackCursor.getItem(), getStackSize(stackCursor));
+                stack = new ItemStack(stackCursor.getItem(), getStackSize(stackCursor));
+            }
+            stackInCursorLast = new ItemStack(stackCursor.getItem(), getStackSize(stackCursor));
 
-                // Store the candidate
-                // NOTE: This method is called BEFORE the stack has been picked up to the cursor!
-                // Thus we can't check that there is an item already in the cursor, and that's why this is just a "candidate"
-            }
-            else
-            {
-                stackInCursorLast = EMPTY_STACK;
-            }
+            // Store the candidate
+            // NOTE: This method is called BEFORE the stack has been picked up to the cursor!
+            // Thus we can't check that there is an item already in the cursor, and that's why this is just a "candidate"
             sourceSlotCandidate = new WeakReference<>(slot);
+            stackInCursorLast = stack;
         }
     }
 
@@ -809,7 +808,7 @@ public class InventoryUtils
     }
 
     private static boolean tryMoveSingleItemToOtherInventory(Slot slot,
-                                                          HandledScreen<? extends ScreenHandler> gui)
+                                                             HandledScreen<? extends ScreenHandler> gui)
     {
         ItemStack stackOrig = slot.getStack().copy();
         ScreenHandler container = gui.getScreenHandler();
@@ -862,14 +861,14 @@ public class InventoryUtils
     }
 
     private static boolean tryMoveAllButOneItemToOtherInventory(Slot slot,
-                                                             HandledScreen<? extends ScreenHandler> gui)
+                                                                HandledScreen<? extends ScreenHandler> gui)
     {
         MinecraftClient mc = MinecraftClient.getInstance();
         PlayerEntity player = mc.player;
         ItemStack stackOrig = slot.getStack().copy();
 
         if (getStackSize(stackOrig) == 1 || getStackSize(stackOrig) > stackOrig.getMaxCount() ||
-                slot.canTakeItems(player) == false || slot.canInsert(stackOrig) == false)
+            slot.canTakeItems(player) == false || slot.canInsert(stackOrig) == false)
         {
             return true;
         }
@@ -987,7 +986,7 @@ public class InventoryUtils
     }
 
     private static boolean tryMoveSingleItemToThisInventory(Slot slot,
-                                                         HandledScreen<? extends ScreenHandler> gui)
+                                                            HandledScreen<? extends ScreenHandler> gui)
     {
         ScreenHandler container = gui.getScreenHandler();
         ItemStack stackOrig = slot.getStack();
@@ -1004,7 +1003,7 @@ public class InventoryUtils
             ItemStack stackTmp = slotTmp.getStack();
 
             if (areSlotsInSameInventory(slotTmp, slot) == false &&
-                    isStackEmpty(stackTmp) == false && slotTmp.canTakeItems(mc.player) &&
+                isStackEmpty(stackTmp) == false && slotTmp.canTakeItems(mc.player) &&
                 (getStackSize(stackTmp) == 1 || slotTmp.canInsert(stackTmp)))
             {
                 if (areStacksEqual(stackTmp, stackOrig))
@@ -1080,7 +1079,7 @@ public class InventoryUtils
 
         // If moving to the other inventory, then move the hovered slot's stack last
         if (toOtherInventory &&
-                shiftClickSlotWithCheck(gui, slot.id) == false &&
+            shiftClickSlotWithCheck(gui, slot.id) == false &&
             Configs.Toggles.SCROLL_STACKS_FALLBACK.getBooleanValue())
         {
             clickSlotsToMoveItemsFromSlot(slot, gui, toOtherInventory);
@@ -1394,9 +1393,9 @@ public class InventoryUtils
     }
 
     private static boolean tryMoveItemsToCraftingGridSlots(RecipePattern recipe,
-                                                        Slot slot,
-                                                        HandledScreen<? extends ScreenHandler> gui,
-                                                        boolean fillStacks)
+                                                           Slot slot,
+                                                           HandledScreen<? extends ScreenHandler> gui,
+                                                           boolean fillStacks)
     {
         ScreenHandler container = gui.getScreenHandler();
         int numSlots = container.slots.size();
@@ -1545,7 +1544,7 @@ public class InventoryUtils
             // Failed to craft items, or the stack became full, or ran out of ingredients
             if (isStackEmpty(stackCursor) || getStackSize(stackCursor) <= sizeLast ||
                 getStackSize(stackCursor) >= stackCursor.getMaxCount() ||
-                    areStacksEqual(slot.getStack(), stackCursor) == false)
+                areStacksEqual(slot.getStack(), stackCursor) == false)
             {
                 break;
             }
@@ -1949,8 +1948,7 @@ public class InventoryUtils
                                                                boolean treatHotbarAsDifferent,
                                                                boolean reverse)
     {
-        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-        //  but not go over 99.
+        // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
         IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
@@ -1982,8 +1980,7 @@ public class InventoryUtils
                                                                ItemStack stackReference,
                                                                boolean preferPartial)
     {
-        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-        //  but not go over 99.
+        // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
         IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
 
@@ -2031,8 +2028,7 @@ public class InventoryUtils
                                                            boolean treatHotbarAsDifferent,
                                                            boolean reverse)
     {
-        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-        //  but not go over 99.
+        /// Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
         IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
@@ -2055,8 +2051,7 @@ public class InventoryUtils
     private static IntArrayList getSlotNumbersOfEmptySlotsInPlayerInventory(ScreenHandler container,
                                                                             boolean reverse)
     {
-        // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-        //  but not go over 99.
+        // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
         IntArrayList slots = new IntArrayList(99);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
@@ -2076,7 +2071,6 @@ public class InventoryUtils
 
     public static boolean areStacksEqual(ItemStack stack1, ItemStack stack2)
     {
-        //return ItemStack.canCombine(stack1, stack2);
         return ItemStack.areItemsAndComponentsEqual(stack1, stack2);
     }
 
@@ -2326,8 +2320,7 @@ public class InventoryUtils
         if (slotNum >= 0 && slotNum < gui.getScreenHandler().slots.size())
         {
             Slot slot = gui.getScreenHandler().getSlot(slotNum);
-            // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-            //  but not go over 99, but does this matter for item slots?
+            // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
             int failsafe = 64;
 
             while (failsafe-- > 0 && slot.hasStack())
@@ -2370,9 +2363,9 @@ public class InventoryUtils
     }
 
     public static boolean tryMoveItemsVertically(HandledScreen<? extends ScreenHandler> gui,
-                                              Slot slot,
-                                              boolean moveUp,
-                                              MoveAmount amount)
+                                                 Slot slot,
+                                                 boolean moveUp,
+                                                 MoveAmount amount)
     {
         // We require an empty cursor
         if (slot == null || isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)

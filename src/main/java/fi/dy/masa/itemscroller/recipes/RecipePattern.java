@@ -171,6 +171,6 @@ public class RecipePattern
 
     public boolean isValid()
     {
-        return this.result.isEmpty() == false;
+        return InventoryUtils.isStackEmpty(this.getResult()) == false;
     }
 }

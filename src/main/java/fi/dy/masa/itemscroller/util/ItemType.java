@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 
 /**
  * Wrapper class for ItemStack, which implements equals()
@@ -26,37 +25,6 @@ public class ItemType
             this.stack = InventoryUtils.copyStack(stack, false);
         }
 
-    }
-
-    public boolean isEmpty()
-    {
-        if (this.stack.equals(InventoryUtils.EMPTY_STACK))
-        {
-            return false;
-        }
-        else
-        {
-            return this.stack.isEmpty();
-        }
-    }
-
-    public boolean isValid()
-    {
-        return this.hasId();
-    }
-
-    public boolean hasId()
-    {
-        if (!this.stack.isEmpty())
-        {
-            if (!this.stack.getItem().equals(Items.AIR))
-            {
-                String idString = this.stack.getItem().getName(this.stack).getLiteralString();
-                return (idString != null) && !idString.isEmpty();
-            }
-        }
-
-        return false;
     }
 
     public ItemStack getStack()

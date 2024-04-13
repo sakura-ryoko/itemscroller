@@ -51,7 +51,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     private void fixRenderScrollBar(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
-                Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue())
+            Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue())
         {
             VillagerData data = VillagerDataStorage.getInstance().getDataForLastInteractionTarget();
             int listSize = this.handler.getRecipes().size();
@@ -182,7 +182,6 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     private int getClampedIndex(int index)
     {
         int listSize = this.handler.getRecipes().size();
-
         return Math.max(0, Math.min(index, listSize - 7));
     }
 
