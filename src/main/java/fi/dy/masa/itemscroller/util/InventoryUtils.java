@@ -666,7 +666,6 @@ public class InventoryUtils
                 // Do a cheap copy without NBT data
                 stack = new ItemStack(stackCursor.getItem(), getStackSize(stackCursor));
             }
-            stackInCursorLast = new ItemStack(stackCursor.getItem(), getStackSize(stackCursor));
 
             // Store the candidate
             // NOTE: This method is called BEFORE the stack has been picked up to the cursor!
@@ -810,7 +809,7 @@ public class InventoryUtils
     private static boolean tryMoveSingleItemToOtherInventory(Slot slot,
                                                              HandledScreen<? extends ScreenHandler> gui)
     {
-        ItemStack stackOrig = slot.getStack().copy();
+        ItemStack stackOrig = slot.getStack();
         ScreenHandler container = gui.getScreenHandler();
         MinecraftClient mc = MinecraftClient.getInstance();
 

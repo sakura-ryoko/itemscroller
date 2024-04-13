@@ -112,7 +112,6 @@ public class RenderEventHandler
             final int recipeId = this.getHoveredRecipeId(mouseX, mouseY, recipes, gui);
 
             float offset = 300f;
-
             Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
             matrix4fStack.pushMatrix();
             matrix4fStack.translate(0, 0, offset);

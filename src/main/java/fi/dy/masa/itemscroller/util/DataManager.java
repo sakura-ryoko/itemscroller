@@ -15,15 +15,11 @@ import net.minecraft.registry.DynamicRegistryManager;
 public class DataManager
 {
     private static final DataManager INSTANCE = new DataManager();
-    //private final MinecraftClient mc = MinecraftClient.getInstance();
     private DynamicRegistryManager registryManager;
     private RecipeManager recipeManager;
-
     public static DataManager getInstance() { return INSTANCE; }
 
-    private DataManager()
-    {
-    }
+    private DataManager() {}
 
     public void reset(boolean isLogout)
     {
