@@ -1,8 +1,7 @@
 package fi.dy.masa.itemscroller.recipes;
 
-import java.util.Arrays;
 import javax.annotation.Nonnull;
-import fi.dy.masa.itemscroller.util.ItemType;
+import java.util.Arrays;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -16,8 +15,8 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 public class RecipePattern
 {
     private static final int MAX_SLOTS = 9;
-    private ItemType result = ItemType.EMPTY;
-    private ItemType[] recipe = new ItemType[MAX_SLOTS];
+    private ItemStack result = InventoryUtils.EMPTY_STACK;
+    private ItemStack[] recipe = new ItemStack[MAX_SLOTS];
 
     public RecipePattern()
     {
@@ -28,14 +27,14 @@ public class RecipePattern
     {
         if (this.getRecipeLength() != size)
         {
-            this.recipe = new ItemType[size];
+            this.recipe = new ItemStack[size];
         }
     }
 
     public void clearRecipe()
     {
-        Arrays.fill(this.recipe, ItemType.EMPTY);
-        this.result = ItemType.EMPTY;
+        Arrays.fill(this.recipe, InventoryUtils.EMPTY_STACK);
+        this.result = InventoryUtils.EMPTY_STACK;
     }
 
     public void ensureRecipeSizeAndClearRecipe(int size)
@@ -60,10 +59,10 @@ public class RecipePattern
                 for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlots; i++, s++)
                 {
                     Slot slotTmp = gui.getScreenHandler().getSlot(s);
-                    this.recipe[i] = new ItemType(slotTmp);
+                    this.recipe[i] = slotTmp.hasStack() ? slotTmp.getStack().copy() : InventoryUtils.EMPTY_STACK;
                 }
 
-                this.result = new ItemType(slot);
+                this.result = slot.getStack().copy();
             }
             else if (clearIfEmpty)
             {
@@ -75,16 +74,16 @@ public class RecipePattern
     public void copyRecipeFrom(RecipePattern other)
     {
         int size = other.getRecipeLength();
-        ItemType[] otherRecipe = other.getRecipeItems();
+        ItemStack[] otherRecipe = other.getRecipeItems();
 
         this.ensureRecipeSizeAndClearRecipe(size);
 
         for (int i = 0; i < size; i++)
         {
-            this.recipe[i] = new ItemType(otherRecipe[i].getStack());
+            this.recipe[i] = InventoryUtils.isStackEmpty(otherRecipe[i]) == false ? otherRecipe[i].copy() : InventoryUtils.EMPTY_STACK;
         }
 
-        this.result = InventoryUtils.isStackEmpty(other.getResult()) == false ? new ItemType(other.getResult()) : ItemType.EMPTY;
+        this.result = InventoryUtils.isStackEmpty(other.getResult()) == false ? other.getResult().copy() : InventoryUtils.EMPTY_STACK;
     }
 
     public void readFromNBT(@Nonnull NbtCompound nbt)
@@ -120,7 +119,7 @@ public class RecipePattern
     {
         NbtCompound nbt = new NbtCompound();
 
-        if (this.result.isValid())
+        if (this.isValid())
         {
             NbtCompound tag = InventoryUtils.recipeResultWriteNbt(this.result);
 
@@ -131,7 +130,7 @@ public class RecipePattern
 
             for (int i = 0; i < this.recipe.length; i++)
             {
-                if (this.recipe[i].isEmpty() == false && this.recipe[i].hasId())
+                if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
                 {
                     tag = new NbtCompound();
                     tag.copyFrom(InventoryUtils.recipeSlotWriteNbt(this.recipe[i]));
@@ -149,9 +148,9 @@ public class RecipePattern
 
     public ItemStack getResult()
     {
-        if (this.result.isValid())
+        if (this.result.isEmpty() == false)
         {
-            return this.result.getStack();
+            return this.result;
         }
         else
         {
@@ -164,21 +163,13 @@ public class RecipePattern
         return this.recipe.length;
     }
 
-    public ItemType[] getRecipeItems()
+    public ItemStack[] getRecipeItems()
     {
         return this.recipe;
     }
 
     public boolean isValid()
     {
-        if (this.result.isEmpty() == false)
-        {
-            if (this.result.hasId())
-            {
-                return this.result.isValid();
-            }
-        }
-
-        return false;
+        return this.result.isEmpty() == false;
     }
 }

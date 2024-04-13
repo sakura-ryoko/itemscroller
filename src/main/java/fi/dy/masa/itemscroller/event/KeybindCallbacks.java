@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
+import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.Message;
@@ -19,7 +20,6 @@ import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.GuiConfigs;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.recipes.RecipeDataStorage;
 import fi.dy.masa.itemscroller.util.AccessorUtils;
 import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 import fi.dy.masa.itemscroller.util.InputUtils;
@@ -100,7 +100,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
         HandledScreen<?> gui = (HandledScreen<?>) GuiUtils.getCurrentScreen();
         Slot slot = AccessorUtils.getSlotUnderMouse(gui);
-        RecipeDataStorage recipes = RecipeDataStorage.getInstance();
+        RecipeStorage recipes = RecipeStorage.getInstance();
         MoveAction moveAction = InputUtils.getDragMoveAction(key);
 
         if (slot != null)
@@ -206,7 +206,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                     ClickPacketBuffer.setShouldBufferClickPackets(true);
                 }
 
-                RecipePattern recipe = RecipeDataStorage.getInstance().getSelectedRecipe();
+                RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
                 int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
 
                 if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())

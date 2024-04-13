@@ -21,13 +21,13 @@ public abstract class MixinCraftingScreenHandler
     @Shadow @Final private net.minecraft.entity.player.PlayerEntity player;
 
     @Inject(method = "onContentChanged", at = @At("RETURN"))
-    private void itemscroller$onSlotChangedCraftingGrid(net.minecraft.inventory.Inventory inventory, CallbackInfo ci)
+    private void onSlotChangedCraftingGrid(net.minecraft.inventory.Inventory inventory, CallbackInfo ci)
     {
         InventoryUtils.onSlotChangedCraftingGrid(this.player, this.input, this.result);
     }
 
     @Inject(method = "updateResult", at = @At("RETURN"))
-    private static void itemscroller$onUpdateResult(
+    private static void onUpdateResult(
             ScreenHandler handler,
             World world,
             PlayerEntity player,

@@ -13,7 +13,7 @@ import net.minecraft.util.math.MathHelper;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
-import fi.dy.masa.itemscroller.recipes.RecipeDataStorage;
+import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.itemscroller.util.AccessorUtils;
 import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 import fi.dy.masa.itemscroller.util.InputUtils;
@@ -59,7 +59,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
         if (InputUtils.isRecipeViewOpen() && eventKeyState)
         {
             int index = -1;
-            RecipeDataStorage recipes = RecipeDataStorage.getInstance();
+            RecipeStorage recipes = RecipeStorage.getInstance();
             int oldIndex = recipes.getSelection();
             int recipesPerPage = recipes.getRecipeCountPerPage();
             int recipeIndexChange = GuiBase.isShiftDown() ? recipesPerPage : recipesPerPage / 2;
@@ -167,7 +167,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                 Configs.GUI_BLACKLIST.contains(screen.getClass().getName()) == false)
             {
                 HandledScreen<?> gui = (HandledScreen<?>) screen;
-                RecipeDataStorage recipes = RecipeDataStorage.getInstance();
+                RecipeStorage recipes = RecipeStorage.getInstance();
 
                 if (dWheel != 0)
                 {

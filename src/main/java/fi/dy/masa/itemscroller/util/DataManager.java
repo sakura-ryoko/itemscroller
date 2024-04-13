@@ -2,7 +2,7 @@ package fi.dy.masa.itemscroller.util;
 
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.recipes.RecipeDataStorage;
+import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -36,7 +36,7 @@ public class DataManager
             ItemScroller.printDebug("DataManager#reset() - dimension change or log-in");
         }
 
-        RecipeDataStorage.getInstance().reset(isLogout);
+        RecipeStorage.getInstance().reset(isLogout);
         VillagerDataStorage.getInstance().reset(isLogout);
 
         this.registryManager = DynamicRegistryManager.EMPTY;
@@ -47,7 +47,7 @@ public class DataManager
     {
         if (Configs.Generic.SCROLL_CRAFT_STORE_RECIPES_TO_FILE.getBooleanValue())
         {
-            RecipeDataStorage.getInstance().writeToDisk();
+            RecipeStorage.getInstance().writeToDisk();
         }
 
         VillagerDataStorage.getInstance().writeToDisk();
@@ -57,7 +57,7 @@ public class DataManager
     {
         if (Configs.Generic.SCROLL_CRAFT_STORE_RECIPES_TO_FILE.getBooleanValue())
         {
-            RecipeDataStorage.getInstance().readFromDisk();
+            RecipeStorage.getInstance().readFromDisk();
         }
 
         VillagerDataStorage.getInstance().readFromDisk();

@@ -19,21 +19,21 @@ import fi.dy.masa.itemscroller.util.Constants;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 
-public class RecipeDataStorage
+public class RecipeStorage
 {
     private static final int MAX_PAGES   = 8;           // 8 Pages of 18 = 144 total slots
     private static final int MAX_RECIPES = 18;          // 8 Pages of 18 = 144 total slots
-    private static final RecipeDataStorage INSTANCE = new RecipeDataStorage(MAX_RECIPES * MAX_PAGES);
+    private static final RecipeStorage INSTANCE = new RecipeStorage(MAX_RECIPES * MAX_PAGES);
     private final RecipePattern[] recipes;
     private int selected;
     private boolean dirty;
 
-    public static RecipeDataStorage getInstance()
+    public static RecipeStorage getInstance()
     {
         return INSTANCE;
     }
 
-    public RecipeDataStorage(int recipeCount)
+    public RecipeStorage(int recipeCount)
     {
         this.recipes = new RecipePattern[recipeCount];
         this.initRecipes();
@@ -43,12 +43,7 @@ public class RecipeDataStorage
     {
         if (isLogout)
         {
-            //ItemScroller.printDebug("RecipeDataStorage#reset() - log-out");
             this.clearRecipes();
-        }
-        else
-        {
-            //ItemScroller.printDebug("RecipeDataStorage#reset() - dimension change or log-in");
         }
     }
 
@@ -240,22 +235,22 @@ public class RecipeDataStorage
                         FileInputStream is = new FileInputStream(file);
                         this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
                         is.close();
-                        ItemScroller.printDebug("RecipeDataStorage#readFromDisk(): Read recipes from file '{}'", file.getPath());
+                        ItemScroller.printDebug("RecipeStorage#readFromDisk(): Read recipes from file '{}'", file.getPath());
                     }
                     else
                     {
-                        ItemScroller.logger.error("RecipeDataStorage#readFromDisk(): Error reading recipes from file '{}'", file.getPath());
+                        ItemScroller.logger.error("RecipeStorage#readFromDisk(): Error reading recipes from file '{}'", file.getPath());
                     }
                 }
                 else
                 {
-                    ItemScroller.logger.warn("RecipeDataStorage#readFromDisk(): File '{}' does not exist.", file.getPath());
+                    ItemScroller.logger.warn("RecipeStorage#readFromDisk(): File '{}' does not exist.", file.getPath());
                 }
             }
         }
         catch (Exception e)
         {
-            ItemScroller.logger.error("RecipeDataStorage#readFromDisk(): Failed to read recipes from file", e);
+            ItemScroller.logger.error("RecipeStorage#readFromDisk(): Failed to read recipes from file", e);
         }
     }
 
@@ -271,7 +266,7 @@ public class RecipeDataStorage
                 {
                     if (saveDir.mkdirs() == false)
                     {
-                        ItemScroller.logger.error("RecipeDataStorage#writeToDisk(): Failed to create the recipe storage directory '{}'", saveDir.getPath());
+                        ItemScroller.logger.error("RecipeStorage#writeToDisk(): Failed to create the recipe storage directory '{}'", saveDir.getPath());
                         return;
                     }
                 }
@@ -286,24 +281,20 @@ public class RecipeDataStorage
                 {
                     if (fileReal.delete() == false)
                     {
-                        ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): failed to delete file {} ", fileReal.getName());
+                        ItemScroller.logger.warn("RecipeStorage#writeToDisk(): failed to delete file {} ", fileReal.getName());
                     }
                 }
 
                 if (fileTmp.renameTo(fileReal) == false)
                 {
-                    ItemScroller.logger.warn("RecipeDataStorage#writeToDisk(): failed to rename file {} ", fileTmp.getName());
+                    ItemScroller.logger.warn("RecipeStorage#writeToDisk(): failed to rename file {} ", fileTmp.getName());
                 }
                 this.dirty = false;
             }
             catch (Exception e)
             {
-                ItemScroller.logger.error("RecipeDataStorage#writeToDisk(): Failed to write recipes to file!", e);
+                ItemScroller.logger.error("RecipeStorage#writeToDisk(): Failed to write recipes to file!", e);
             }
-        }
-        else
-        {
-            ItemScroller.printDebug("RecipeDataStorage#writeToDisk(): File marked as clean, skipping output to disk.");
         }
     }
 }

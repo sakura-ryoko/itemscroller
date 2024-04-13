@@ -1,13 +1,11 @@
 package fi.dy.masa.itemscroller.util;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.Items;
 
 /**
  * Wrapper class for ItemStack, which implements equals()
@@ -15,37 +13,19 @@ import net.minecraft.util.Identifier;
  */
 public class ItemType
 {
-    public static final ItemType EMPTY = new ItemType((ItemStack) null);
     private final ItemStack stack;
-    private Identifier id;
 
-    public ItemType(ItemStack stack)
+    public ItemType(@Nonnull ItemStack stack)
     {
-        if (stack == null || stack.isEmpty())
+        if (stack.isEmpty())
         {
             this.stack = InventoryUtils.EMPTY_STACK;
-            this.id = null;
         }
         else
         {
             this.stack = InventoryUtils.copyStack(stack, false);
-            this.id = Registries.ITEM.getId(this.stack.getItem());
         }
 
-    }
-
-    public ItemType(Slot slot)
-    {
-        if (slot != null && slot.hasStack())
-        {
-            this.stack = slot.getStack().copy();
-            this.id = Registries.ITEM.getId(this.stack.getItem());
-        }
-        else
-        {
-            this.stack = InventoryUtils.EMPTY_STACK;
-            this.id = null;
-        }
     }
 
     public boolean isEmpty()
@@ -67,40 +47,21 @@ public class ItemType
 
     public boolean hasId()
     {
-        return this.id != null;
-    }
-
-    public void setId()
-    {
-        if (!this.isEmpty())
+        if (!this.stack.isEmpty())
         {
-            this.id = Registries.ITEM.getId(this.stack.getItem());
+            if (!this.stack.getItem().equals(Items.AIR))
+            {
+                String idString = this.stack.getItem().getName(this.stack).getLiteralString();
+                return (idString != null) && !idString.isEmpty();
+            }
         }
-    }
 
-    public Identifier getId()
-    {
-        return this.id;
+        return false;
     }
 
     public ItemStack getStack()
     {
         return this.stack;
-    }
-
-    @Override
-    public String toString()
-    {
-        if (this.id != null && this.stack != null && !this.stack.isEmpty())
-            return "ItemType id: "+ this.id +" // "+this.stack.getItem().toString();
-        else if (this.id == null && this.stack != null && !this.stack.isEmpty())
-            return "ItemType id: <null> // "+this.stack.getItem().toString();
-        else if (this.id == null && this.stack != null)
-            return "ItemType id: <null> // <empty>";
-        else if (this.id != null)
-            return "ItemType id: "+ this.id +" // <null>";
-        else
-            return "ItemType id: <null> // <null>";
     }
 
     @Override
@@ -134,17 +95,18 @@ public class ItemType
      * @param stacks
      * @return
      */
-    public static Map<ItemType, IntArrayList> getSlotsPerItem(ItemType[] stacks)
+    public static Map<ItemType, IntArrayList> getSlotsPerItem(ItemStack[] stacks)
     {
         Map<ItemType, IntArrayList> mapSlots = new HashMap<>();
 
         for (int i = 0; i < stacks.length; i++)
         {
-            ItemType stack = stacks[i];
+            ItemStack stack = stacks[i];
 
-            if (stack.isValid())
+            if (InventoryUtils.isStackEmpty(stack) == false)
             {
-                IntArrayList slots = mapSlots.computeIfAbsent(stack, k -> new IntArrayList());
+                ItemType item = new ItemType(stack);
+                IntArrayList slots = mapSlots.computeIfAbsent(item, k -> new IntArrayList());
 
                 slots.add(i);
             }

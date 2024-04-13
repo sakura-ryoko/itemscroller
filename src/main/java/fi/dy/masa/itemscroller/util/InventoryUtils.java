@@ -51,7 +51,7 @@ import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.recipes.RecipeDataStorage;
+import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 import fi.dy.masa.itemscroller.villager.VillagerUtils;
 import fi.dy.masa.malilib.util.GuiUtils;
@@ -98,7 +98,7 @@ public class InventoryUtils
             outputSlot instanceof CraftingResultSlot resultSlot &&
             resultSlot.inventory instanceof CraftingResultInventory resultInv)
         {
-            RecipeInputInventory craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller$getCraftingInventory();
+            RecipeInputInventory craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
             updateCraftingOutputSlot(player, craftingInv, resultInv, true);
         }
     }
@@ -220,7 +220,7 @@ public class InventoryUtils
     }
 
     public static boolean tryMoveItems(HandledScreen<? extends ScreenHandler> gui,
-                                       RecipeDataStorage recipes,
+                                       RecipeStorage recipes,
                                        boolean scrollingUp)
     {
         Slot slot = AccessorUtils.getSlotUnderMouse(gui);
@@ -1154,7 +1154,7 @@ public class InventoryUtils
 
     public static void handleRecipeClick(HandledScreen<? extends ScreenHandler> gui,
                                          MinecraftClient mc,
-                                         RecipeDataStorage recipes,
+                                         RecipeStorage recipes,
                                          int hoveredRecipeId,
                                          boolean isLeftClick,
                                          boolean isRightClick,
@@ -1250,7 +1250,7 @@ public class InventoryUtils
         }
     }
 
-    private static boolean tryMoveItemsCrafting(RecipeDataStorage recipes,
+    private static boolean tryMoveItemsCrafting(RecipeStorage recipes,
                                                 Slot slot,
                                                 HandledScreen<? extends ScreenHandler> gui,
                                                 boolean moveToOtherInventory,
@@ -1363,7 +1363,7 @@ public class InventoryUtils
             Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
 
             if (slotTmp != null && slotTmp.hasStack() &&
-                (clearNonMatchingOnly == false || areStacksEqual(recipe.getRecipeItems()[i].getStack(), slotTmp.getStack()) == false))
+                (clearNonMatchingOnly == false || areStacksEqual(recipe.getRecipeItems()[i], slotTmp.getStack()) == false))
             {
                 shiftClickSlot(gui, slotNum);
 
@@ -1643,7 +1643,7 @@ public class InventoryUtils
         if (outputSlot != null && isStackEmpty(recipe.getResult()) == false)
         {
             SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
-            ItemType[] recipeItems = recipe.getRecipeItems();
+            ItemStack[] recipeItems = recipe.getRecipeItems();
             final int invSlots = gui.getScreenHandler().slots.size();
             final int rangeSlots = Math.min(range.getSlotCount(), recipeItems.length);
 
@@ -1652,7 +1652,7 @@ public class InventoryUtils
                 Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
                 ItemStack stack = slotTmp.getStack();
 
-                if (stack.isEmpty() == false && areStacksEqual(stack, recipeItems[i].getStack()) == false)
+                if (stack.isEmpty() == false && areStacksEqual(stack, recipeItems[i]) == false)
                 {
                     dropAllMatchingStacks(gui, stack);
                 }
@@ -1669,7 +1669,7 @@ public class InventoryUtils
 
         if (range != null && isStackEmpty(recipe.getResult()) == false)
         {
-            ItemType[] recipeItems = recipe.getRecipeItems();
+            ItemStack[] recipeItems = recipe.getRecipeItems();
             final int invSlots = gui.getScreenHandler().slots.size();
             final int rangeSlots = Math.min(range.getSlotCount(), recipeItems.length);
             IntArrayList toRemove = new IntArrayList();
@@ -1680,11 +1680,11 @@ public class InventoryUtils
             for (int i = 0, slotNum = range.getFirst(); i < rangeSlots && slotNum < invSlots; i++, slotNum++)
             {
                 Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
-                ItemType recipeStack = recipeItems[i];
+                ItemStack recipeStack = recipeItems[i];
                 ItemStack slotStack = slotTmp.getStack();
-                boolean recipeHasItem = isStackEmpty(recipeStack.getStack()) == false;
+                boolean recipeHasItem = isStackEmpty(recipeStack) == false;
 
-                if (areStacksEqual(recipeStack.getStack(), slotStack) == false)
+                if (areStacksEqual(recipeStack, slotStack) == false)
                 {
                     if (recipeHasItem == false)
                     {
@@ -1692,7 +1692,7 @@ public class InventoryUtils
                     }
                     else
                     {
-                        int index = getPlayerInventoryIndexWithItem(recipeStack.getStack(), inv);
+                        int index = getPlayerInventoryIndexWithItem(recipeStack, inv);
 
                         if (index >= 0)
                         {
@@ -2609,7 +2609,7 @@ public class InventoryUtils
     }
 
 
-    public static ItemType recipeResultReadNbt(@Nonnull NbtCompound nbt)
+    public static ItemStack recipeResultReadNbt(@Nonnull NbtCompound nbt)
     {
         String idString;
         int count;
@@ -2636,52 +2636,48 @@ public class InventoryUtils
             }
 
             ItemStack stackIn = fi.dy.masa.malilib.util.InventoryUtils.getItemStackFromString(idString, count);
-            ItemType result = new ItemType(stackIn);
 
             if (!stackIn.isEmpty())
             {
-                result.setId();
-                return result;
+                return stackIn;
             }
         }
 
-        return ItemType.EMPTY;
+        return EMPTY_STACK;
     }
 
-    public static NbtCompound recipeResultWriteNbt(@Nonnull ItemType itemType)
+    public static NbtCompound recipeResultWriteNbt(@Nonnull ItemStack stackIn)
     {
         NbtCompound result = new NbtCompound();
 
-        if (!itemType.isEmpty())
+        if (!stackIn.isEmpty())
         {
-            if (itemType.getId() != null)
-            {
-                String idString = itemType.getId().toString();
-                int count = itemType.getStack().getCount();
-                int maxCount = itemType.getStack().getMaxCount();
+            String idString = Registries.ITEM.getId(stackIn.getItem()).toString();
+            int count = stackIn.getCount();
+            int maxCount = stackIn.getMaxCount();
+            ItemScroller.printDebug("recipeResultWriteNbt(): id: {}, count: {} // max: {}", idString, count, maxCount);
 
-                if (idString != null && !idString.isEmpty())
+            if (idString != null && !idString.isEmpty())
+            {
+                result.putString("id", idString);
+                if (count < 0)
                 {
-                    result.putString("id", idString);
-                    if (count < 0)
-                    {
-                        count = 0;
-                    }
-                    // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-                    //  but not go over 99.
-                    else if (count > maxCount)
-                    {
-                        count = maxCount;
-                    }
-                    result.putByte("Count", (byte) count);
+                    count = 0;
                 }
+                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+                //  but not go over 99.
+                else if (count > maxCount)
+                {
+                    count = maxCount;
+                }
+                result.putByte("Count", (byte) count);
             }
         }
 
         return result;
     }
 
-    public static ItemType recipeSlotReadNbt(@Nonnull NbtCompound nbt)
+    public static ItemStack recipeSlotReadNbt(@Nonnull NbtCompound nbt)
     {
         String idString;
         int count = -1;
@@ -2705,45 +2701,41 @@ public class InventoryUtils
             }
 
             ItemStack stackIn = fi.dy.masa.malilib.util.InventoryUtils.getItemStackFromString(idString, count);
-            ItemType result = new ItemType(stackIn);
 
             if (!stackIn.isEmpty())
             {
-                result.setId();
-                return result;
+                return stackIn;
             }
         }
 
-        return ItemType.EMPTY;
+        return EMPTY_STACK;
     }
 
-    public static NbtCompound recipeSlotWriteNbt(@Nonnull ItemType itemType)
+    public static NbtCompound recipeSlotWriteNbt(@Nonnull ItemStack stackIn)
     {
         NbtCompound result = new NbtCompound();
 
-        if (!itemType.isEmpty())
+        if (!stackIn.isEmpty())
         {
-            if (itemType.getId() != null)
-            {
-                String id = itemType.getId().toString();
-                int count = itemType.getStack().getCount();
-                int maxCount = itemType.getStack().getMaxCount();
+            String idString = Registries.ITEM.getId(stackIn.getItem()).toString();
+            int count = stackIn.getCount();
+            int maxCount = stackIn.getMaxCount();
+            ItemScroller.printDebug("recipeSlotWriteNbt(): id: {}, count: {} // max: {}", idString, count, maxCount);
 
-                if (!(id == null) && !id.isEmpty())
+            if (!(idString == null) && !idString.isEmpty())
+            {
+                result.putString("id", idString);
+                if (count < 0)
                 {
-                    result.putString("id", id);
-                    if (count < 0)
-                    {
-                        count = 1;
-                    }
-                    // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-                    //  but not go over 99.
-                    else if (count > maxCount)
-                    {
-                        count = maxCount;
-                    }
-                    result.putByte("Count", (byte) count);
+                    count = 1;
                 }
+                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
+                //  but not go over 99.
+                else if (count > maxCount)
+                {
+                    count = maxCount;
+                }
+                result.putByte("Count", (byte) count);
             }
         }
 

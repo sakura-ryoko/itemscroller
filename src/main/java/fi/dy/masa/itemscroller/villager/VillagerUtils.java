@@ -48,7 +48,7 @@ public class VillagerUtils
     {
         if (handler instanceof IMerchantScreenHandler)
         {
-            TradeOfferList originalList = ((IMerchantScreenHandler) handler).itemscroller$getOriginalList();
+            TradeOfferList originalList = ((IMerchantScreenHandler) handler).getOriginalList();
             TradeOfferList customList = handler.getRecipes();
 
             if (originalList != null && customList != null &&

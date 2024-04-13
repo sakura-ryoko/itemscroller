@@ -3,7 +3,6 @@ package fi.dy.masa.itemscroller.mixin;
 import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -32,11 +31,9 @@ import fi.dy.masa.malilib.render.RenderUtils;
 @Mixin(MerchantScreen.class)
 public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHandler>
 {
-    @Unique
     @Nullable private FavoriteData favoriteData;
     @Shadow private int selectedIndex;
     @Shadow int indexStartOffset;
-    @Unique
     private int indexStartOffsetLast = -1;
 
     @Shadow protected abstract boolean canScroll(int listSize);
@@ -46,36 +43,12 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
         super(handler, inventory, title);
     }
 
-/*
-    Injecting at init() no longer works because listSize is always 0, so canScroll() is always false
-
-    @Inject(method = "init", at = @At("RETURN"))
-    private void itemscroller$initTradeListWidget(CallbackInfo ci)
-    {
-        ItemScroller.printDebug("itemscroller$initTradeListWidget(): this.indexStartOffsetLast {} : this.indexStartOffset {}", this.indexStartOffsetLast, this.indexStartOffset);
-
-        if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
-            Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue())
-        {
-            VillagerData data = VillagerDataStorage.getInstance().getDataForLastInteractionTarget();
-            int listSize = this.handler.getRecipes().size();
-
-            ItemScroller.printDebug("itemscroller$initTradeListWidget(): this.canScroll {} : this.handler.getRecipes().size() {} : listSize {}", this.canScroll(listSize), ((MerchantScreenHandler) this.handler).getRecipes().size(), listSize);
-            if (data != null && this.canScroll(listSize))
-            {
-                ItemScroller.printDebug("itemscroller$initTradeListWidget(): data.getTradeListPosition() {}", data.getTradeListPosition());
-                this.indexStartOffset = this.itemscroller$getClampedIndex(data.getTradeListPosition());
-            }
-        }
-    }
- */
-
     @Inject(
             method = "render",
             at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;renderScrollbar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/village/TradeOfferList;)V")
     )
-    private void itemscroller$fixRenderScrollBar(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    private void fixRenderScrollBar(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
                 Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue())
@@ -85,43 +58,43 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
 
             if (data != null && this.canScroll(listSize))
             {
-                this.indexStartOffset = this.itemscroller$getClampedIndex(data.getTradeListPosition());
+                this.indexStartOffset = this.getClampedIndex(data.getTradeListPosition());
             }
         }
     }
 
     @Inject(method = "mouseScrolled", at = @At("RETURN"))
-    private void itemscroller$onMouseScrollPost(double mouseX, double mouseY, double horizontalAmount, double verticalAmount, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseScrollPost(double mouseX, double mouseY, double horizontalAmount, double verticalAmount, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
             this.indexStartOffsetLast != this.indexStartOffset)
         {
-            int index = this.itemscroller$getClampedIndex(this.indexStartOffset);
+            int index = this.getClampedIndex(this.indexStartOffset);
             VillagerDataStorage.getInstance().setTradeListPosition(index);
             this.indexStartOffsetLast = index;
         }
     }
 
     @Inject(method = "mouseDragged", at = @At("RETURN"))
-    private void itemscroller$onMouseDragPost(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseDragPost(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
             this.indexStartOffsetLast != this.indexStartOffset)
         {
-            int index = this.itemscroller$getClampedIndex(this.indexStartOffset);
+            int index = this.getClampedIndex(this.indexStartOffset);
             VillagerDataStorage.getInstance().setTradeListPosition(index);
             this.indexStartOffsetLast = index;
         }
     }
 
     @Inject(method = "mouseClicked", at = @At("RETURN"), cancellable = true)
-    private void itemscroller$onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
-            int visibleIndex = this.itemscroller$getHoveredTradeButtonIndex(mouseX, mouseY);
+            int visibleIndex = this.getHoveredTradeButtonIndex(mouseX, mouseY);
             int realIndex = VillagerUtils.getRealTradeIndexFor(visibleIndex, this.handler);
 
             if (realIndex >= 0)
@@ -148,7 +121,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
                     this.favoriteData = null; // Force a re-build of the list
 
                     // Rebuild the custom list based on the new favorites (See the Mixin for MerchantScreenHandler#setOffers())
-                    this.handler.setOffers(((IMerchantScreenHandler) this.handler).itemscroller$getOriginalList());
+                    this.handler.setOffers(((IMerchantScreenHandler) this.handler).getOriginalList());
 
                     cir.setReturnValue(true);
                 }
@@ -157,7 +130,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     }
 
     @Inject(method = "syncRecipeIndex", at = @At("HEAD"), cancellable = true)
-    private void itemscroller$fixRecipeIndex(CallbackInfo ci)
+    private void fixRecipeIndex(CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             this.getScreenHandler() instanceof IMerchantScreenHandler)
@@ -171,7 +144,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
 
     @Inject(method = "render", at = @At(value = "FIELD",
             target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;offers:[Lnet/minecraft/client/gui/screen/ingame/MerchantScreen$WidgetButtonPage;"))
-    private void itemscroller$renderFavoriteMarker(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    private void renderFavoriteMarker(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
@@ -206,16 +179,14 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
         }
     }
 
-    @Unique
-    private int itemscroller$getClampedIndex(int index)
+    private int getClampedIndex(int index)
     {
         int listSize = this.handler.getRecipes().size();
 
         return Math.max(0, Math.min(index, listSize - 7));
     }
 
-    @Unique
-    private int itemscroller$getHoveredTradeButtonIndex(double mouseX, double mouseY)
+    private int getHoveredTradeButtonIndex(double mouseX, double mouseY)
     {
         int screenX = (this.width - this.backgroundWidth) / 2;
         int screenY = (this.height - this.backgroundHeight) / 2;

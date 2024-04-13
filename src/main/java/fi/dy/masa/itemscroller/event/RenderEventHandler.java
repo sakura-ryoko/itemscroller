@@ -1,7 +1,7 @@
 package fi.dy.masa.itemscroller.event;
 
+import org.joml.Matrix4fStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import fi.dy.masa.itemscroller.util.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -9,14 +9,14 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.recipes.RecipePattern;
+import fi.dy.masa.itemscroller.recipes.RecipeStorage;
+import fi.dy.masa.itemscroller.util.*;
 import fi.dy.masa.malilib.render.InventoryOverlay;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.StringUtils;
-import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.recipes.RecipeDataStorage;
-import org.joml.Matrix4fStack;
 
 public class RenderEventHandler
 {
@@ -43,14 +43,13 @@ public class RenderEventHandler
         if (GuiUtils.getCurrentScreen() instanceof HandledScreen && InputUtils.isRecipeViewOpen())
         {
             HandledScreen<?> gui = (HandledScreen<?>) GuiUtils.getCurrentScreen();
-            RecipeDataStorage recipes = RecipeDataStorage.getInstance();
+            RecipeStorage recipes = RecipeStorage.getInstance();
             final int first = recipes.getFirstVisibleRecipeId();
             final int countPerPage = recipes.getRecipeCountPerPage();
             final int lastOnPage = first + countPerPage - 1;
 
             this.calculateRecipePositions(gui);
 
-            // MatrixStack is being replaced by Matrix4fStack
             Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
             matrix4fStack.pushMatrix();
             matrix4fStack.translate(this.recipeListX, this.recipeListY, 0);
@@ -106,7 +105,7 @@ public class RenderEventHandler
                 return;
             }
 
-            RecipeDataStorage recipes = RecipeDataStorage.getInstance();
+            RecipeStorage recipes = RecipeStorage.getInstance();
 
             final int mouseX = fi.dy.masa.malilib.util.InputUtils.getMouseX();
             final int mouseY = fi.dy.masa.malilib.util.InputUtils.getMouseY();
@@ -114,7 +113,6 @@ public class RenderEventHandler
 
             float offset = 300f;
 
-            // MatrixStack is being replaced by Matrix4fStack
             Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
             matrix4fStack.pushMatrix();
             matrix4fStack.translate(0, 0, offset);
@@ -142,7 +140,7 @@ public class RenderEventHandler
 
     private void calculateRecipePositions(HandledScreen<?> gui)
     {
-        RecipeDataStorage recipes = RecipeDataStorage.getInstance();
+        RecipeStorage recipes = RecipeStorage.getInstance();
         final int gapHorizontal = 2;
         final int gapVertical = 2;
         final int stackBaseHeight = 16;
@@ -181,7 +179,7 @@ public class RenderEventHandler
         }
     }
 
-    public int getHoveredRecipeId(int mouseX, int mouseY, RecipeDataStorage recipes, HandledScreen<?> gui)
+    public int getHoveredRecipeId(int mouseX, int mouseY, RecipeStorage recipes, HandledScreen<?> gui)
     {
         if (InputUtils.isRecipeViewOpen())
         {
@@ -224,9 +222,7 @@ public class RenderEventHandler
         x = x - (int) (font.getWidth(indexStr) * scale) - 2;
         y = row * this.entryHeight + this.entryHeight / 2 - font.fontHeight / 2;
 
-        // TODO DrawContext still uses the MatrixStack type,
-        //  even though it uses a Matrix4f for the actual draw() internally,
-        //  so I am sure Mojang will change this.
+        // TODO DrawContext still uses the MatrixStack type
         MatrixStack matrixStack = drawContext.getMatrices();
         matrixStack.push();
         matrixStack.translate(x, y, 0);
@@ -239,7 +235,7 @@ public class RenderEventHandler
 
     private void renderRecipeItems(RecipePattern recipe, int recipeCountPerPage, HandledScreen<?> gui, DrawContext drawContext)
     {
-        ItemType[] items = recipe.getRecipeItems();
+        ItemStack[] items = recipe.getRecipeItems();
         final int recipeDimensions = (int) Math.ceil(Math.sqrt(recipe.getRecipeLength()));
         int x = -3 * 17 + 2;
         int y = 3 * this.entryHeight;
@@ -251,7 +247,7 @@ public class RenderEventHandler
                 int xOff = col * 17;
                 int yOff = row * 17;
 
-                this.renderStackAt(items[i].getStack(), x + xOff, y + yOff, false, drawContext);
+                this.renderStackAt(items[i], x + xOff, y + yOff, false, drawContext);
             }
         }
     }
@@ -279,7 +275,7 @@ public class RenderEventHandler
                     if (mouseX >= xStart && mouseX < xStart + scaledStackDimensions &&
                         mouseY >= yStart && mouseY < yStart + scaledStackDimensions)
                     {
-                        return recipe.getRecipeItems()[i].getStack();
+                        return recipe.getRecipeItems()[i];
                     }
                 }
             }
@@ -307,9 +303,7 @@ public class RenderEventHandler
             stack = stack.copy();
             InventoryUtils.setStackSize(stack, 1);
 
-            // TODO DrawContext still uses the MatrixStack type,
-            //  even though it uses a Matrix4f for the actual draw() internally,
-            //  so I am sure Mojang will change this.
+            // TODO DrawContext still uses the MatrixStack type
             MatrixStack matrixStack = drawContext.getMatrices();
             matrixStack.push();
             matrixStack.translate(0, 0, 100.f);

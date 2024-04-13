@@ -11,7 +11,7 @@ import fi.dy.masa.itemscroller.util.InputUtils;
 public abstract class MixinAbstractInventoryScreen
 {
     @Inject(method = "drawStatusEffects", at = @At("HEAD"), cancellable = true)
-    private void itemscroller$preventPotionEffectRendering(CallbackInfo ci)
+    private void preventPotionEffectRendering(CallbackInfo ci)
     {
         if (InputUtils.isRecipeViewOpen())
         {

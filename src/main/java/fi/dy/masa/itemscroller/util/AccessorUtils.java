@@ -14,47 +14,47 @@ public class AccessorUtils
     @Nullable
     public static Slot getSlotUnderMouse(HandledScreen<?> gui)
     {
-        return ((IMixinScreenWithHandler) gui).itemscroller$getHoveredSlot();
+        return ((IMixinScreenWithHandler) gui).itemscroller_getHoveredSlot();
     }
 
     @Nullable
     public static Slot getSlotAtPosition(HandledScreen<?> gui, int x, int y)
     {
-        return ((IMixinScreenWithHandler) gui).itemscroller$getSlotAtPositionInvoker(x, y);
+        return ((IMixinScreenWithHandler) gui).itemscroller_getSlotAtPositionInvoker(x, y);
     }
 
     public static void handleMouseClick(HandledScreen<?> gui, Slot slotIn, int slotId, int mouseButton, SlotActionType type)
     {
-        ((IMixinScreenWithHandler) gui).itemscroller$handleMouseClickInvoker(slotIn, slotId, mouseButton, type);
+        ((IMixinScreenWithHandler) gui).itemscroller_handleMouseClickInvoker(slotIn, slotId, mouseButton, type);
     }
 
     public static int getGuiLeft(HandledScreen<?> gui)
     {
-        return ((IMixinScreenWithHandler) gui).itemscroller$getGuiLeft();
+        return ((IMixinScreenWithHandler) gui).itemscroller_getGuiLeft();
     }
 
     public static int getGuiTop(HandledScreen<?> gui)
     {
-        return ((IMixinScreenWithHandler) gui).itemscroller$getGuiTop();
+        return ((IMixinScreenWithHandler) gui).itemscroller_getGuiTop();
     }
 
     public static int getGuiXSize(HandledScreen<?> gui)
     {
-        return ((IMixinScreenWithHandler) gui).itemscroller$getBackgroundWidth();
+        return ((IMixinScreenWithHandler) gui).itemscroller_getBackgroundWidth();
     }
 
     public static int getGuiYSize(HandledScreen<?> gui)
     {
-        return ((IMixinScreenWithHandler) gui).itemscroller$getBackgroundHeight();
+        return ((IMixinScreenWithHandler) gui).itemscroller_getBackgroundHeight();
     }
 
     public static int getSelectedMerchantRecipe(MerchantScreen gui)
     {
-        return ((IMixinMerchantScreen) gui).itemscroller$getSelectedMerchantRecipe();
+        return ((IMixinMerchantScreen) gui).itemscroller_getSelectedMerchantRecipe();
     }
 
     public static int getSlotIndex(Slot slot)
     {
-        return ((IMixinSlot) slot).itemscroller$getSlotIndex();
+        return ((IMixinSlot) slot).itemscroller_getSlotIndex();
     }
 }

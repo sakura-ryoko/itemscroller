@@ -14,7 +14,7 @@ import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 public class MixinClientPlayerInteractionManager
 {
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
-    private void itemscroller$cancelWindowClicksWhileReplayingBufferedPackets(CallbackInfo ci)
+    private void cancelWindowClicksWhileReplayingBufferedPackets(CallbackInfo ci)
     {
         if (ClickPacketBuffer.shouldCancelWindowClicks())
         {
@@ -24,7 +24,7 @@ public class MixinClientPlayerInteractionManager
 
     @Redirect(method = "clickSlot", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
-    private void itemscroller$bufferClickPacketsAndCancel(ClientPlayNetworkHandler netHandler, Packet<?> packet)
+    private void bufferClickPacketsAndCancel(ClientPlayNetworkHandler netHandler, Packet<?> packet)
     {
         if (ClickPacketBuffer.shouldBufferClickPackets())
         {

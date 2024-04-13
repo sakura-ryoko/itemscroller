@@ -9,23 +9,23 @@ import net.minecraft.screen.slot.Slot;
 public interface IMixinScreenWithHandler
 {
     @Invoker("getSlotAt")
-    Slot itemscroller$getSlotAtPositionInvoker(double x, double y);
+    Slot itemscroller_getSlotAtPositionInvoker(double x, double y);
 
     @Invoker("onMouseClick")
-    void itemscroller$handleMouseClickInvoker(Slot slotIn, int slotId, int mouseButton, net.minecraft.screen.slot.SlotActionType type);
+    void itemscroller_handleMouseClickInvoker(Slot slotIn, int slotId, int mouseButton, net.minecraft.screen.slot.SlotActionType type);
 
     @Accessor("focusedSlot")
-    Slot itemscroller$getHoveredSlot();
+    Slot itemscroller_getHoveredSlot();
 
     @Accessor("x")
-    int itemscroller$getGuiLeft();
+    int itemscroller_getGuiLeft();
 
     @Accessor("y")
-    int itemscroller$getGuiTop();
+    int itemscroller_getGuiTop();
 
     @Accessor("backgroundWidth")
-    int itemscroller$getBackgroundWidth();
+    int itemscroller_getBackgroundWidth();
 
     @Accessor("backgroundHeight")
-    int itemscroller$getBackgroundHeight();
+    int itemscroller_getBackgroundHeight();
 }
