@@ -1,18 +1,10 @@
 package fi.dy.masa.itemscroller.util;
 
-import java.lang.ref.WeakReference;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
+import java.lang.ref.WeakReference;
+import java.util.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -27,7 +19,6 @@ import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
@@ -43,7 +34,6 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
@@ -2606,140 +2596,6 @@ public class InventoryUtils
     public static MoveAction getActiveMoveAction()
     {
         return activeMoveAction;
-    }
-
-
-    public static ItemStack recipeResultReadNbt(@Nonnull NbtCompound nbt)
-    {
-        String idString;
-        int count;
-
-        if (nbt.contains("id"))
-        {
-            idString = nbt.getString("id");
-            if (nbt.contains("Count")) {
-                count = nbt.getByte("Count");
-                if (count < 0)
-                {
-                    count = 1;
-                }
-                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-                //  but not go over 99.
-                else if (count > 99)
-                {
-                    count = 99;
-                }
-            }
-            else
-            {
-                count = 1;
-            }
-
-            ItemStack stackIn = fi.dy.masa.malilib.util.InventoryUtils.getItemStackFromString(idString, count);
-
-            if (!stackIn.isEmpty())
-            {
-                return stackIn;
-            }
-        }
-
-        return EMPTY_STACK;
-    }
-
-    public static NbtCompound recipeResultWriteNbt(@Nonnull ItemStack stackIn)
-    {
-        NbtCompound result = new NbtCompound();
-
-        if (!stackIn.isEmpty())
-        {
-            String idString = Registries.ITEM.getId(stackIn.getItem()).toString();
-            int count = stackIn.getCount();
-            int maxCount = stackIn.getMaxCount();
-            ItemScroller.printDebug("recipeResultWriteNbt(): id: {}, count: {} // max: {}", idString, count, maxCount);
-
-            if (idString != null && !idString.isEmpty())
-            {
-                result.putString("id", idString);
-                if (count < 0)
-                {
-                    count = 0;
-                }
-                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-                //  but not go over 99.
-                else if (count > maxCount)
-                {
-                    count = maxCount;
-                }
-                result.putByte("Count", (byte) count);
-            }
-        }
-
-        return result;
-    }
-
-    public static ItemStack recipeSlotReadNbt(@Nonnull NbtCompound nbt)
-    {
-        String idString;
-        int count = -1;
-
-        if (nbt.contains("id"))
-        {
-            idString = nbt.getString("id");
-            if (nbt.contains("Count"))
-            {
-                count = nbt.getByte("Count");
-                if (count < 0)
-                {
-                    count = 1;
-                }
-                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-                //  but not go over 99.
-                else if (count > 99)
-                {
-                    count = 99;
-                }
-            }
-
-            ItemStack stackIn = fi.dy.masa.malilib.util.InventoryUtils.getItemStackFromString(idString, count);
-
-            if (!stackIn.isEmpty())
-            {
-                return stackIn;
-            }
-        }
-
-        return EMPTY_STACK;
-    }
-
-    public static NbtCompound recipeSlotWriteNbt(@Nonnull ItemStack stackIn)
-    {
-        NbtCompound result = new NbtCompound();
-
-        if (!stackIn.isEmpty())
-        {
-            String idString = Registries.ITEM.getId(stackIn.getItem()).toString();
-            int count = stackIn.getCount();
-            int maxCount = stackIn.getMaxCount();
-            ItemScroller.printDebug("recipeSlotWriteNbt(): id: {}, count: {} // max: {}", idString, count, maxCount);
-
-            if (!(idString == null) && !idString.isEmpty())
-            {
-                result.putString("id", idString);
-                if (count < 0)
-                {
-                    count = 1;
-                }
-                // Note that the ItemStack.getMaxCount() is now a data Component that can exceed 64,
-                //  but not go over 99.
-                else if (count > maxCount)
-                {
-                    count = maxCount;
-                }
-                result.putByte("Count", (byte) count);
-            }
-        }
-
-        return result;
     }
 
     /*
