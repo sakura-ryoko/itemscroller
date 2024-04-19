@@ -235,11 +235,10 @@ public class RecipeStorage
                         FileInputStream is = new FileInputStream(file);
                         this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
                         is.close();
-                        ItemScroller.printDebug("RecipeStorage#readFromDisk(): Read recipes from file '{}'", file.getPath());
                     }
                     else
                     {
-                        ItemScroller.logger.error("RecipeStorage#readFromDisk(): Error reading recipes from file '{}'", file.getPath());
+                        ItemScroller.logger.warn("RecipeStorage#readFromDisk(): Error reading recipes from file '{}'", file.getPath());
                     }
                 }
                 else
@@ -250,7 +249,7 @@ public class RecipeStorage
         }
         catch (Exception e)
         {
-            ItemScroller.logger.error("RecipeStorage#readFromDisk(): Failed to read recipes from file", e);
+            ItemScroller.logger.warn("RecipeStorage#readFromDisk(): Failed to read recipes from file", e);
         }
     }
 
@@ -293,7 +292,7 @@ public class RecipeStorage
             }
             catch (Exception e)
             {
-                ItemScroller.logger.error("RecipeStorage#writeToDisk(): Failed to write recipes to file!", e);
+                ItemScroller.logger.warn("RecipeStorage#writeToDisk(): Failed to write recipes to file!", e);
             }
         }
     }

@@ -5,6 +5,7 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -34,6 +35,7 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
@@ -153,7 +155,7 @@ public class InventoryUtils
     {
         if (slot == null)
         {
-            ItemScroller.printDebug("slot was null");
+            ItemScroller.logger.info("slot was null");
             return;
         }
 
@@ -161,7 +163,7 @@ public class InventoryUtils
         Object inv = slot.inventory;
         String stackStr = InventoryUtils.getStackString(slot.getStack());
 
-        ItemScroller.printDebug(String.format("slot: slotNumber: %d, getSlotIndex(): %d, getHasStack(): %s, " +
+        ItemScroller.logger.info(String.format("slot: slotNumber: %d, getSlotIndex(): %d, getHasStack(): %s, " +
                 "slot class: %s, inv class: %s, Container's slot list has slot: %s, stack: %s, numSlots: %d",
                 slot.id, AccessorUtils.getSlotIndex(slot), slot.hasStack(), slot.getClass().getName(),
                 inv != null ? inv.getClass().getName() : "<null>", hasSlot ? " true" : "false", stackStr,
@@ -1947,8 +1949,7 @@ public class InventoryUtils
                                                                boolean treatHotbarAsDifferent,
                                                                boolean reverse)
     {
-        // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
-        IntArrayList slots = new IntArrayList(99);
+        IntArrayList slots = new IntArrayList(64);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
 
@@ -1979,8 +1980,7 @@ public class InventoryUtils
                                                                ItemStack stackReference,
                                                                boolean preferPartial)
     {
-        // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
-        IntArrayList slots = new IntArrayList(99);
+        IntArrayList slots = new IntArrayList(64);
         final int maxSlot = container.slots.size() - 1;
 
         for (int i = 0; i <= maxSlot; ++i)
@@ -2027,8 +2027,7 @@ public class InventoryUtils
                                                            boolean treatHotbarAsDifferent,
                                                            boolean reverse)
     {
-        /// Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
-        IntArrayList slots = new IntArrayList(99);
+        IntArrayList slots = new IntArrayList(64);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
 
@@ -2050,8 +2049,7 @@ public class InventoryUtils
     private static IntArrayList getSlotNumbersOfEmptySlotsInPlayerInventory(ScreenHandler container,
                                                                             boolean reverse)
     {
-        // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
-        IntArrayList slots = new IntArrayList(99);
+        IntArrayList slots = new IntArrayList(64);
         final int maxSlot = container.slots.size() - 1;
         final int increment = reverse ? -1 : 1;
 
@@ -2319,7 +2317,6 @@ public class InventoryUtils
         if (slotNum >= 0 && slotNum < gui.getScreenHandler().slots.size())
         {
             Slot slot = gui.getScreenHandler().getSlot(slotNum);
-            // Note that the ItemStack.getMaxCount() is now a data Component that can go up to 99
             int failsafe = 64;
 
             while (failsafe-- > 0 && slot.hasStack())

@@ -9,14 +9,17 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.recipes.RecipeStorage;
-import fi.dy.masa.itemscroller.util.*;
 import fi.dy.masa.malilib.render.InventoryOverlay;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.StringUtils;
+import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.recipes.RecipePattern;
+import fi.dy.masa.itemscroller.recipes.RecipeStorage;
+import fi.dy.masa.itemscroller.util.AccessorUtils;
+import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
+import fi.dy.masa.itemscroller.util.InputUtils;
+import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 public class RenderEventHandler
 {

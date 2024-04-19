@@ -1,11 +1,11 @@
 package fi.dy.masa.itemscroller.event;
 
 import javax.annotation.Nullable;
-import fi.dy.masa.itemscroller.util.DataManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
-import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 import fi.dy.masa.malilib.interfaces.IWorldLoadListener;
+import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
+import fi.dy.masa.itemscroller.util.DataManager;
 
 public class WorldLoadListener implements IWorldLoadListener
 {

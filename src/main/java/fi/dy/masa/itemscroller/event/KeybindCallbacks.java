@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
-import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.Message;
@@ -20,11 +19,8 @@ import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.GuiConfigs;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
-import fi.dy.masa.itemscroller.util.AccessorUtils;
-import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
-import fi.dy.masa.itemscroller.util.InputUtils;
-import fi.dy.masa.itemscroller.util.InventoryUtils;
-import fi.dy.masa.itemscroller.util.MoveAction;
+import fi.dy.masa.itemscroller.recipes.RecipeStorage;
+import fi.dy.masa.itemscroller.util.*;
 
 public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 {

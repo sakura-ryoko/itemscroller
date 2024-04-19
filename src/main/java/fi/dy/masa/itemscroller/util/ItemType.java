@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+
 import net.minecraft.item.ItemStack;
 
 /**
@@ -16,15 +17,7 @@ public class ItemType
 
     public ItemType(@Nonnull ItemStack stack)
     {
-        if (stack.isEmpty())
-        {
-            this.stack = InventoryUtils.EMPTY_STACK;
-        }
-        else
-        {
-            this.stack = InventoryUtils.copyStack(stack, false);
-        }
-
+        this.stack = stack.isEmpty() ? InventoryUtils.EMPTY_STACK : InventoryUtils.copyStack(stack, false);
     }
 
     public ItemStack getStack()

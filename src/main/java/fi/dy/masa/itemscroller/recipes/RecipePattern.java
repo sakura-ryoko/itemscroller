@@ -15,13 +15,12 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 public class RecipePattern
 {
-    private static final int MAX_SLOTS = 9;
     private ItemStack result = InventoryUtils.EMPTY_STACK;
-    private ItemStack[] recipe = new ItemStack[MAX_SLOTS];
+    private ItemStack[] recipe = new ItemStack[9];
 
     public RecipePattern()
     {
-        this.ensureRecipeSizeAndClearRecipe(MAX_SLOTS);
+        this.ensureRecipeSizeAndClearRecipe(9);
     }
 
     public void ensureRecipeSize(int size)

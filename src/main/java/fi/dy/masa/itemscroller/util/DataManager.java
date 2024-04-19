@@ -1,11 +1,10 @@
 package fi.dy.masa.itemscroller.util;
 
-import fi.dy.masa.itemscroller.ItemScroller;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.registry.DynamicRegistryManager;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
-import net.minecraft.recipe.RecipeManager;
-import net.minecraft.registry.DynamicRegistryManager;
 
 /**
  * New ItemScroller Data Manager
@@ -23,15 +22,6 @@ public class DataManager
 
     public void reset(boolean isLogout)
     {
-        if (isLogout)
-        {
-            ItemScroller.printDebug("DataManager#reset() - log-out");
-        }
-        else
-        {
-            ItemScroller.printDebug("DataManager#reset() - dimension change or log-in");
-        }
-
         RecipeStorage.getInstance().reset(isLogout);
         VillagerDataStorage.getInstance().reset(isLogout);
 
@@ -67,17 +57,25 @@ public class DataManager
     public void setWorldRegistryManager(DynamicRegistryManager manager)
     {
         if (manager != null && manager != DynamicRegistryManager.EMPTY)
+        {
             this.registryManager = manager;
+        }
         else
+        {
             this.registryManager = DynamicRegistryManager.EMPTY;
+        }
     }
 
     public DynamicRegistryManager getWorldRegistryManager()
     {
         if (this.registryManager != DynamicRegistryManager.EMPTY)
+        {
             return this.registryManager;
+        }
         else
+        {
             return DynamicRegistryManager.EMPTY;
+        }
     }
 
     /**

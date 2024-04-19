@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import net.minecraft.nbt.NbtCompound;
@@ -31,6 +30,7 @@ import fi.dy.masa.malilib.util.StringUtils;
 public class VillagerDataStorage
 {
     private static final VillagerDataStorage INSTANCE = new VillagerDataStorage();
+
     private final Map<UUID, VillagerData> data = new HashMap<>();
     private final List<TradeType> globalFavorites = new ArrayList<>();
     private UUID lastInteractedUUID;
@@ -43,14 +43,6 @@ public class VillagerDataStorage
 
     public void reset(boolean isLogout)
     {
-        if (isLogout)
-        {
-            //ItemScroller.printDebug("VillagerDataStorage#reset() - log-out");
-        }
-        else
-        {
-            //ItemScroller.printDebug("VillagerDataStorage#reset() - dimension change or log-in");
-        }
     }
 
 
@@ -234,11 +226,10 @@ public class VillagerDataStorage
                     FileInputStream is = new FileInputStream(file);
                     this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
                     is.close();
-                    ItemScroller.printDebug("VillagerDataStorage#readFromDisk(): Read villager data from file '{}'", file.getPath());
                 }
                 else
                 {
-                    ItemScroller.logger.error("VillagerDataStorage#readFromDisk(): Error reading villager data from file '{}'", file.getPath());
+                    ItemScroller.logger.warn("VillagerDataStorage#readFromDisk(): Error reading villager data from file '{}'", file.getPath());
                 }
             }
             else
@@ -248,7 +239,7 @@ public class VillagerDataStorage
         }
         catch (Exception e)
         {
-            ItemScroller.logger.error("Failed to read villager data from file", e);
+            ItemScroller.logger.warn("Failed to read villager data from file", e);
         }
     }
 
@@ -286,16 +277,11 @@ public class VillagerDataStorage
                 }
                 this.dirty = false;
 
-                ItemScroller.printDebug("VillagerDataStorage#writeToDisk(): Wrote villager data to file '{}'", fileReal.getPath());
             }
             catch (Exception e)
             {
                 ItemScroller.logger.warn("Failed to write villager data to file!", e);
             }
-        }
-        else
-        {
-            ItemScroller.printDebug("VillagerDataStorage#writeToDisk(): File marked as clean, skipping output to disk.");
         }
     }
 }
