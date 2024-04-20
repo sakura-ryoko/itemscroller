@@ -232,10 +232,6 @@ public class VillagerDataStorage
                     ItemScroller.logger.warn("VillagerDataStorage#readFromDisk(): Error reading villager data from file '{}'", file.getPath());
                 }
             }
-            else
-            {
-                ItemScroller.logger.warn("VillagerDataStorage#readFromDisk(): File '{}' does not exist.", file.getPath());
-            }
         }
         catch (Exception e)
         {

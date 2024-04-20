@@ -241,10 +241,6 @@ public class RecipeStorage
                         ItemScroller.logger.warn("RecipeStorage#readFromDisk(): Error reading recipes from file '{}'", file.getPath());
                     }
                 }
-                else
-                {
-                    ItemScroller.logger.warn("RecipeStorage#readFromDisk(): File '{}' does not exist.", file.getPath());
-                }
             }
         }
         catch (Exception e)
