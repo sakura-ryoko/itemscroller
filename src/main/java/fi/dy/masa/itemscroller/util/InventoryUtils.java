@@ -110,7 +110,7 @@ public class InventoryUtils
 
             if (recipe == null || recipe.matches(craftMatrix, world) == false)
             {
-                Optional<RecipeEntry<CraftingRecipe>> optional = DataManager.getInstance().getWorldRecipeManager().getFirstMatch(RecipeType.CRAFTING, craftMatrix, world);
+                Optional<RecipeEntry<CraftingRecipe>> optional = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, craftMatrix, world);
                 recipe = optional.map(RecipeEntry::value).orElse(null);
                 recipeEntry = optional.orElse(null);
             }
@@ -122,7 +122,7 @@ public class InventoryUtils
                      ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
-                    stack = recipe.craft(craftMatrix, DataManager.getInstance().getWorldRegistryManager());
+                    stack = recipe.craft(craftMatrix, world.getRegistryManager());
                 }
 
                 if (setEmptyStack || stack.isEmpty() == false)

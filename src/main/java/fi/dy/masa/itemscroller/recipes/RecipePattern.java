@@ -6,11 +6,11 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.util.Constants;
-import fi.dy.masa.itemscroller.util.DataManager;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 public class RecipePattern
@@ -86,7 +86,7 @@ public class RecipePattern
         this.result = InventoryUtils.isStackEmpty(other.getResult()) == false ? other.getResult().copy() : InventoryUtils.EMPTY_STACK;
     }
 
-    public void readFromNBT(@Nonnull NbtCompound nbt)
+    public void readFromNBT(@Nonnull NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
     {
         if (nbt.contains("Result", Constants.NBT.TAG_COMPOUND) && nbt.contains("Ingredients", Constants.NBT.TAG_LIST))
         {
@@ -106,22 +106,22 @@ public class RecipePattern
 
                 if (slot >= 0 && slot < this.recipe.length)
                 {
-                    this.recipe[slot] = ItemStack.fromNbtOrEmpty(DataManager.getInstance().getWorldRegistryManager(), tag);
+                    this.recipe[slot] = ItemStack.fromNbtOrEmpty(registryManager, tag);
                 }
             }
 
-            this.result = ItemStack.fromNbtOrEmpty(DataManager.getInstance().getWorldRegistryManager(), nbt.getCompound("Result"));
+            this.result = ItemStack.fromNbtOrEmpty(registryManager, nbt.getCompound("Result"));
         }
     }
 
     @Nonnull
-    public NbtCompound writeToNBT()
+    public NbtCompound writeToNBT(@Nonnull DynamicRegistryManager registryManager)
     {
         NbtCompound nbt = new NbtCompound();
 
         if (this.isValid())
         {
-            NbtCompound tag = (NbtCompound) this.result.encode(DataManager.getInstance().getWorldRegistryManager());
+            NbtCompound tag = (NbtCompound) this.result.encode(registryManager);
 
             nbt.putInt("Length", this.recipe.length);
             nbt.put("Result", tag);
@@ -133,7 +133,7 @@ public class RecipePattern
                 if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
                 {
                     tag = new NbtCompound();
-                    tag.copyFrom((NbtCompound) this.recipe[i].encode(DataManager.getInstance().getWorldRegistryManager()));
+                    tag.copyFrom((NbtCompound) this.recipe[i].encode(registryManager));
 
                     tag.putInt("Slot", i);
                     tagIngredients.add(tag);
