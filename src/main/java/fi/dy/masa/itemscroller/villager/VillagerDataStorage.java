@@ -41,11 +41,6 @@ public class VillagerDataStorage
         return INSTANCE;
     }
 
-    public void reset(boolean isLogout)
-    {
-    }
-
-
     public void setLastInteractedUUID(UUID uuid)
     {
         this.lastInteractedUUID = uuid;

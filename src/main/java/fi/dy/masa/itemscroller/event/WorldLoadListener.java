@@ -27,6 +27,8 @@ public class WorldLoadListener implements IWorldLoadListener
     @Override
     public void onWorldLoadPost(@Nullable ClientWorld worldBefore, @Nullable ClientWorld worldAfter, MinecraftClient mc)
     {
+        RecipeStorage.getInstance().reset(worldAfter == null);
+
         // Logging in to a world, load the data
         if (worldBefore == null && worldAfter != null)
         {
