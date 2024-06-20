@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/sakura-ryoko/itemscroller.svg)](https://jitpack.io/#sakura-ryoko/itemscroller)
+
 Item Scroller
 ==============
 Item Scroller is a Minecraft mod that adds various convenience features for moving items
