@@ -1,6 +1,9 @@
 {
+    "itemscroller.config.generic.name.testColor": "testColor",
+    "itemscroller.config.generic.comment.testColor": "Test Comment (Color)",
+
     "itemscroller.config.generic.name.carpetCtrlQCraftingEnabledOnServer": "carpetCtrlQCraftingEnabledOnServer",
-    "itemscroller.config.generic.name.clientCraftingFixOn1_12": "clientCraftingFixOn1_12",
+    "itemscroller.config.generic.name.clientCraftingFixOn1_12": "clientCraftingFixOn1.12",
     "itemscroller.config.generic.name.craftingRenderRecipeItems": "craftingRenderRecipeItems",
     "itemscroller.config.generic.name.debugMessages": "debugMessages",
     "itemscroller.config.generic.name.modMainToggle": "modMainToggle",
