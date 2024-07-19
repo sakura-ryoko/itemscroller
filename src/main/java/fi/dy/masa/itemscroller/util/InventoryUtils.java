@@ -67,6 +67,7 @@ public class InventoryUtils
 {
     private static final Set<Integer> DRAGGED_SLOTS = new HashSet<>();
     private static final int SERVER_SYNC_MAGIC = 45510;
+    public static boolean dontUpdateRecipeBook;
 
     private static WeakReference<Slot> sourceSlotCandidate = null;
     private static WeakReference<Slot> sourceSlot = null;

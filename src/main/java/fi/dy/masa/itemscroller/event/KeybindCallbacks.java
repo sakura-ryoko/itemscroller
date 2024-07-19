@@ -215,6 +215,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
                 if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getVanillaRecipe() != null)
                 {
+                    InventoryUtils.dontUpdateRecipeBook = true;
                     for (int i = 0; i < limit; ++i)
                     {
                         InventoryUtils.tryClearCursor(gui);
@@ -229,6 +230,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         recipeBookClicks = true;
                         InventoryUtils.setInhibitCraftingOutputUpdate(false);
                     }
+                    InventoryUtils.dontUpdateRecipeBook = false;
                 }
                 else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
                 {
