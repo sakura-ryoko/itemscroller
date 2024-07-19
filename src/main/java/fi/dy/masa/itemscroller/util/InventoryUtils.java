@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
 
+import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -28,7 +29,9 @@ import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
 import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
+import net.minecraft.network.packet.s2c.play.StatisticsS2CPacket;
 import net.minecraft.network.packet.s2c.query.PingResultS2CPacket;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
@@ -42,6 +45,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
@@ -2604,96 +2608,101 @@ public class InventoryUtils
 
     public static void sortInventory(HandledScreen<?> gui)
     {
-        Inventory inventory;
+        Pair<Integer, Integer> range = new IntIntMutablePair(Integer.MAX_VALUE, 0);
         Slot focusedSlot = AccessorUtils.getSlotUnderMouse(gui);
-        if (focusedSlot != null)
-        {
-            inventory = focusedSlot.inventory;
-        }
-        else if (gui.getScreenHandler().slots.size() > 0)
-        {
-            inventory = gui.getScreenHandler().slots.getFirst().inventory;
-        }
-        else
-        {
+        if (focusedSlot == null) {
             return;
         }
         ScreenHandler container = gui.getScreenHandler();
 
+        for (int i = 0; i < container.slots.size(); i++)
+        {
+            Slot slot = container.slots.get(i);
+            if (slot.inventory == focusedSlot.inventory)
+            {
+                if (focusedSlot.inventory instanceof PlayerInventory)
+                {
+                    if (focusedSlot.getIndex() >= 9)
+                    {
+                        if (slot.getIndex() < 9 || slot.getIndex() >= 36)
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if (slot.getIndex() >= 9)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                if (i < range.first())
+                {
+                    range.first(i);
+                }
+                if (i >= range.second())
+                {
+                    range.second(i + 1);
+                }
+            }
+        }
+
         tryClearCursor(gui);
-        var slots = container.slots.stream().filter(slot -> {
-            if (slot.inventory != inventory)
-            {
-                return false;
-            }
-            if (inventory instanceof PlayerInventory)
-            {
-                if (focusedSlot.getIndex() >= 9)
-                {
-                    return slot.getIndex() >= 9;
-                }
-                else
-                {
-                    return slot.getIndex() < 9;
-                }
-            }
-            return true;
-        }).toList();
-        tryMergeItems(gui, slots);
+        tryMergeItems(gui, range.left(), range.right() - 1);
 
         if (Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
         {
-            QueryPingC2SPacket packet = new QueryPingC2SPacket(SERVER_SYNC_MAGIC);
+            ClientStatusC2SPacket packet = new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS);
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(packet);
-            selectedSlotUpdateTask = () -> quickSort(gui, slots, 0, slots.size() - 1);
+            selectedSlotUpdateTask = () -> quickSort(gui, range.first(), range.second() - 1);
         }
         else
         {
-            quickSort(gui, slots, 0, slots.size() - 1);
+            quickSort(gui, range.first(), range.second() - 1);
         }
     }
 
     /**
      * sort inventory
      */
-    private static void quickSort(HandledScreen<?> gui, List<Slot> slots, int start, int end)
+    private static void quickSort(HandledScreen<?> gui, int start, int end)
     {
         if (start >= end) return;
 
-        ItemStack mid = slots.get(end).getStack();
+        ItemStack mid = gui.getScreenHandler().getSlot(end).getStack();
         int l = start;
         int r = end - 1;
         while (l < r)
         {
-            while (l < r && compareStacks(slots.get(l).getStack(), mid) < 0)
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid) < 0)
             {
-                System.out.printf("%s < %s\n", slots.get(l).getStack(), mid);
+                System.out.printf("%s < %s\n", gui.getScreenHandler().getSlot(l).getStack(), mid);
                 l++;
             }
-            while (l < r && compareStacks(slots.get(r).getStack(), mid) >= 0)
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(r).getStack(), mid) >= 0)
             {
-                System.out.printf("%s >= %s\n", slots.get(r).getStack(), mid);
+                System.out.printf("%s >= %s\n", gui.getScreenHandler().getSlot(r).getStack(), mid);
                 r--;
             }
             if (l != r)
             {
-                System.out.printf("swap l: %d, r: %d\n", l, r);
-                swapSlots(gui, slots.get(l).id, slots.get(r).id);
+                swapSlots(gui, l, r);
             }
         }
-        if (compareStacks(slots.get(l).getStack(), slots.get(end).getStack()) >= 0)
+        if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack()) >= 0)
         {
-            System.out.printf("%s >= %s\n", slots.get(l).getStack(), slots.get(end).getStack());
+            System.out.printf("%s >= %s\n", gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack());
             System.out.printf("swap l: %d, end: %d\n", l, end);
-            swapSlots(gui, slots.get(l).id, slots.get(end).id);
+            swapSlots(gui, l, end);
         }
         else
         {
             l++;
         }
 
-        quickSort(gui, slots, start, l - 1);
-        quickSort(gui, slots, l + 1, end);
+        quickSort(gui, start, l - 1);
+        quickSort(gui, l + 1, end);
     }
 
     private static int compareStacks(ItemStack stack1, ItemStack stack2)
@@ -2736,15 +2745,13 @@ public class InventoryUtils
         return Integer.compare(-stack1.getCount(), -stack2.getCount());
     }
 
-    public static boolean onPong(PingResultS2CPacket packet) {
-        if (packet.startTime() == SERVER_SYNC_MAGIC)
+    public static boolean onPong(StatisticsS2CPacket packet)
+    {
+        if (selectedSlotUpdateTask != null)
         {
-            if (selectedSlotUpdateTask != null)
-            {
-                selectedSlotUpdateTask.run();
-                selectedSlotUpdateTask = null;
-                return true;
-            }
+            selectedSlotUpdateTask.run();
+            selectedSlotUpdateTask = null;
+            return true;
         }
         return false;
     }
@@ -2821,13 +2828,13 @@ public class InventoryUtils
         return amount > 0;
     }
 
-    private static void tryMergeItems(HandledScreen<?> gui, List<Slot> slots)
+    private static void tryMergeItems(HandledScreen<?> gui, int left, int right)
     {
         Map<ItemType, Integer> nonFullStacks = new HashMap<>();
 
-        for (int i = 0; i < slots.size(); i++)
+        for (int i = left; i <= right; i++)
         {
-            Slot slot = slots.get(i);
+            Slot slot = gui.getScreenHandler().getSlot(i);
 
             if (slot.hasStack())
             {
@@ -2847,7 +2854,7 @@ public class InventoryUtils
                 }
                 else
                 {
-                    if (addStackTo(gui, slots.get(i), slots.get(slotNum)))
+                    if (addStackTo(gui, slot, gui.getScreenHandler().getSlot(slotNum)))
                     {
                         nonFullStacks.put(key, i);
                     }
