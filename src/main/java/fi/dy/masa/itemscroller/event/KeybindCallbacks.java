@@ -3,6 +3,8 @@ package fi.dy.masa.itemscroller.event;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.gui.GuiBase;
@@ -27,6 +29,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
     private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
 
     protected int massCraftTicker;
+    private boolean recipeBookClicks = false;
 
     public static KeybindCallbacks getInstance()
     {
@@ -210,7 +213,17 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                 RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
                 int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
 
-                if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
+                if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getVanillaRecipe() != null)
+                {
+                    InventoryUtils.tryClearCursor(gui);
+                    InventoryUtils.setInhibitCraftingOutputUpdate(true);
+                    InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+                    InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
+                    mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipe(), true);
+                    recipeBookClicks = true;
+                    InventoryUtils.setInhibitCraftingOutputUpdate(false);
+                }
+                else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
                 {
                     for (int i = 0; i < limit; ++i)
                     {
@@ -240,14 +253,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         InventoryUtils.setInhibitCraftingOutputUpdate(true);
                         InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
                         InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
-                        if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getVanillaRecipe() != null)
-                        {
-                            mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipe(), true);
-                        }
-                        else
-                        {
-                            InventoryUtils.tryMoveItemsToFirstCraftingGrid(recipe, gui, true);
-                        }
+                        InventoryUtils.tryMoveItemsToFirstCraftingGrid(recipe, gui, true);
                         InventoryUtils.setInhibitCraftingOutputUpdate(false);
                         InventoryUtils.updateCraftingOutputSlot(outputSlot);
 
@@ -271,6 +277,23 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             }
 
             this.massCraftTicker = 0;
+        }
+    }
+
+    public void onPacket(ScreenHandlerSlotUpdateS2CPacket packet)
+    {
+        var mc = MinecraftClient.getInstance();
+        if (packet.getSlot() == 0 && packet.getSyncId() >= 0 && mc.player.currentScreenHandler instanceof CraftingScreenHandler)
+        {
+            var gui = (HandledScreen<?>) mc.currentScreen;
+            var outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
+            var recipe = RecipeStorage.getInstance().getSelectedRecipe();
+
+            if (recipeBookClicks)
+            {
+                InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.id, recipe.getResult());
+                recipeBookClicks = false;
+            }
         }
     }
 }
