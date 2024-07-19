@@ -50,6 +50,8 @@ public class Hotkeys
     public static final ConfigHotkey MODIFIER_MOVE_STACK        = new ConfigHotkey("modifierMoveStack",      "LEFT_SHIFT", GUI_NO_ORDER, "itemscroller.config.hotkeys.comment.modifierMoveStack").translatedName("itemscroller.config.hotkeys.name.modifierMoveStack");
     public static final ConfigHotkey MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE = new ConfigHotkey("modifierToggleVillagerGlobalFavorite", "LEFT_SHIFT", GUI_RELAXED, "itemscroller.config.hotkeys.comment.modifierToggleVillagerGlobalFavorite").translatedName("itemscroller.config.hotkeys.name.modifierToggleVillagerGlobalFavorite");
 
+    public static final ConfigHotkey SORT_INVENTORY             = new ConfigHotkey("sortInventory",         "R", GUI_NO_ORDER, "itemscroller.config.hotkeys.comment.sortInventory").translatedName("itemscroller.config.hotkeys.name.sortInventory");
+
     public static final List<ConfigHotkey> HOTKEY_LIST = ImmutableList.of(
             OPEN_CONFIG_GUI,
             TOGGLE_MOD_ON_OFF,
@@ -87,6 +89,8 @@ public class Hotkeys
             KEY_WS_MOVE_UP_LEAVE_ONE,
             KEY_WS_MOVE_UP_MATCHING,
             KEY_WS_MOVE_UP_SINGLE,
-            KEY_WS_MOVE_UP_STACKS
+            KEY_WS_MOVE_UP_STACKS,
+
+            SORT_INVENTORY
     );
 }

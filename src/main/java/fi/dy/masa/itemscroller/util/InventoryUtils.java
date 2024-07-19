@@ -3,9 +3,13 @@ package fi.dy.masa.itemscroller.util;
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.Supplier;
+
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
 
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -14,11 +18,16 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
@@ -62,6 +71,8 @@ public class InventoryUtils
     private static int lastPosY;
     private static int slotNumberLast;
     private static boolean inhibitCraftResultUpdate;
+    private static Supplier<Boolean> selectedSlotUpdateTask;
+    public static boolean assumeEmptyShulkerStacking = false;
 
     public static void setInhibitCraftingOutputUpdate(boolean inhibitUpdate)
     {
@@ -2587,6 +2598,142 @@ public class InventoryUtils
     public static MoveAction getActiveMoveAction()
     {
         return activeMoveAction;
+    }
+
+    public static void sortInventory(HandledScreen<?> gui)
+    {
+        tryClearCursor(gui);
+        tryMergeItems(gui);
+
+        if (Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
+        {
+
+        }
+        else
+        {
+
+        }
+    }
+
+    public static void onSelectedSlotUpdated() {
+
+    }
+
+    public static int stackMaxSize(ItemStack stack, boolean assumeShulkerStacking) {
+        if (stack.isEmpty()) {
+            return 64;
+        }
+
+        if (assumeShulkerStacking && Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
+        {
+            if (stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof ShulkerBoxBlock)
+            {
+                if (stack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).copyFirstStack().isEmpty())
+                {
+                    return 64;
+                }
+            }
+        }
+
+        return stack.getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1);
+    }
+
+    /**
+     * @return are there still items left in the original slot?
+     */
+    private static boolean addStackTo(HandledScreen<? extends ScreenHandler> gui, Slot slot, Slot target)
+    {
+        if (slot == null || target == null)
+        {
+            return false;
+        }
+
+        ItemStack stack = slot.getStack();
+        ItemStack targetStack = target.getStack();
+
+        if (stack.isEmpty() || !ItemStack.areItemsEqual(stack, targetStack))
+        {
+            return !stack.isEmpty();
+        }
+
+        if (targetStack.isEmpty())
+        {
+            clickSlot(gui, slot, slot.id, 0, SlotActionType.PICKUP);
+            clickSlot(gui, target, target.id, 0, SlotActionType.PICKUP);
+            System.out.printf("Moved stack from slot %d to slot %d\n", slot.id, target.id);
+            return false;
+        }
+
+        int stackSize = stack.getCount();
+        int targetSize = targetStack.getCount();
+        assumeEmptyShulkerStacking = true;
+        int maxSize = stackMaxSize(stack, true);
+        System.out.printf("Merging %s into %s, maxSize: %d\n", stack, targetStack, maxSize);
+
+        if (targetSize >= maxSize)
+        {
+            return true;
+        }
+
+        clickSlot(gui, slot, slot.id, 0, SlotActionType.PICKUP);
+        clickSlot(gui, target, target.id, 0, SlotActionType.PICKUP);
+        clickSlot(gui, slot, slot.id, 0, SlotActionType.PICKUP);
+        assumeEmptyShulkerStacking = false;
+        int amount = stackSize + targetSize - maxSize;
+
+        return amount > 0;
+    }
+
+    private static void tryMergeItems(HandledScreen<?> gui)
+    {
+        Inventory inventory;
+        if (AccessorUtils.getSlotUnderMouse(gui) != null)
+        {
+            inventory = AccessorUtils.getSlotUnderMouse(gui).inventory;
+        }
+        else if (gui.getScreenHandler().slots.size() > 0)
+        {
+            inventory = gui.getScreenHandler().slots.getFirst().inventory;
+        }
+        else
+        {
+            return;
+        }
+        ScreenHandler container = gui.getScreenHandler();
+        var slots = container.slots.stream().filter(slot -> slot.inventory == inventory).toList();
+        Map<Pair<Item, ComponentMap>, Integer> nonFullStacks = new HashMap<>();
+
+        for (int i = 0; i < slots.size(); i++)
+        {
+            Slot slot = slots.get(i);
+
+            if (slot.hasStack())
+            {
+                ItemStack stack = slot.getStack();
+                Item item = stack.getItem();
+                ComponentMap components = stack.getComponents();
+
+                if (stack.getCount() > stackMaxSize(stack, true)) {
+                    // ignore overstacking items.
+                    continue;
+                }
+
+                Pair<Item, ComponentMap> key = Pair.of(item, components);
+                int slotNum = nonFullStacks.getOrDefault(key, -1);
+
+                if (slotNum == -1)
+                {
+                    nonFullStacks.put(key, i);
+                }
+                else
+                {
+                    if (addStackTo(gui, slots.get(i), slots.get(slotNum)))
+                    {
+                        nonFullStacks.put(key, i);
+                    }
+                }
+            }
+        }
     }
 
     /*

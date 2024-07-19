@@ -3,6 +3,9 @@ package fi.dy.masa.itemscroller.event;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.network.packet.PingPackets;
+import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
+import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.gui.GuiBase;
@@ -164,6 +167,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
             return true;
         }
+        else if (key == Hotkeys.SORT_INVENTORY.getKeybind())
+        {
+            InventoryUtils.sortInventory(gui);
+            return true;
+        }
 
         return false;
     }
@@ -224,6 +232,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
                         InventoryUtils.shiftClickSlot(gui, outputSlot.id);
                     }
+                }
+                else if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue())
+                {
+
                 }
                 else
                 {
