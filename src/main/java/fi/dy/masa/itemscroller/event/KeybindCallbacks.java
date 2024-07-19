@@ -215,17 +215,20 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
                 if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getVanillaRecipe() != null)
                 {
-                    InventoryUtils.tryClearCursor(gui);
-                    InventoryUtils.setInhibitCraftingOutputUpdate(true);
-                    InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
-                    InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
-                    mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipe(), true);
-                    for (int i = 0; i < 64; i++)
+                    for (int i = 0; i < limit; ++i)
                     {
-                        InventoryUtils.dropStack(gui, outputSlot.id);
+                        InventoryUtils.tryClearCursor(gui);
+                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
+                        InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+                        InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
+                        mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipe(), true);
+                        for (int j = 0; j < 64 / recipe.getResult().getCount(); j++)
+                        {
+                            InventoryUtils.dropStack(gui, outputSlot.id);
+                        }
+                        recipeBookClicks = true;
+                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
                     }
-                    recipeBookClicks = true;
-                    InventoryUtils.setInhibitCraftingOutputUpdate(false);
                 }
                 else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
                 {
