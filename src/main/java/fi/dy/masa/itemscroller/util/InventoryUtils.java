@@ -3,7 +3,6 @@ package fi.dy.masa.itemscroller.util;
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.*;
-import java.util.function.Supplier;
 
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -29,6 +28,8 @@ import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
+import net.minecraft.network.packet.s2c.query.PingResultS2CPacket;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
@@ -61,6 +62,7 @@ import fi.dy.masa.malilib.util.GuiUtils;
 public class InventoryUtils
 {
     private static final Set<Integer> DRAGGED_SLOTS = new HashSet<>();
+    private static final int SERVER_SYNC_MAGIC = 45510;
 
     private static WeakReference<Slot> sourceSlotCandidate = null;
     private static WeakReference<Slot> sourceSlot = null;
@@ -71,7 +73,7 @@ public class InventoryUtils
     private static int lastPosY;
     private static int slotNumberLast;
     private static boolean inhibitCraftResultUpdate;
-    private static Supplier<Boolean> selectedSlotUpdateTask;
+    private static Runnable selectedSlotUpdateTask;
     public static boolean assumeEmptyShulkerStacking = false;
 
     public static void setInhibitCraftingOutputUpdate(boolean inhibitUpdate)
@@ -2602,21 +2604,159 @@ public class InventoryUtils
 
     public static void sortInventory(HandledScreen<?> gui)
     {
-        tryClearCursor(gui);
-        tryMergeItems(gui);
-
-        if (Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
+        Inventory inventory;
+        Slot focusedSlot = AccessorUtils.getSlotUnderMouse(gui);
+        if (focusedSlot != null)
         {
-
+            inventory = focusedSlot.inventory;
+        }
+        else if (gui.getScreenHandler().slots.size() > 0)
+        {
+            inventory = gui.getScreenHandler().slots.getFirst().inventory;
         }
         else
         {
+            return;
+        }
+        ScreenHandler container = gui.getScreenHandler();
 
+        tryClearCursor(gui);
+        var slots = container.slots.stream().filter(slot -> {
+            if (slot.inventory != inventory)
+            {
+                return false;
+            }
+            if (inventory instanceof PlayerInventory)
+            {
+                if (focusedSlot.getIndex() >= 9)
+                {
+                    return slot.getIndex() >= 9;
+                }
+                else
+                {
+                    return slot.getIndex() < 9;
+                }
+            }
+            return true;
+        }).toList();
+        tryMergeItems(gui, slots);
+
+        if (Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
+        {
+            QueryPingC2SPacket packet = new QueryPingC2SPacket(SERVER_SYNC_MAGIC);
+            MinecraftClient.getInstance().getNetworkHandler().sendPacket(packet);
+            selectedSlotUpdateTask = () -> quickSort(gui, slots, 0, slots.size() - 1);
+        }
+        else
+        {
+            quickSort(gui, slots, 0, slots.size() - 1);
         }
     }
 
-    public static void onSelectedSlotUpdated() {
+    /**
+     * sort inventory
+     */
+    private static void quickSort(HandledScreen<?> gui, List<Slot> slots, int start, int end)
+    {
+        if (start >= end) return;
 
+        ItemStack mid = slots.get(end).getStack();
+        int l = start;
+        int r = end - 1;
+        while (l < r)
+        {
+            while (l < r && compareStacks(slots.get(l).getStack(), mid) < 0)
+            {
+                System.out.printf("%s < %s\n", slots.get(l).getStack(), mid);
+                l++;
+            }
+            while (l < r && compareStacks(slots.get(r).getStack(), mid) >= 0)
+            {
+                System.out.printf("%s >= %s\n", slots.get(r).getStack(), mid);
+                r--;
+            }
+            if (l != r)
+            {
+                System.out.printf("swap l: %d, r: %d\n", l, r);
+                swapSlots(gui, slots.get(l).id, slots.get(r).id);
+            }
+        }
+        if (compareStacks(slots.get(l).getStack(), slots.get(end).getStack()) >= 0)
+        {
+            System.out.printf("%s >= %s\n", slots.get(l).getStack(), slots.get(end).getStack());
+            System.out.printf("swap l: %d, end: %d\n", l, end);
+            swapSlots(gui, slots.get(l).id, slots.get(end).id);
+        }
+        else
+        {
+            l++;
+        }
+
+        quickSort(gui, slots, start, l - 1);
+        quickSort(gui, slots, l + 1, end);
+    }
+
+    private static int compareStacks(ItemStack stack1, ItemStack stack2)
+    {
+        if (Configs.Generic.SORT_SHULKER_BOXES_AT_END.getBooleanValue())
+        {
+            if (isShulkerBox(stack1) && !isShulkerBox(stack2))
+            {
+                return 1;
+            }
+            if (!isShulkerBox(stack1) && isShulkerBox(stack2))
+            {
+                return -1;
+            }
+        }
+        if (stack1.isEmpty() && stack2.isEmpty())
+            return 0;
+        else if (stack1.isEmpty())
+            return 1;
+        else if (stack2.isEmpty())
+            return -1;
+
+        if (isShulkerBox(stack1) && isShulkerBox(stack2))
+        {
+            List<ItemStack> contents1 = stack1.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().toList();
+            List<ItemStack> contents2 = stack2.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().toList();
+            if (contents1.size() != contents2.size())
+            {
+                return Integer.compare(contents1.size(), contents2.size());
+            }
+        }
+        if (stack1.getItem() != stack2.getItem())
+        {
+            return Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem()));
+        }
+        if (!areStacksEqual(stack1, stack2))
+        {
+            return Integer.compare(stack1.getComponents().hashCode(), stack2.getComponents().hashCode());
+        }
+        return Integer.compare(-stack1.getCount(), -stack2.getCount());
+    }
+
+    public static boolean onPong(PingResultS2CPacket packet) {
+        if (packet.startTime() == SERVER_SYNC_MAGIC)
+        {
+            if (selectedSlotUpdateTask != null)
+            {
+                selectedSlotUpdateTask.run();
+                selectedSlotUpdateTask = null;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isShulkerBox(ItemStack stack)
+    {
+        return stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof ShulkerBoxBlock;
+    }
+
+    private static boolean isEmptyShulkerBox(ItemStack stack)
+    {
+        return isShulkerBox(stack) && stack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().findAny().isEmpty();
     }
 
     public static int stackMaxSize(ItemStack stack, boolean assumeShulkerStacking) {
@@ -2626,12 +2766,9 @@ public class InventoryUtils
 
         if (assumeShulkerStacking && Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
         {
-            if (stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof ShulkerBoxBlock)
+            if (isEmptyShulkerBox(stack))
             {
-                if (stack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).copyFirstStack().isEmpty())
-                {
-                    return 64;
-                }
+                return 64;
             }
         }
 
@@ -2684,23 +2821,8 @@ public class InventoryUtils
         return amount > 0;
     }
 
-    private static void tryMergeItems(HandledScreen<?> gui)
+    private static void tryMergeItems(HandledScreen<?> gui, List<Slot> slots)
     {
-        Inventory inventory;
-        if (AccessorUtils.getSlotUnderMouse(gui) != null)
-        {
-            inventory = AccessorUtils.getSlotUnderMouse(gui).inventory;
-        }
-        else if (gui.getScreenHandler().slots.size() > 0)
-        {
-            inventory = gui.getScreenHandler().slots.getFirst().inventory;
-        }
-        else
-        {
-            return;
-        }
-        ScreenHandler container = gui.getScreenHandler();
-        var slots = container.slots.stream().filter(slot -> slot.inventory == inventory).toList();
         Map<Pair<Item, ComponentMap>, Integer> nonFullStacks = new HashMap<>();
 
         for (int i = 0; i < slots.size(); i++)
@@ -2713,7 +2835,7 @@ public class InventoryUtils
                 Item item = stack.getItem();
                 ComponentMap components = stack.getComponents();
 
-                if (stack.getCount() > stackMaxSize(stack, true)) {
+                if (stack.getCount() >= stackMaxSize(stack, true)) {
                     // ignore overstacking items.
                     continue;
                 }
