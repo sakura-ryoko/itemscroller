@@ -2625,23 +2625,6 @@ public class InventoryUtils
             Slot slot = container.slots.get(i);
             if (slot.inventory == focusedSlot.inventory)
             {
-                if (focusedSlot.inventory instanceof PlayerInventory)
-                {
-                    if (focusedSlot.getIndex() >= 9)
-                    {
-                        if (slot.getIndex() < 9 || slot.getIndex() >= 36)
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        if (slot.getIndex() >= 9)
-                        {
-                            continue;
-                        }
-                    }
-                }
                 if (i < range.first())
                 {
                     range.first(i);
@@ -2649,6 +2632,33 @@ public class InventoryUtils
                 if (i >= range.second())
                 {
                     range.second(i + 1);
+                }
+            }
+        }
+        if (focusedSlot.inventory instanceof PlayerInventory)
+        {
+            if (range.left() == 5 && range.right() == 46)
+            {
+                // Creative, PlayerScreenHandler
+                if (focusedSlot.id >= 9 && focusedSlot.id < 36)
+                {
+                    range.left(9).right(36);
+                }
+                else if (focusedSlot.id >= 36 && focusedSlot.id < 45)
+                {
+                    range.left(36).right(45);
+                }
+            }
+            else if (range.right() - range.left() == 36)
+            {
+                // Normal containers
+                if (focusedSlot.id < range.left() + 27)
+                {
+                    range.right(range.left() + 27);
+                }
+                else
+                {
+                    range.left(range.right() - 9);
                 }
             }
         }
@@ -2683,12 +2693,10 @@ public class InventoryUtils
         {
             while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid) < 0)
             {
-                System.out.printf("%s < %s\n", gui.getScreenHandler().getSlot(l).getStack(), mid);
                 l++;
             }
             while (l < r && compareStacks(gui.getScreenHandler().getSlot(r).getStack(), mid) >= 0)
             {
-                System.out.printf("%s >= %s\n", gui.getScreenHandler().getSlot(r).getStack(), mid);
                 r--;
             }
             if (l != r)
@@ -2698,8 +2706,6 @@ public class InventoryUtils
         }
         if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack()) >= 0)
         {
-            System.out.printf("%s >= %s\n", gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack());
-            System.out.printf("swap l: %d, end: %d\n", l, end);
             swapSlots(gui, l, end);
         }
         else
