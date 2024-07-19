@@ -220,6 +220,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                     InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
                     InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
                     mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipe(), true);
+                    for (int i = 0; i < 64; i++)
+                    {
+                        InventoryUtils.dropStack(gui, outputSlot.id);
+                    }
                     recipeBookClicks = true;
                     InventoryUtils.setInhibitCraftingOutputUpdate(false);
                 }
