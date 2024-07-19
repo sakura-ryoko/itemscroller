@@ -233,10 +233,6 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         InventoryUtils.shiftClickSlot(gui, outputSlot.id);
                     }
                 }
-                else if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue())
-                {
-
-                }
                 else
                 {
                     int failsafe = 0;
@@ -247,6 +243,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         InventoryUtils.setInhibitCraftingOutputUpdate(true);
                         InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
                         InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
+                        if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue())
+                        {
+
+                        }
                         InventoryUtils.tryMoveItemsToFirstCraftingGrid(recipe, gui, true);
                         InventoryUtils.setInhibitCraftingOutputUpdate(false);
                         InventoryUtils.updateCraftingOutputSlot(outputSlot);

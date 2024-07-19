@@ -1432,7 +1432,7 @@ public class InventoryUtils
 
             for (Map.Entry<ItemType, IntArrayList> entry : ingredientSlots.entrySet())
             {
-                ItemStack ingredientReference = entry.getKey().getStack();
+                ItemStack ingredientReference = entry.getKey().stack();
                 IntArrayList recipeSlots = entry.getValue();
                 IntArrayList targetSlots = new IntArrayList();
 
@@ -2823,7 +2823,7 @@ public class InventoryUtils
 
     private static void tryMergeItems(HandledScreen<?> gui, List<Slot> slots)
     {
-        Map<Pair<Item, ComponentMap>, Integer> nonFullStacks = new HashMap<>();
+        Map<ItemType, Integer> nonFullStacks = new HashMap<>();
 
         for (int i = 0; i < slots.size(); i++)
         {
@@ -2832,15 +2832,13 @@ public class InventoryUtils
             if (slot.hasStack())
             {
                 ItemStack stack = slot.getStack();
-                Item item = stack.getItem();
-                ComponentMap components = stack.getComponents();
 
                 if (stack.getCount() >= stackMaxSize(stack, true)) {
                     // ignore overstacking items.
                     continue;
                 }
 
-                Pair<Item, ComponentMap> key = Pair.of(item, components);
+                ItemType key = new ItemType(stack);
                 int slotNum = nonFullStacks.getOrDefault(key, -1);
 
                 if (slotNum == -1)
