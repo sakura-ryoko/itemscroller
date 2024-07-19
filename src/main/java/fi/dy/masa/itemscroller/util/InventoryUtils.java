@@ -2615,7 +2615,7 @@ public class InventoryUtils
             return;
         }
         ScreenHandler container = gui.getScreenHandler();
-        if (gui instanceof CreativeInventoryScreen)
+        if (gui instanceof CreativeInventoryScreen creative && !creative.isInventoryTabSelected())
         {
             return;
         }
@@ -2653,6 +2653,7 @@ public class InventoryUtils
             }
         }
 
+        System.out.printf("Sorting [%d, %d)\n", range.first(), range.second());
         tryClearCursor(gui);
         tryMergeItems(gui, range.left(), range.right() - 1);
 
