@@ -2614,6 +2614,10 @@ public class InventoryUtils
             return;
         }
         ScreenHandler container = gui.getScreenHandler();
+        if (gui instanceof CreativeInventoryScreen)
+        {
+            return;
+        }
 
         for (int i = 0; i < container.slots.size(); i++)
         {
