@@ -1,26 +1,26 @@
 {
-  "required": true,
-  "package": "fi.dy.masa.itemscroller.mixin",
-  "compatibilityLevel": "JAVA_17",
-  "minVersion": "0.8",
-  "client": [
-    "IMixinCraftingResultSlot",
-    "IMixinMerchantScreen",
-    "IMixinScreenWithHandler",
-    "IMixinSlot",
-    "MixinAbstractInventoryScreen",
-    "MixinClientPlayerInteractionManager",
-    "MixinClientPlayNetworkHandler",
-    "MixinCraftingScreenHandler",
-    "MixinMerchantScreen",
-    "MixinMerchantScreenHandler",
-    "MixinRecipeBookWidget",
-    "MixinScreen"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  },
-  "mixins": [
-    "MixinItemStak"
-  ]
+    "required": true,
+    "package": "fi.dy.masa.itemscroller.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "minVersion": "0.8",
+    "client": [
+        "IMixinCraftingResultSlot",
+        "IMixinMerchantScreen",
+        "IMixinScreenWithHandler",
+        "IMixinSlot",
+        "MixinAbstractInventoryScreen",
+        "MixinClientPlayerInteractionManager",
+        "MixinClientPlayNetworkHandler",
+        "MixinCraftingScreenHandler",
+        "MixinMerchantScreen",
+        "MixinMerchantScreenHandler",
+        "MixinRecipeBookWidget",
+        "MixinScreen"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "mixins": [
+        "MixinItemStak"
+    ]
 }
