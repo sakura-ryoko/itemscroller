@@ -2623,9 +2623,14 @@ public class InventoryUtils
             return;
         }
 
+        int focusedIndex = -1;
         for (int i = 0; i < container.slots.size(); i++)
         {
             Slot slot = container.slots.get(i);
+            if (slot == focusedSlot)
+            {
+                focusedIndex = i;
+            }
             if (slot.inventory == focusedSlot.inventory)
             {
                 if (i < range.first())
@@ -2638,16 +2643,20 @@ public class InventoryUtils
                 }
             }
         }
+        if (focusedIndex == -1)
+        {
+            return;
+        }
         if (focusedSlot.inventory instanceof PlayerInventory)
         {
             if (range.left() == 5 && range.right() == 46)
             {
                 // Creative, PlayerScreenHandler
-                if (focusedSlot.id >= 9 && focusedSlot.id < 36)
+                if (focusedIndex >= 9 && focusedIndex < 36)
                 {
                     range.left(9).right(36);
                 }
-                else if (focusedSlot.id >= 36 && focusedSlot.id < 45)
+                else if (focusedIndex >= 36 && focusedIndex < 45)
                 {
                     range.left(36).right(45);
                 }
@@ -2655,7 +2664,7 @@ public class InventoryUtils
             else if (range.right() - range.left() == 36)
             {
                 // Normal containers
-                if (focusedSlot.id < range.left() + 27)
+                if (focusedIndex < range.left() + 27)
                 {
                     range.right(range.left() + 27);
                 }
