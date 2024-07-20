@@ -1671,31 +1671,39 @@ public class InventoryUtils
 
             for (int i = 0, slotNum = range.getFirst(); i < rangeSlots && slotNum < invSlots; i++, slotNum++)
             {
-                Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
+                Slot craftingTableSlot = gui.getScreenHandler().getSlot(slotNum);
                 ItemStack recipeStack = recipeItems[i];
-                ItemStack slotStack = slotTmp.getStack();
-                boolean recipeHasItem = isStackEmpty(recipeStack) == false;
+                ItemStack slotStack = craftingTableSlot.getStack();
 
                 if (areStacksEqual(recipeStack, slotStack) == false)
                 {
-                    if (recipeHasItem == false)
+                    if (recipeStack.isEmpty())
                     {
                         toRemove.add(slotNum);
                     }
                     else
                     {
-                        int index = getPlayerInventoryIndexWithItem(recipeStack, inv);
+                        int index = getSlotNumberOfLargestMatchingStackFromDifferentInventory(gui.getScreenHandler(), craftingTableSlot, recipeStack);
 
                         if (index >= 0)
                         {
-                            clickSlot(gui, slotNum, index, SlotActionType.SWAP);
+                            Slot ingredientSlot = gui.getScreenHandler().getSlot(index);
+                            if (ingredientSlot.inventory instanceof PlayerInventory && ingredientSlot.getIndex() < 9)
+                            {
+                                // hotbar
+                                clickSlot(gui, slotNum, ingredientSlot.getIndex(), SlotActionType.SWAP);
+                            }
+                            else
+                            {
+                                swapSlots(gui, slotNum, index);
+                            }
                             movedSomething = true;
                         }
                     }
                 }
             }
 
-            movedSomething |= (toRemove.isEmpty() == false);
+            movedSomething |= !toRemove.isEmpty();
 
             for (int slotNum : toRemove)
             {
