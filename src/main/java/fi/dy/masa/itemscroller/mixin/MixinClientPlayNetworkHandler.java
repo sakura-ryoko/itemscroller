@@ -43,6 +43,5 @@ public class MixinClientPlayNetworkHandler
     private void onCraftFailedResponse(CraftFailedResponseS2CPacket packet, CallbackInfo ci)
     {
         // todo
-        ci.cancel();
     }
 }

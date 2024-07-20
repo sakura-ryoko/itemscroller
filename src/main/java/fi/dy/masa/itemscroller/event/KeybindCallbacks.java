@@ -1,9 +1,13 @@
 package fi.dy.masa.itemscroller.event;
 
+import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
@@ -218,17 +222,43 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                     InventoryUtils.dontUpdateRecipeBook = true;
                     for (int i = 0; i < limit; ++i)
                     {
-                        InventoryUtils.tryClearCursor(gui);
-                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
+                        // todo
+//                        InventoryUtils.tryClearCursor(gui);
+//                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
                         InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
-                        InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
-                        mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipe(), true);
-                        for (int j = 0; j < 64 / recipe.getResult().getCount(); j++)
+
+                        RecipeInputInventory craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+                        if (!recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
                         {
-                            InventoryUtils.dropStack(gui, outputSlot.id);
+                            CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
+                            final int invSlots = gui.getScreenHandler().slots.size();
+                            final int rangeSlots = range.getSlotCount();
+
+                            for (int j = 0, slotNum = range.getFirst(); j < rangeSlots && slotNum < invSlots; j++, slotNum++)
+                            {
+                                InventoryUtils.shiftClickSlot(gui, slotNum);
+
+                                Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
+                                ItemStack stack = slotTmp.getStack();
+                                if (!stack.isEmpty())
+                                {
+                                    InventoryUtils.dropStack(gui, slotNum);
+                                }
+                            }
                         }
+
+                        mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipeEntry(), true);
+//                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
+//                        InventoryUtils.updateCraftingOutputSlot(outputSlot);
+
+                        craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+                        if (recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
+                        {
+                            break;
+                        }
+
+                        InventoryUtils.shiftClickSlot(gui, outputSlot.id);
                         recipeBookClicks = true;
-                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
                     }
                     InventoryUtils.dontUpdateRecipeBook = false;
                 }
@@ -292,17 +322,5 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
     public void onPacket(ScreenHandlerSlotUpdateS2CPacket packet)
     {
         var mc = MinecraftClient.getInstance();
-        if (packet.getSlot() == 0 && packet.getSyncId() >= 0 && mc.player.currentScreenHandler instanceof CraftingScreenHandler)
-        {
-            var gui = (HandledScreen<?>) mc.currentScreen;
-            var outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
-            var recipe = RecipeStorage.getInstance().getSelectedRecipe();
-
-            if (recipeBookClicks)
-            {
-                InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.id, recipe.getResult());
-                recipeBookClicks = false;
-            }
-        }
     }
 }

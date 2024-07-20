@@ -10,9 +10,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.input.CraftingRecipeInput;
+import net.minecraft.recipe.input.RecipeInput;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -200,8 +202,19 @@ public class RecipePattern
     }
 
     @Nullable
-    public RecipeEntry<?> getVanillaRecipe()
+    public RecipeEntry<?> getVanillaRecipeEntry()
     {
         return vanillaRecipe;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T extends RecipeInput> Recipe<T> getVanillaRecipe()
+    {
+        if (vanillaRecipe == null)
+        {
+            return null;
+        }
+        return (Recipe<T>) vanillaRecipe.value();
     }
 }

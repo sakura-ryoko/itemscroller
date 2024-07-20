@@ -2584,8 +2584,11 @@ public class InventoryUtils
                             break;
                         }
 
-                        leftClickSlot(gui, slotNum);
-                        stackCursor = gui.getScreenHandler().getCursorStack();
+                        if (slot.inventory instanceof PlayerInventory)
+                        {
+                            leftClickSlot(gui, slotNum);
+                            stackCursor = gui.getScreenHandler().getCursorStack();
+                        }
                     }
                 }
             }
