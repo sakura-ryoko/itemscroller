@@ -15,12 +15,10 @@
 		"MixinMerchantScreen",
 		"MixinMerchantScreenHandler",
 		"MixinRecipeBookWidget",
-		"MixinScreen"
+		"MixinScreen",
+		"MixinItemStak"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	},
-	"mixins": [
-		"MixinItemStak"
-	]
+	}
 }
