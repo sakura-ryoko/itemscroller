@@ -26,7 +26,7 @@
     "itemscroller.config.generic.comment.modMainToggle": "开启/关闭所有功能",
     "itemscroller.config.generic.comment.massCraftInhibitMidUpdates": "禁止批量合成时配方输出槽在材料移动到合成GUI的过程中更新。\n这将会减少CPU的占用，因为游戏会在每次合成配方更改后\n不断地查询配方并显示产物。",
     "itemscroller.config.generic.comment.massCraftInterval": "每tick中批量合成的次数。",
-    "itemscroller.config.generic.comment.massCraftIterations": "设置每次执行多少次批量合成的迭代或者尝试，\n适用于当玩家合成不可堆叠的物品或玩家背包已满这类情况，\n这将需要玩家拥有更大的背包空间，\n因为使用shift单击合成时，\n背包中可能只进行1或2次合成操作。\n当启用'massCraftUseRecipeBook'时此设置无效。",
+    "itemscroller.config.generic.comment.massCraftIterations": "设置每次执行多少次批量合成的迭代或者尝试，\n适用于当玩家合成不可堆叠的物品或玩家背包已满这类情况，\n这将需要玩家拥有更大的背包空间，\n因为使用shift单击合成时，\n背包中可能只进行1或2次合成操作。",
     "itemscroller.config.generic.comment.massCraftSwapsOnly": "使用新的方法填充配方GUI，\n即只使用slot swap packets（槽位交换包)\n注意：由于只使用槽位交换包，不可能有部分的合成！\n而且也不会发生整组物品拆开的现象。",
     "itemscroller.config.generic.comment.packetRateLimit": "当 §6[连点限制]§f 开启后每个tick发送的最大模拟操作数据包的数量。",
     "itemscroller.config.generic.comment.craftingRecipesSaveToFile": "启用后，合成配方将保存到文件\n\"minecraft/itemscroller/recipes_worldorservername.nbt\"\n中。这可以使得合成配方在游戏重启后能保持不变。",
