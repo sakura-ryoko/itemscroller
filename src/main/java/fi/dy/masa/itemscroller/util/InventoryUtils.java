@@ -89,10 +89,10 @@ public class InventoryUtils
                                                  RecipeInputInventory craftMatrix,
                                                  CraftingResultInventory inventoryCraftResult)
     {
-        if (inhibitCraftResultUpdate && Configs.Generic.MASS_CRAFT_INHIBIT_MID_UPDATES.getBooleanValue())
-        {
-            return;
-        }
+//        if (inhibitCraftResultUpdate && Configs.Generic.MASS_CRAFT_INHIBIT_MID_UPDATES.getBooleanValue())
+//        {
+//            return;
+//        }
 
         if (Configs.Generic.CLIENT_CRAFTING_FIX.getBooleanValue())
         {
