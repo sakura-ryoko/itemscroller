@@ -45,6 +45,8 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean SLOT_POSITION_AWARE_SCROLL_DIRECTION  = new ConfigBoolean("useSlotPositionAwareScrollDirection",  false, "itemscroller.config.generic.comment.useSlotPositionAwareScrollDirection").translatedName("itemscroller.config.generic.name.useSlotPositionAwareScrollDirection");
         public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",      true, "itemscroller.config.generic.comment.villagerTradeUseGlobalFavorites").translatedName("itemscroller.config.generic.name.villagerTradeUseGlobalFavorites");
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true, "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition").translatedName("itemscroller.config.generic.name.villagerTradeListRememberScrollPosition");
+        public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",             true, "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks").translatedName("itemscroller.config.generic.name.sortAssumeEmptyBoxStacks");
+        public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                true, "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd").translatedName("itemscroller.config.generic.name.sortShulkerBoxesAtEnd");
 
         public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
@@ -65,7 +67,10 @@ public class Configs implements IConfigHandler
                 SLOT_POSITION_AWARE_SCROLL_DIRECTION,
                 USE_RECIPE_CACHING,
                 VILLAGER_TRADE_USE_GLOBAL_FAVORITES,
-                VILLAGER_TRADE_LIST_REMEMBER_SCROLL
+                VILLAGER_TRADE_LIST_REMEMBER_SCROLL,
+
+                SORT_ASSUME_EMPTY_BOX_STACKS,
+                SORT_SHULKER_BOXES_AT_END
         );
     }
 

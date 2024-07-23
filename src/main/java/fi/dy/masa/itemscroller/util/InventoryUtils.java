@@ -3,9 +3,13 @@ package fi.dy.masa.itemscroller.util;
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.*;
+
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
 
+import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -14,12 +18,21 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
+import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
+import net.minecraft.network.packet.s2c.play.StatisticsS2CPacket;
+import net.minecraft.network.packet.s2c.query.PingResultS2CPacket;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
@@ -32,6 +45,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
@@ -52,6 +66,7 @@ import fi.dy.masa.malilib.util.GuiUtils;
 public class InventoryUtils
 {
     private static final Set<Integer> DRAGGED_SLOTS = new HashSet<>();
+    private static final int SERVER_SYNC_MAGIC = 45510;
 
     private static WeakReference<Slot> sourceSlotCandidate = null;
     private static WeakReference<Slot> sourceSlot = null;
@@ -62,6 +77,8 @@ public class InventoryUtils
     private static int lastPosY;
     private static int slotNumberLast;
     private static boolean inhibitCraftResultUpdate;
+    private static Runnable selectedSlotUpdateTask;
+    public static boolean assumeEmptyShulkerStacking = false;
 
     public static void setInhibitCraftingOutputUpdate(boolean inhibitUpdate)
     {
@@ -1419,7 +1436,7 @@ public class InventoryUtils
 
             for (Map.Entry<ItemType, IntArrayList> entry : ingredientSlots.entrySet())
             {
-                ItemStack ingredientReference = entry.getKey().getStack();
+                ItemStack ingredientReference = entry.getKey().stack();
                 IntArrayList recipeSlots = entry.getValue();
                 IntArrayList targetSlots = new IntArrayList();
 
@@ -2574,8 +2591,11 @@ public class InventoryUtils
                             break;
                         }
 
-                        leftClickSlot(gui, slotNum);
-                        stackCursor = gui.getScreenHandler().getCursorStack();
+                        if (slot.inventory instanceof PlayerInventory)
+                        {
+                            leftClickSlot(gui, slotNum);
+                            stackCursor = gui.getScreenHandler().getCursorStack();
+                        }
                     }
                 }
             }
@@ -2595,6 +2615,288 @@ public class InventoryUtils
     public static MoveAction getActiveMoveAction()
     {
         return activeMoveAction;
+    }
+
+    public static void sortInventory(HandledScreen<?> gui)
+    {
+        Pair<Integer, Integer> range = new IntIntMutablePair(Integer.MAX_VALUE, 0);
+        Slot focusedSlot = AccessorUtils.getSlotUnderMouse(gui);
+        if (focusedSlot == null) {
+            return;
+        }
+        ScreenHandler container = gui.getScreenHandler();
+        if (gui instanceof CreativeInventoryScreen creative && !creative.isInventoryTabSelected())
+        {
+            return;
+        }
+
+        int focusedIndex = -1;
+        for (int i = 0; i < container.slots.size(); i++)
+        {
+            Slot slot = container.slots.get(i);
+            if (slot == focusedSlot)
+            {
+                focusedIndex = i;
+            }
+            if (slot.inventory == focusedSlot.inventory)
+            {
+                if (i < range.first())
+                {
+                    range.first(i);
+                }
+                if (i >= range.second())
+                {
+                    range.second(i + 1);
+                }
+            }
+        }
+        if (focusedIndex == -1)
+        {
+            return;
+        }
+        if (focusedSlot.inventory instanceof PlayerInventory)
+        {
+            if (range.left() == 5 && range.right() == 46)
+            {
+                // Creative, PlayerScreenHandler
+                if (focusedIndex >= 9 && focusedIndex < 36)
+                {
+                    range.left(9).right(36);
+                }
+                else if (focusedIndex >= 36 && focusedIndex < 45)
+                {
+                    range.left(36).right(45);
+                }
+            }
+            else if (range.right() - range.left() == 36)
+            {
+                // Normal containers
+                if (focusedIndex < range.left() + 27)
+                {
+                    range.right(range.left() + 27);
+                }
+                else
+                {
+                    range.left(range.right() - 9);
+                }
+            }
+        }
+
+        //System.out.printf("Sorting [%d, %d)\n", range.first(), range.second());
+        //ItemScroller.printDebug("Sorting [{}, {}]", range.first(), range.second());
+        tryClearCursor(gui);
+        tryMergeItems(gui, range.left(), range.right() - 1);
+
+        if (Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
+        {
+            ClientStatusC2SPacket packet = new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS);
+            MinecraftClient.getInstance().getNetworkHandler().sendPacket(packet);
+            selectedSlotUpdateTask = () -> quickSort(gui, range.first(), range.second() - 1);
+        }
+        else
+        {
+            quickSort(gui, range.first(), range.second() - 1);
+        }
+    }
+
+    /**
+     * sort inventory
+     */
+    private static void quickSort(HandledScreen<?> gui, int start, int end)
+    {
+        if (start >= end) return;
+
+        ItemStack mid = gui.getScreenHandler().getSlot(end).getStack();
+        int l = start;
+        int r = end - 1;
+        while (l < r)
+        {
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid) < 0)
+            {
+                l++;
+            }
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(r).getStack(), mid) >= 0)
+            {
+                r--;
+            }
+            if (l != r)
+            {
+                swapSlots(gui, l, r);
+            }
+        }
+        if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack()) >= 0)
+        {
+            swapSlots(gui, l, end);
+        }
+        else
+        {
+            l++;
+        }
+
+        quickSort(gui, start, l - 1);
+        quickSort(gui, l + 1, end);
+    }
+
+    private static int compareStacks(ItemStack stack1, ItemStack stack2)
+    {
+        if (Configs.Generic.SORT_SHULKER_BOXES_AT_END.getBooleanValue())
+        {
+            if (isShulkerBox(stack1) && !isShulkerBox(stack2))
+            {
+                return 1;
+            }
+            if (!isShulkerBox(stack1) && isShulkerBox(stack2))
+            {
+                return -1;
+            }
+        }
+        if (stack1.isEmpty() && stack2.isEmpty())
+            return 0;
+        else if (stack1.isEmpty())
+            return 1;
+        else if (stack2.isEmpty())
+            return -1;
+
+        if (isShulkerBox(stack1) && isShulkerBox(stack2))
+        {
+            List<ItemStack> contents1 = stack1.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().toList();
+            List<ItemStack> contents2 = stack2.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().toList();
+            if (contents1.size() != contents2.size())
+            {
+                return Integer.compare(contents1.size(), contents2.size());
+            }
+        }
+        if (stack1.getItem() != stack2.getItem())
+        {
+            return Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem()));
+        }
+        if (!areStacksEqual(stack1, stack2))
+        {
+            return Integer.compare(stack1.getComponents().hashCode(), stack2.getComponents().hashCode());
+        }
+        return Integer.compare(-stack1.getCount(), -stack2.getCount());
+    }
+
+    public static boolean onPong(StatisticsS2CPacket packet)
+    {
+        if (selectedSlotUpdateTask != null)
+        {
+            selectedSlotUpdateTask.run();
+            selectedSlotUpdateTask = null;
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isShulkerBox(ItemStack stack)
+    {
+        return stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof ShulkerBoxBlock;
+    }
+
+    private static boolean isEmptyShulkerBox(ItemStack stack)
+    {
+        return isShulkerBox(stack) && stack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().findAny().isEmpty();
+    }
+
+    public static int stackMaxSize(ItemStack stack, boolean assumeShulkerStacking)
+    {
+        if (stack.isEmpty())
+        {
+            return 64;
+        }
+
+        if (assumeShulkerStacking && Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
+        {
+            if (isEmptyShulkerBox(stack))
+            {
+                return 64;
+            }
+        }
+
+        return stack.getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1);
+    }
+
+    /**
+     * @return are there still items left in the original slot?
+     */
+    private static boolean addStackTo(HandledScreen<? extends ScreenHandler> gui, Slot slot, Slot target)
+    {
+        if (slot == null || target == null)
+        {
+            return false;
+        }
+
+        ItemStack stack = slot.getStack();
+        ItemStack targetStack = target.getStack();
+
+        if (stack.isEmpty() || !ItemStack.areItemsEqual(stack, targetStack))
+        {
+            return !stack.isEmpty();
+        }
+
+        if (targetStack.isEmpty())
+        {
+            clickSlot(gui, slot, slot.id, 0, SlotActionType.PICKUP);
+            clickSlot(gui, target, target.id, 0, SlotActionType.PICKUP);
+            //System.out.printf("Moved stack from slot %d to slot %d\n", slot.id, target.id);
+            //ItemScroller.printDebug("Moved stack from slot {} to slot {}", slot.id, target.id);
+            return false;
+        }
+
+        int stackSize = stack.getCount();
+        int targetSize = targetStack.getCount();
+        assumeEmptyShulkerStacking = true;
+        int maxSize = stackMaxSize(stack, true);
+        //System.out.printf("Merging %s into %s, maxSize: %d\n", stack, targetStack, maxSize);
+        //ItemScroller.printDebug("Merging {} into {}, maxSize: {}", stack, targetStack, maxSize);
+
+        if (targetSize >= maxSize)
+        {
+            return true;
+        }
+
+        clickSlot(gui, slot, slot.id, 0, SlotActionType.PICKUP);
+        clickSlot(gui, target, target.id, 0, SlotActionType.PICKUP);
+        clickSlot(gui, slot, slot.id, 0, SlotActionType.PICKUP);
+        assumeEmptyShulkerStacking = false;
+        int amount = stackSize + targetSize - maxSize;
+
+        return amount > 0;
+    }
+
+    private static void tryMergeItems(HandledScreen<?> gui, int left, int right)
+    {
+        Map<ItemType, Integer> nonFullStacks = new HashMap<>();
+
+        for (int i = left; i <= right; i++)
+        {
+            Slot slot = gui.getScreenHandler().getSlot(i);
+
+            if (slot.hasStack())
+            {
+                ItemStack stack = slot.getStack();
+
+                if (stack.getCount() >= stackMaxSize(stack, true)) {
+                    // ignore overstacking items.
+                    continue;
+                }
+
+                ItemType key = new ItemType(stack);
+                int slotNum = nonFullStacks.getOrDefault(key, -1);
+
+                if (slotNum == -1)
+                {
+                    nonFullStacks.put(key, i);
+                }
+                else
+                {
+                    if (addStackTo(gui, slot, gui.getScreenHandler().getSlot(slotNum)))
+                    {
+                        nonFullStacks.put(key, i);
+                    }
+                }
+            }
+        }
     }
 
     /*

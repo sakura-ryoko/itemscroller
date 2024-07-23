@@ -18,6 +18,8 @@
     "itemscroller.config.generic.name.useSlotPositionAwareScrollDirection": "useSlotPositionAwareScrollDirection",
     "itemscroller.config.generic.name.villagerTradeUseGlobalFavorites": "villagerTradeUseGlobalFavorites",
     "itemscroller.config.generic.name.villagerTradeListRememberScrollPosition": "villagerTradeListRememberScrollPosition",
+    "itemscroller.config.generic.name.sortAssumeEmptyBoxStacks": "sortAssumeEmptyBoxStacks",
+    "itemscroller.config.generic.name.sortShulkerBoxesAtEnd": "sortShulkerBoxesAtEnd",
 
     "itemscroller.config.generic.comment.carpetCtrlQCraftingEnabledOnServer": "Set to true if the server is running the Carpet mod,\nand has the ctrlQCrafting option enabled.\nThis just changes which method Item Scroller uses\nfor the Drop key + Shift + Right click crafting.",
     "itemscroller.config.generic.comment.clientCraftingFixOn1_12": "Enable updating the crafting recipe output directly on the client side.\nThis fixes the quick/mass crafting and right-click-to-craft-a-stack\nfeatures otherwise being broken in 1.12.",
@@ -38,6 +40,8 @@
     "itemscroller.config.generic.comment.useSlotPositionAwareScrollDirection": "When enabled, the item movement direction depends\non the slots' y-position on screen. Might be derpy with more\ncomplex inventories, use with caution!",
     "itemscroller.config.generic.comment.villagerTradeUseGlobalFavorites": "Whether or not global (per-item-type) villager trade\nfavorites should be used.",
     "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition": "Remember and restore the last scroll position in the\ntrade list when re-opening the GUI",
+    "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks": "Assume that empty boxes are stacking items\nwhen sorting the inventory.\nThis is useful if you installed mods to stack\nshulker boxes on remote server.\nThis will send an extra packet to ensure the\ninventory is synced.",
+    "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd": "Sort shulker boxes at the end of the inventory\nwhen sorting the inventory.",
 
     "itemscroller.config.toggles.name.enableCraftingFeatures": "enableCraftingFeatures",
     "itemscroller.config.toggles.name.enableDropkeyDropMatching": "enableDropkeyDropMatching",
@@ -96,6 +100,7 @@
     "itemscroller.config.hotkeys.name.modifierMoveMatching": "modifierMoveMatching",
     "itemscroller.config.hotkeys.name.modifierMoveStack": "modifierMoveStack",
     "itemscroller.config.hotkeys.name.modifierToggleVillagerGlobalFavorite": "modifierToggleVillagerGlobalFavorite",
+    "itemscroller.config.hotkeys.name.sortInventory": "sortInventory",
 
     "itemscroller.config.hotkeys.comment.openConfigGui": "Open the in-game config GUI",
     "itemscroller.config.hotkeys.comment.craftEverything": "Craft everything possible once with the currently selected recipe",
@@ -128,6 +133,7 @@
     "itemscroller.config.hotkeys.comment.modifierMoveMatching": "Modifier key to move all matching items to the other\ninventory when scrolling over a stack",
     "itemscroller.config.hotkeys.comment.modifierMoveStack": "Modifier key to move the entire stack to the other\ninventory when scrolling over it",
     "itemscroller.config.hotkeys.comment.modifierToggleVillagerGlobalFavorite": "Modifier key to hold while middle clicking a trade,\nto toggle the global favorite state for that trade.\nGlobal favorites are used for villagers that don't\nhave any \"local\"/villager-specific favorites set.",
+    "itemscroller.config.hotkeys.comment.sortInventory": "Sort the inventory that the cursor is hovering over",
 
     "itemscroller.gui.button.config_gui.generic": "Generic",
     "itemscroller.gui.button.config_gui.hotkeys": "Hotkeys",

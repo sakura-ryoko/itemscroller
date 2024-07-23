@@ -1,22 +1,33 @@
 package fi.dy.masa.itemscroller.recipes;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
+
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.input.CraftingRecipeInput;
+import net.minecraft.recipe.input.RecipeInput;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.util.Constants;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
+import net.minecraft.world.World;
 
 public class RecipePattern
 {
     private ItemStack result = InventoryUtils.EMPTY_STACK;
     private ItemStack[] recipe = new ItemStack[9];
+    private RecipeEntry<?> vanillaRecipe;
 
     public RecipePattern()
     {
@@ -35,12 +46,26 @@ public class RecipePattern
     {
         Arrays.fill(this.recipe, InventoryUtils.EMPTY_STACK);
         this.result = InventoryUtils.EMPTY_STACK;
+        this.vanillaRecipe = null;
     }
 
     public void ensureRecipeSizeAndClearRecipe(int size)
     {
         this.ensureRecipeSize(size);
         this.clearRecipe();
+    }
+
+    private void lookupVanillaRecipe(World world) {
+        this.vanillaRecipe = null;
+        var mc = MinecraftClient.getInstance();
+        for (RecipeEntry<CraftingRecipe> match : mc.world.getRecipeManager().getAllMatches(RecipeType.CRAFTING, CraftingRecipeInput.create(3, 3, Arrays.asList(recipe)), world))
+        {
+            if (InventoryUtils.areStacksEqual(result, match.value().getResult(world.getRegistryManager())))
+            {
+                this.vanillaRecipe = match;
+                return;
+            }
+        }
     }
 
     public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty)
@@ -63,6 +88,7 @@ public class RecipePattern
                 }
 
                 this.result = slot.getStack().copy();
+                this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
             }
             else if (clearIfEmpty)
             {
@@ -84,6 +110,7 @@ public class RecipePattern
         }
 
         this.result = InventoryUtils.isStackEmpty(other.getResult()) == false ? other.getResult().copy() : InventoryUtils.EMPTY_STACK;
+        this.vanillaRecipe = other.vanillaRecipe;
     }
 
     public void readFromNBT(@Nonnull NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
@@ -111,6 +138,7 @@ public class RecipePattern
             }
 
             this.result = ItemStack.fromNbtOrEmpty(registryManager, nbt.getCompound("Result"));
+            this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
         }
     }
 
@@ -171,5 +199,22 @@ public class RecipePattern
     public boolean isValid()
     {
         return InventoryUtils.isStackEmpty(this.getResult()) == false;
+    }
+
+    @Nullable
+    public RecipeEntry<?> getVanillaRecipeEntry()
+    {
+        return vanillaRecipe;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T extends RecipeInput> Recipe<T> getVanillaRecipe()
+    {
+        if (vanillaRecipe == null)
+        {
+            return null;
+        }
+        return (Recipe<T>) vanillaRecipe.value();
     }
 }

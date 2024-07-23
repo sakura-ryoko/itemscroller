@@ -18,6 +18,8 @@
     "itemscroller.config.generic.name.useSlotPositionAwareScrollDirection": "useSlotPositionAwareScrollDirection",
     "itemscroller.config.generic.name.villagerTradeListRememberScrollPosition": "villagerTradeListRememberScrollPosition",
     "itemscroller.config.generic.name.villagerTradeUseGlobalFavorites": "villagerTradeUseGlobalFavorites",
+    "itemscroller.config.generic.name.sortAssumeEmptyBoxStacks": "sortAssumeEmptyBoxStacks",
+    "itemscroller.config.generic.name.sortShulkerBoxesAtEnd": "sortShulkerBoxesAtEnd",
 
     "itemscroller.config.generic.comment.carpetCtrlQCraftingEnabledOnServer": "Activalo si el servidor tiene Carpet mod,\ny tienes activado el ctrlQCrafting .\nEsto solo cambia la forma en la forma en la que el mod de Item Scroller\nfunciona con la combiacion de teclas + Shift + Clik derecho en mesas de crafteo/inventario y demás.",
     "itemscroller.config.generic.comment.clientCraftingFixOn1_12": "Arregla el problema del crafteo masivo en la 1.12.",
@@ -38,6 +40,8 @@
     "itemscroller.config.generic.comment.useSlotPositionAwareScrollDirection": "Cuando esta activado, el movimiento de los items, depende de la posicion en las ranuras en la pantalla\n Esto puede tener un comportamiento inesperado con invetarios mas complejos\n¡Usalo con precaucion!",
     "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition": "Recuerda y restaura la ultima posicion de scroll en\nla lista de tradeos al abrir la GUI",
     "itemscroller.config.generic.comment.villagerTradeUseGlobalFavorites": "Activa los intercambios favoritos con aldenos que tenga guardados como Globales o Locales",
+    "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks": "Assume that empty boxes are stacking items\nwhen sorting the inventory.\nThis is useful if you installed mods to stack\nshulker boxes on remote server.\nThis will send an extra packet to ensure the\ninventory is synced.",
+    "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd": "Sort shulker boxes at the end of the inventory\nwhen sorting the inventory.",
 
     "itemscroller.config.toggles.name.enableCraftingFeatures": "enableCraftingFeatures",
     "itemscroller.config.toggles.name.enableDropkeyDropMatching": "enableDropkeyDropMatching",
@@ -96,7 +100,8 @@
     "itemscroller.config.hotkeys.name.wsMoveUpMatching": "wsMoveUpMatching",
     "itemscroller.config.hotkeys.name.wsMoveUpSingle": "wsMoveUpSingle",
     "itemscroller.config.hotkeys.name.wsMoveUpStacks": "wsMoveUpStacks",
- 
+    "itemscroller.config.hotkeys.name.sortInventory": "sortInventory",
+
     "itemscroller.config.hotkeys.comment.craftEverything": "Craftea todo lo posible de una vez con la receta seleccionada actualmente.",
     "itemscroller.config.hotkeys.comment.dropAllMatching": "Suelta todos los stacks iguales sobre otro stack mientras el cursos esta encima.",
     "itemscroller.config.hotkeys.comment.keyDragDropLeaveOne": "Tecla para soltar todos los items del stack menos el ultimo.",
@@ -128,17 +133,18 @@
     "itemscroller.config.hotkeys.comment.wsMoveUpMatching": "Tecla para mover todos los objetos iguales haci \"arriba\" en el inventario.",
     "itemscroller.config.hotkeys.comment.wsMoveUpSingle": "Tecla para mover un solo item hacia\"arriba\" en el inventario.",
     "itemscroller.config.hotkeys.comment.wsMoveUpStacks": "Tecla para mover stacks hacias \"arriba\" en el inventario.",
-    
+    "itemscroller.config.hotkeys.comment.sortInventory": "Sort the inventory that the cursor is hovering over",
+
     "itemscroller.gui.button.config_gui.generic": "Generico",
     "itemscroller.gui.button.config_gui.hotkeys": "Combinacíon de teclas",
     "itemscroller.gui.button.config_gui.toggles": "Toggles",
-    
+
     "itemscroller.gui.label.recipe_page": "Página %d / %d",
     "itemscroller.gui.label.trade_uses": "Uso de Tradeos: %d / %d",
     "itemscroller.gui.label.trades": "Tradeos",
-    
+
     "itemscroller.gui.title.configs": "Item Scroller Configuraciones - %s",
-    
+
     "itemscroller.message.toggled_mod_off": "Activar todas las funionalidades de Item Scroller §cOFF",
     "itemscroller.message.toggled_mod_on": "Activar todas las funionalidades de Item Scroller  §aON"
 }

@@ -11,18 +11,11 @@ import net.minecraft.item.ItemStack;
  * Wrapper class for ItemStack, which implements equals()
  * for the item, damage and NBT, but not stackSize.
  */
-public class ItemType
+public record ItemType(ItemStack stack)
 {
-    private final ItemStack stack;
-
     public ItemType(@Nonnull ItemStack stack)
     {
         this.stack = stack.isEmpty() ? InventoryUtils.EMPTY_STACK : InventoryUtils.copyStack(stack, false);
-    }
-
-    public ItemStack getStack()
-    {
-        return this.stack;
     }
 
     @Override
@@ -53,6 +46,7 @@ public class ItemType
 
     /**
      * Returns a map that has a list of the indices for each different item in the input list
+     *
      * @param stacks
      * @return
      */
