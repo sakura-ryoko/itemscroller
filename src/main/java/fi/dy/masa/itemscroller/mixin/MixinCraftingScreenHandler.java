@@ -1,5 +1,6 @@
 package fi.dy.masa.itemscroller.mixin;
 
+import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,7 +26,10 @@ public abstract class MixinCraftingScreenHandler
     @Inject(method = "onContentChanged", at = @At("RETURN"))
     private void onSlotChangedCraftingGrid(net.minecraft.inventory.Inventory inventory, CallbackInfo ci)
     {
-        InventoryUtils.onSlotChangedCraftingGrid(this.player, this.input, this.result);
+        if (MinecraftClient.getInstance().isOnThread())
+        {
+            InventoryUtils.onSlotChangedCraftingGrid(this.player, this.input, this.result);
+        }
     }
 
     @Inject(method = "updateResult", at = @At("RETURN"))
@@ -37,6 +41,9 @@ public abstract class MixinCraftingScreenHandler
             CraftingResultInventory resultInv,
             RecipeEntry<CraftingRecipe> recipeEntry, CallbackInfo ci)
     {
-        InventoryUtils.onSlotChangedCraftingGrid(player, craftingInventory, resultInv);
+        if (MinecraftClient.getInstance().isOnThread())
+        {
+            InventoryUtils.onSlotChangedCraftingGrid(player, craftingInventory, resultInv);
+        }
     }
 }
