@@ -12,6 +12,10 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 
+loom {
+	accessWidenerPath = file("src/main/resources/minihud.accesswidener")
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.mappings_version}:v2"

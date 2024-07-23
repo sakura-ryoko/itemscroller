@@ -3041,9 +3041,9 @@ public class InventoryUtils
 
     public static void swapSlots(HandledScreen<? extends ScreenHandler> gui, int slotNum, int otherSlot)
     {
-        clickSlot(gui, slotNum, 0, SlotActionType.SWAP);
-        clickSlot(gui, otherSlot, 0, SlotActionType.SWAP);
-        clickSlot(gui, slotNum, 0, SlotActionType.SWAP);
+        clickSlot(gui, slotNum, 8, SlotActionType.SWAP);
+        clickSlot(gui, otherSlot, 8, SlotActionType.SWAP);
+        clickSlot(gui, slotNum, 8, SlotActionType.SWAP);
     }
 
     private static void dragSplitItemsIntoSlots(HandledScreen<? extends ScreenHandler> gui,

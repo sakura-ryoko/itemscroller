@@ -12,13 +12,16 @@
 		"MixinClientPlayerInteractionManager",
 		"MixinClientPlayNetworkHandler",
 		"MixinCraftingScreenHandler",
+		"MixinItemStack",
 		"MixinMerchantScreen",
 		"MixinMerchantScreenHandler",
 		"MixinRecipeBookWidget",
-		"MixinScreen",
-        "MixinItemStack"
+		"MixinScreen"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	}
+	},
+	"mixins": [
+		"debug.MixinServerPlayNetworkHandler"
+	]
 }
