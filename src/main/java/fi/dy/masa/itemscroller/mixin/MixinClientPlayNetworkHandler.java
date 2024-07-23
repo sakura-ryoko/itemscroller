@@ -2,6 +2,8 @@ package fi.dy.masa.itemscroller.mixin;
 
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.StatisticsS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,6 +18,41 @@ public class MixinClientPlayNetworkHandler
     {
         if (InventoryUtils.onPong(packet))
         {
+            ci.cancel();
+        }
+    }
+
+    @Inject(
+            method = "onInventory",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true)
+    private void onInventory(InventoryS2CPacket packet, CallbackInfo ci)
+    {
+        if (InventoryUtils.bufferInvUpdates)
+        {
+            InventoryUtils.invUpdatesBuffer.add(packet);
+            ci.cancel();
+        }
+    }
+
+    @Inject(
+            method = "onScreenHandlerSlotUpdate",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    private void onScreenHandlerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci)
+    {
+        if (InventoryUtils.bufferInvUpdates)
+        {
+            InventoryUtils.invUpdatesBuffer.add(packet);
             ci.cancel();
         }
     }

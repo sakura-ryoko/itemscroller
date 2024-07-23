@@ -212,6 +212,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                 return;
             }
 
+            InventoryUtils.bufferInvUpdates = true;
             Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
 
             if (outputSlot != null)
@@ -293,6 +294,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             }
 
             this.massCraftTicker = 0;
+            InventoryUtils.bufferInvUpdates = false;
+            InventoryUtils.invUpdatesBuffer.removeIf(packet -> {
+                packet.apply(mc.getNetworkHandler());
+                return true;
+            });
         }
     }
 }
