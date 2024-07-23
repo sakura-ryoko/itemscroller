@@ -247,6 +247,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         InventoryUtils.setInhibitCraftingOutputUpdate(false);
                         InventoryUtils.updateCraftingOutputSlot(outputSlot);
 
+                        System.out.printf("Output slot: %s\n", outputSlot.getStack());
+
                         if (InventoryUtils.areStacksEqual(outputSlot.getStack(), recipe.getResult()) == false)
                         {
                             break;

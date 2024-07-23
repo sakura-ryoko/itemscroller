@@ -58,7 +58,21 @@ public class RecipePattern
     private void lookupVanillaRecipe(World world) {
         this.vanillaRecipe = null;
         var mc = MinecraftClient.getInstance();
-        for (RecipeEntry<CraftingRecipe> match : mc.world.getRecipeManager().getAllMatches(RecipeType.CRAFTING, CraftingRecipeInput.create(3, 3, Arrays.asList(recipe)), world))
+        int recipeSize;
+        if (recipe.length == 4)
+        {
+            recipeSize = 2;
+        }
+        else if (recipe.length == 9)
+        {
+            recipeSize = 3;
+        }
+        else
+        {
+            return;
+        }
+
+        for (RecipeEntry<CraftingRecipe> match : mc.world.getRecipeManager().getAllMatches(RecipeType.CRAFTING, CraftingRecipeInput.create(recipeSize, recipeSize, Arrays.asList(recipe)), world))
         {
             if (InventoryUtils.areStacksEqual(result, match.value().getResult(world.getRegistryManager())))
             {
