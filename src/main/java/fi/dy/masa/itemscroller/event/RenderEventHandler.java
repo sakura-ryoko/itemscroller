@@ -83,7 +83,7 @@ public class RenderEventHandler
             }
 
             matrix4fStack.popMatrix();
-            RenderSystem.applyModelViewMatrix();
+            //RenderSystem.applyModelViewMatrix();
             RenderSystem.enableBlend(); // Fixes the crafting book icon rendering
         }
     }
@@ -136,7 +136,7 @@ public class RenderEventHandler
             }
 
             matrix4fStack.popMatrix();
-            RenderSystem.applyModelViewMatrix();
+            //RenderSystem.applyModelViewMatrix();
         }
     }
 
