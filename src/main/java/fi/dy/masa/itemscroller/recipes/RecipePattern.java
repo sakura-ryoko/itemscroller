@@ -55,7 +55,9 @@ public class RecipePattern
         this.clearRecipe();
     }
 
-    private void lookupVanillaRecipe(World world) {
+    @Nullable
+    public <T extends RecipeInput> Recipe<T> lookupVanillaRecipe(World world) {
+        //Assume all recipes here are of type CraftingRecipe
         this.vanillaRecipe = null;
         var mc = MinecraftClient.getInstance();
         int recipeSize;
@@ -69,7 +71,7 @@ public class RecipePattern
         }
         else
         {
-            return;
+            return null;
         }
 
         for (RecipeEntry<CraftingRecipe> match : mc.world.getRecipeManager().getAllMatches(RecipeType.CRAFTING, CraftingRecipeInput.create(recipeSize, recipeSize, Arrays.asList(recipe)), world))
@@ -77,9 +79,10 @@ public class RecipePattern
             if (InventoryUtils.areStacksEqual(result, match.value().getResult(world.getRegistryManager())))
             {
                 this.vanillaRecipe = match;
-                return;
+                return (Recipe<T>) match.value();
             }
         }
+        return null;
     }
 
     public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty)
@@ -152,7 +155,6 @@ public class RecipePattern
             }
 
             this.result = ItemStack.fromNbtOrEmpty(registryManager, nbt.getCompound("Result"));
-            this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
         }
     }
 
@@ -225,7 +227,7 @@ public class RecipePattern
     @Nullable
     public <T extends RecipeInput> Recipe<T> getVanillaRecipe()
     {
-        if (vanillaRecipe == null)
+        if (recipe == null)
         {
             return null;
         }

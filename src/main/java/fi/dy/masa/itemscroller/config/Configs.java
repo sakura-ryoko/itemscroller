@@ -35,6 +35,7 @@ public class Configs implements IConfigHandler
         public static final ConfigInteger MASS_CRAFT_INTERVAL                   = new ConfigInteger("massCraftInterval",                    2, 1, 60, "itemscroller.config.generic.comment.massCraftInterval").translatedName("itemscroller.config.generic.name.massCraftInterval");
         public static final ConfigInteger MASS_CRAFT_ITERATIONS                 = new ConfigInteger("massCraftIterations",                  36, 1, 256, "itemscroller.config.generic.comment.massCraftIterations").translatedName("itemscroller.config.generic.name.massCraftIterations");
         public static final ConfigBoolean MASS_CRAFT_SWAPS                      = new ConfigBoolean("massCraftSwapsOnly",                   false, "itemscroller.config.generic.comment.massCraftSwapsOnly").translatedName("itemscroller.config.generic.name.massCraftSwapsOnly");
+        public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook", false, "itemscroller.config.generic.comment.massCraftUseRecipeBook").translatedName("itemscroller.config.generic.name.massCraftUseRecipeBook");
         public static final ConfigInteger PACKET_RATE_LIMIT                     = new ConfigInteger("packetRateLimit",                      4, 1, 1024, "itemscroller.config.generic.comment.packetRateLimit").translatedName("itemscroller.config.generic.name.packetRateLimit");
         public static final ConfigBoolean SCROLL_CRAFT_STORE_RECIPES_TO_FILE    = new ConfigBoolean("craftingRecipesSaveToFile",            true, "itemscroller.config.generic.comment.craftingRecipesSaveToFile").translatedName("itemscroller.config.generic.name.craftingRecipesSaveToFile");
         public static final ConfigBoolean SCROLL_CRAFT_RECIPE_FILE_GLOBAL       = new ConfigBoolean("craftingRecipesSaveFileIsGlobal",      false, "itemscroller.config.generic.comment.craftingRecipesSaveFileIsGlobal").translatedName("itemscroller.config.generic.name.craftingRecipesSaveFileIsGlobal");
@@ -57,6 +58,7 @@ public class Configs implements IConfigHandler
                 MASS_CRAFT_INTERVAL,
                 MASS_CRAFT_ITERATIONS,
                 MASS_CRAFT_SWAPS,
+                MASS_CRAFT_RECIPE_BOOK,
                 MOD_MAIN_TOGGLE,
                 PACKET_RATE_LIMIT,
                 RATE_LIMIT_CLICK_PACKETS,

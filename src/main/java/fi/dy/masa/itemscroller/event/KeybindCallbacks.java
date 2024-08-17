@@ -5,6 +5,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.inventory.RecipeInputInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.slot.Slot;
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
 import fi.dy.masa.malilib.gui.GuiBase;
@@ -29,6 +31,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
     private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
 
     protected int massCraftTicker;
+
+    private boolean recipeBookClicks = false;
 
     public static KeybindCallbacks getInstance()
     {
@@ -190,6 +194,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
     @Override
     public void onClientTick(MinecraftClient mc)
     {
+        if (InventoryUtils.dontUpdateRecipeBook > 0) {
+            --InventoryUtils.dontUpdateRecipeBook;
+        }
         if (this.functionalityEnabled() == false || mc.player == null)
         {
             return;
@@ -223,9 +230,54 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                 }
 
                 RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
+
                 int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
 
-                if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
+                if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.lookupVanillaRecipe(mc.world) != null)
+                {
+                    InventoryUtils.dontUpdateRecipeBook = 2;
+                    for (int i = 0; i < limit; ++i)
+                    {
+                        // todo
+//                        InventoryUtils.tryClearCursor(gui);
+//                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
+                        InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+
+                        RecipeInputInventory craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+                        if (!recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
+                        {
+                            CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
+                            final int invSlots = gui.getScreenHandler().slots.size();
+                            final int rangeSlots = range.getSlotCount();
+
+                            for (int j = 0, slotNum = range.getFirst(); j < rangeSlots && slotNum < invSlots; j++, slotNum++)
+                            {
+                                InventoryUtils.shiftClickSlot(gui, slotNum);
+
+                                Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
+                                ItemStack stack = slotTmp.getStack();
+                                if (!stack.isEmpty())
+                                {
+                                    InventoryUtils.dropStack(gui, slotNum);
+                                }
+                            }
+                        }
+
+                        mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getVanillaRecipeEntry(), true);
+//                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
+//                        InventoryUtils.updateCraftingOutputSlot(outputSlot);
+
+                        craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+                        if (recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
+                        {
+                            break;
+                        }
+
+                        InventoryUtils.shiftClickSlot(gui, outputSlot.id);
+                        recipeBookClicks = true;
+                    }
+                }
+                else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
                 {
                     for (int i = 0; i < limit; ++i)
                     {
@@ -300,5 +352,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                 return true;
             });
         }
+    }
+
+    public void onPacket(ScreenHandlerSlotUpdateS2CPacket packet)
+    {
+        var mc = MinecraftClient.getInstance();
     }
 }
