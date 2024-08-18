@@ -122,7 +122,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
                     this.favoriteData = null; // Force a re-build of the list
 
                     // Rebuild the custom list based on the new favorites (See the Mixin for MerchantScreenHandler#setOffers())
-                    this.handler.setOffers(((IMerchantScreenHandler) this.handler).getOriginalList());
+                    this.handler.setOffers(((IMerchantScreenHandler) this.handler).itemscroller$getOriginalList());
 
                     cir.setReturnValue(true);
                 }
