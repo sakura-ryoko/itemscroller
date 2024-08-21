@@ -10,7 +10,7 @@
     "IMixinScreenWithHandler",
     "IMixinSlot",
     "MixinAbstractInventoryScreen",
-    "MixinClass_9933",
+    "MixinAbstractCraftingRecipeBookWidget",
     "MixinClientPlayerInteractionManager",
     "MixinClientPlayNetworkHandler",
     "MixinCraftingScreenHandler",
