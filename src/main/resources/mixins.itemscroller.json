@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [
+    "IMixinAbstractCraftingScreenHandler",
     "IMixinCraftingResultSlot",
     "IMixinMerchantScreen",
     "IMixinRecipeBookWidget",
@@ -22,9 +23,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "IMixinAbstractCraftingScreenHandler",
-    "debug.MixinServerPlayNetworkHandler"
-  ]
+  }
 }
