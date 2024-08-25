@@ -165,7 +165,7 @@ public class RecipePattern
 
         if (this.isValid())
         {
-            NbtCompound tag = (NbtCompound) this.result.encode(registryManager);
+            NbtCompound tag = (NbtCompound) this.result.toNbt(registryManager);
 
             nbt.putInt("Length", this.recipe.length);
             nbt.put("Result", tag);
@@ -177,7 +177,7 @@ public class RecipePattern
                 if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
                 {
                     tag = new NbtCompound();
-                    tag.copyFrom((NbtCompound) this.recipe[i].encode(registryManager));
+                    tag.copyFrom((NbtCompound) this.recipe[i].toNbt(registryManager));
 
                     tag.putInt("Slot", i);
                     tagIngredients.add(tag);
