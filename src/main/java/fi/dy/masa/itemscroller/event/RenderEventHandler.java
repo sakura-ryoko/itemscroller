@@ -65,6 +65,7 @@ public class RenderEventHandler
             String str = StringUtils.translate("itemscroller.gui.label.recipe_page", (first / countPerPage) + 1, recipes.getTotalRecipeCount() / countPerPage);
 
             drawContext.drawText(this.mc.textRenderer, str, 16, -12, 0xC0C0C0C0, false);
+            RenderUtils.forceDraw(drawContext);
 
             for (int i = 0, recipeId = first; recipeId <= lastOnPage; ++i, ++recipeId)
             {
@@ -221,6 +222,7 @@ public class RenderEventHandler
         drawContext.getMatrices().scale(scale, scale, 1);
 
         drawContext.drawText(font, indexStr, 0, 0, 0xFFC0C0C0, false);
+        RenderUtils.forceDraw(drawContext);
 
         drawContext.getMatrices().pop();
     }
@@ -279,9 +281,8 @@ public class RenderEventHandler
     private void renderStackAt(ItemStack stack, int x, int y, boolean border, DrawContext drawContext)
     {
         final int w = 16;
-        // FIXME --> TERRIBLE OFFSET! (What values am I missing?  I've tried several)
-        int xAdj = (int) ((x) * this.scale) + 125;
-        int yAdj = (int) ((y) * this.scale) + 35;
+        int xAdj = (int) ((x) * this.scale) + this.recipeListX;
+        int yAdj = (int) ((y) * this.scale) + this.recipeListY;
         int wAdj = (int) ((w) * this.scale);
 
         if (border)
@@ -290,7 +291,8 @@ public class RenderEventHandler
             RenderUtils.drawOutline(xAdj - 1, yAdj - 1, wAdj + 2, wAdj + 2, 0xFFFFFFFF);
         }
 
-        RenderUtils.drawRect(xAdj, yAdj, wAdj, wAdj, 0x20FFFFFF); // light background for the item
+        // light background for the item
+        RenderUtils.drawRect(xAdj, yAdj, wAdj, wAdj, 0x20FFFFFF);
 
         if (InventoryUtils.isStackEmpty(stack) == false)
         {
@@ -303,6 +305,7 @@ public class RenderEventHandler
             drawContext.getMatrices().translate(0, 0, 100.f);
 
             drawContext.drawItem(stack, x, y);
+            RenderUtils.forceDraw(drawContext);
 
             drawContext.getMatrices().pop();
         }
