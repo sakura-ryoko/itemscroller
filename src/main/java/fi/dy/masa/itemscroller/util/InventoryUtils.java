@@ -42,6 +42,7 @@ import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
@@ -2737,8 +2738,36 @@ public class InventoryUtils
         quickSort(gui, l + 1, end);
     }
 
+    // TODO: make these lists customizable in-game
+    private static final List<String> topSortingPriorityList = Arrays.asList(
+            "minecraft:diamond_sword", // Highest priority
+            "minecraft:diamond_pickaxe", // Second highest priority
+            "minecraft:diamond_axe",
+            "minecraft:diamond_shovel",
+            "minecraft:diamond_hoe",
+            "minecraft:ender_chest", // Ender chest with specific priority
+            "Tools", // Named Shulker Boxes with specific priority
+            "Redstone",
+            "Redstone adjacents",
+            "Booty",
+            "Materials");
+    private static final List<String> bottomSortingPriorityList = Arrays.asList(
+            "minecraft:firework_rocket" // Highest priority
+    );
+
     private static int compareStacks(ItemStack stack1, ItemStack stack2)
     {
+
+        // Check if they have a custom priority
+        int priority1 = getCustomPriority(stack1);
+        int priority2 = getCustomPriority(stack2);
+
+        if (priority1 != -1 || priority2 != -1)
+        {
+            // Any of both has a priority, compare them using that
+            return Integer.compare(priority2, priority1);
+        }
+
         if (Configs.Generic.SORT_SHULKER_BOXES_AT_END.getBooleanValue())
         {
             if (isShulkerBox(stack1) && !isShulkerBox(stack2))
@@ -2775,6 +2804,58 @@ public class InventoryUtils
             return Integer.compare(stack1.getComponents().hashCode(), stack2.getComponents().hashCode());
         }
         return Integer.compare(-stack1.getCount(), -stack2.getCount());
+    }
+
+    public static void logToChat(String message) {
+        // Check if the player is available
+        if (MinecraftClient.getInstance().player != null) {
+            // Create a Text component from the message string
+            Text textMessage = Text.of(message);
+
+            // Send the message to the player's chat
+            MinecraftClient.getInstance().player.sendMessage(textMessage, false); // 'false' means it's not a system
+                                                                                  // message
+        }
+    }
+
+    private static int getCustomPriority(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return -1; // No priority for empty stacks
+        }
+
+        // Get item ID and name to check against custom priority lists
+        String itemID = Registries.ITEM.getId(stack.getItem()).toString();
+        String itemName = stack.getName().getString();
+        if (itemID.equals(itemName)) {
+            itemName = null;
+        }
+
+        // Top priority check
+        int idTopPriority = topSortingPriorityList.indexOf(itemID);
+        int nameTopPriority = itemName != null ? topSortingPriorityList.indexOf(itemName) : -1;
+
+        // Bottom priority check
+        int idBottomPriority = bottomSortingPriorityList.indexOf(itemID);
+        int nameBottomPriority = itemName != null ? bottomSortingPriorityList.indexOf(itemName) : -1;
+
+        // Sort at the top: Prefer name priority if it exists
+        if (nameTopPriority != -1) {
+            return topSortingPriorityList.size() - nameTopPriority;
+        }
+        if (idTopPriority != -1) {
+            return topSortingPriorityList.size() - idTopPriority;
+        }
+
+        // Sort at the bottom: Prefer name priority if it exists
+        if (nameBottomPriority != -1) {
+            return -bottomSortingPriorityList.size() - nameBottomPriority - 2;
+        }
+        if (idBottomPriority != -1) {
+            return -bottomSortingPriorityList.size() - idBottomPriority - 2;
+        }
+
+        // Default: no specific priority found
+        return -1;
     }
 
     public static boolean onPong(StatisticsS2CPacket packet)
