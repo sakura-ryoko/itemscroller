@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screen.ingame.CraftingScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.screen.slot.CraftingResultSlot;
 import fi.dy.masa.malilib.config.ConfigUtils;
+import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.*;
@@ -48,8 +49,10 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true, "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition").translatedName("itemscroller.config.generic.name.villagerTradeListRememberScrollPosition");
         public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",             true, "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks").translatedName("itemscroller.config.generic.name.sortAssumeEmptyBoxStacks");
         public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                true, "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd").translatedName("itemscroller.config.generic.name.sortShulkerBoxesAtEnd");
+        public static final ConfigStringList TOP_PRIORITY_SORTING_INVENTORY     = new ConfigStringList("topPrioritySortingInventory",       ImmutableList.of("minecraft:diamond_sword","minecraft:diamond_pickaxe","minecraft:diamond_axe","minecraft:diamond_shovel","minecraft:diamond_hoe","minecraft:netherite_sword","minecraft:netherite_pickaxe","minecraft:netherite_axe","minecraft:netherite_shovel","minecraft:netherite_hoe"), "itemscroller.config.generic.comment.topPrioritySortingInventory").translatedName("itemscroller.config.generic.name.topPrioritySortingInventory");
+        public static final ConfigStringList BOTTOM_PRIORITY_SORTING_INVENTORY  = new ConfigStringList("bottomPrioritySortingInventory",    ImmutableList.of(), "itemscroller.config.generic.comment.bottomPrioritySortingInventory").translatedName("itemscroller.config.generic.name.bottomPrioritySortingInventory");
 
-        public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(
+        public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
                 CLIENT_CRAFTING_FIX,
                 CRAFTING_RENDER_RECIPE_ITEMS,
@@ -72,7 +75,9 @@ public class Configs implements IConfigHandler
                 VILLAGER_TRADE_LIST_REMEMBER_SCROLL,
 
                 SORT_ASSUME_EMPTY_BOX_STACKS,
-                SORT_SHULKER_BOXES_AT_END
+                SORT_SHULKER_BOXES_AT_END,
+                TOP_PRIORITY_SORTING_INVENTORY,
+                BOTTOM_PRIORITY_SORTING_INVENTORY
         );
     }
 

@@ -20,6 +20,8 @@
     "itemscroller.config.generic.name.villagerTradeListRememberScrollPosition": "villagerTradeListRememberScrollPosition",
     "itemscroller.config.generic.name.sortAssumeEmptyBoxStacks": "sortAssumeEmptyBoxStacks",
     "itemscroller.config.generic.name.sortShulkerBoxesAtEnd": "sortShulkerBoxesAtEnd",
+    "itemscroller.config.generic.name.topPrioritySortingInventory": "topPrioritySortingInventory",
+    "itemscroller.config.generic.name.bottomPrioritySortingInventory": "bottomPrioritySortingInventory",
 
     "itemscroller.config.generic.comment.carpetCtrlQCraftingEnabledOnServer": "Set to true if the server is running the Carpet mod,\nand has the ctrlQCrafting option enabled.\nThis just changes which method Item Scroller uses\nfor the Drop key + Shift + Right click crafting.",
     "itemscroller.config.generic.comment.clientCraftingFixOn1_12": "Enable updating the crafting recipe output directly on the client side.\nThis fixes the quick/mass crafting and right-click-to-craft-a-stack\nfeatures otherwise being broken in 1.12.",
@@ -42,6 +44,8 @@
     "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition": "Remember and restore the last scroll position in the\ntrade list when re-opening the GUI",
     "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks": "Assume that empty boxes are stacking items\nwhen sorting the inventory.\nThis is useful if you installed mods to stack\nshulker boxes on remote server.\nThis will send an extra packet to ensure the\ninventory is synced.",
     "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd": "Sort shulker boxes at the end of the inventory\nwhen sorting the inventory.",
+    "itemscroller.config.generic.comment.topPrioritySortingInventory": "These items will have a priority to be sorted first.\nYou can put item IDs (eg. \"minecraft:diamond_sword\") or custom names (eg. \"Wither killer\").\nIf you put custom names, those will be prefered before the id.\nItems in the list will be sorted to the front according to the list.",
+    "itemscroller.config.generic.comment.bottomPrioritySortingInventory": "These items will have a priority to be sorted last.\nYou can put item IDs (eg. \"minecraft:diamond_sword\") or custom names (eg. \"Wither killer\").\nIf you put custom names, those will be prefered before the id.\nItems in the list will be sorted to the back according to the list.",
 
     "itemscroller.config.toggles.name.enableCraftingFeatures": "enableCraftingFeatures",
     "itemscroller.config.toggles.name.enableDropkeyDropMatching": "enableDropkeyDropMatching",

@@ -78,6 +78,8 @@ public class InventoryUtils
     private static boolean inhibitCraftResultUpdate;
     private static Runnable selectedSlotUpdateTask;
     public static boolean assumeEmptyShulkerStacking = false;
+    private static List<String> topSortingPriorityList = Configs.Generic.TOP_PRIORITY_SORTING_INVENTORY.getStrings();
+    private static List<String> bottomSortingPriorityList = Configs.Generic.BOTTOM_PRIORITY_SORTING_INVENTORY.getStrings();
     public static boolean bufferInvUpdates = false;
     public static List<Packet<ClientPlayPacketListener>> invUpdatesBuffer = new ArrayList<>();
 
@@ -2737,23 +2739,6 @@ public class InventoryUtils
         quickSort(gui, start, l - 1);
         quickSort(gui, l + 1, end);
     }
-
-    // TODO: make these lists customizable in-game
-    private static final List<String> topSortingPriorityList = Arrays.asList(
-            "minecraft:diamond_sword", // Highest priority
-            "minecraft:diamond_pickaxe", // Second highest priority
-            "minecraft:diamond_axe",
-            "minecraft:diamond_shovel",
-            "minecraft:diamond_hoe",
-            "minecraft:ender_chest", // Ender chest with specific priority
-            "Tools", // Named Shulker Boxes with specific priority
-            "Redstone",
-            "Redstone adjacents",
-            "Booty",
-            "Materials");
-    private static final List<String> bottomSortingPriorityList = Arrays.asList(
-            "minecraft:firework_rocket" // Highest priority
-    );
 
     private static int compareStacks(ItemStack stack1, ItemStack stack2)
     {
