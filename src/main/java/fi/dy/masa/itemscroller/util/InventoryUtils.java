@@ -42,7 +42,6 @@ import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
@@ -2789,18 +2788,6 @@ public class InventoryUtils
             return Integer.compare(stack1.getComponents().hashCode(), stack2.getComponents().hashCode());
         }
         return Integer.compare(-stack1.getCount(), -stack2.getCount());
-    }
-
-    public static void logToChat(String message) {
-        // Check if the player is available
-        if (MinecraftClient.getInstance().player != null) {
-            // Create a Text component from the message string
-            Text textMessage = Text.of(message);
-
-            // Send the message to the player's chat
-            MinecraftClient.getInstance().player.sendMessage(textMessage, false); // 'false' means it's not a system
-                                                                                  // message
-        }
     }
 
     private static int getCustomPriority(ItemStack stack) {
