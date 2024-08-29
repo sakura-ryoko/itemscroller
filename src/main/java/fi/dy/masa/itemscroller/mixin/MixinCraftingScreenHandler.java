@@ -19,8 +19,8 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 @Mixin(net.minecraft.screen.CraftingScreenHandler.class)
 public abstract class MixinCraftingScreenHandler
 {
-    @Shadow @Final private RecipeInputInventory input;
-    @Shadow @Final private net.minecraft.inventory.CraftingResultInventory result;
+    //@Shadow @Final private RecipeInputInventory craftingInventory;
+    //@Shadow @Final private net.minecraft.inventory.CraftingResultInventory craftingResultInventory;
     @Shadow @Final private net.minecraft.entity.player.PlayerEntity player;
 
     @Inject(method = "onContentChanged", at = @At("RETURN"))
@@ -28,7 +28,9 @@ public abstract class MixinCraftingScreenHandler
     {
         if (MinecraftClient.getInstance().isOnThread())
         {
-            InventoryUtils.onSlotChangedCraftingGrid(this.player, this.input, this.result);
+            InventoryUtils.onSlotChangedCraftingGrid(this.player,
+                    ((IMixinAbstractCraftingScreenHandler) this).itemscroller_getCraftingInventory(),
+                    ((IMixinAbstractCraftingScreenHandler) this).itemscroller_getCraftingResultInventory());
         }
     }
 
