@@ -69,7 +69,7 @@ public class TradeType
         {
             Identifier id = Identifier.tryParse(name);
             //return Registries.ITEM.get(id);
-            Optional<RegistryEntry.Reference<Item>> opt = Registries.ITEM.get(id);
+            Optional<RegistryEntry.Reference<Item>> opt = Registries.ITEM.getEntry(id);
 
             if (opt.isPresent())
             {
