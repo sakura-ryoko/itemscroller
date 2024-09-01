@@ -74,6 +74,6 @@ public enum SortingMethod implements IConfigOptionListEntry
             }
         }
 
-        return SortingMethod.ITEM_RAWID;
+        return SortingMethod.ITEM_NAME;
     }
 }
