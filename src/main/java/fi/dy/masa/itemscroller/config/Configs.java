@@ -7,13 +7,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import net.minecraft.client.gui.screen.ingame.CraftingScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.screen.slot.CraftingResultSlot;
+
 import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
-import fi.dy.masa.malilib.config.options.*;
+import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.JsonUtils;
 import fi.dy.masa.itemscroller.Reference;
@@ -24,30 +27,33 @@ public class Configs implements IConfigHandler
 {
     private static final String CONFIG_FILE_NAME = Reference.MOD_ID + ".json";
 
+    private static final String GENERIC_KEY = Reference.MOD_ID+".config.generic";
+    private static final String TOGGLES_KEY = Reference.MOD_ID+".config.toggles";
+
     public static class Generic
     {
-        public static final ConfigBoolean CARPET_CTRL_Q_CRAFTING                = new ConfigBoolean("carpetCtrlQCraftingEnabledOnServer",   false, "itemscroller.config.generic.comment.carpetCtrlQCraftingEnabledOnServer").translatedName("itemscroller.config.generic.name.carpetCtrlQCraftingEnabledOnServer");
-        public static final ConfigBoolean CLIENT_CRAFTING_FIX                   = new ConfigBoolean("clientCraftingFixOn1.12",              true, "itemscroller.config.generic.comment.clientCraftingFixOn1_12").translatedName("itemscroller.config.generic.name.clientCraftingFixOn1_12");
-        public static final ConfigBoolean CRAFTING_RENDER_RECIPE_ITEMS          = new ConfigBoolean("craftingRenderRecipeItems",            true, "itemscroller.config.generic.comment.craftingRenderRecipeItems").translatedName("itemscroller.config.generic.name.craftingRenderRecipeItems");
-        //public static final ConfigBoolean DEBUG_MESSAGES                        = new ConfigBoolean("debugMessages",                        false, "itemscroller.config.generic.comment.debugMessages").translatedName("itemscroller.config.generic.name.debugMessages");
-        public static final ConfigBoolean MOD_MAIN_TOGGLE                       = new ConfigBoolean("modMainToggle",                        true, "itemscroller.config.generic.comment.modMainToggle").translatedName("itemscroller.config.generic.name.modMainToggle");
-        public static final ConfigBoolean MASS_CRAFT_INHIBIT_MID_UPDATES        = new ConfigBoolean("massCraftInhibitMidUpdates",           true, "itemscroller.config.generic.comment.massCraftInhibitMidUpdates").translatedName("itemscroller.config.generic.name.massCraftInhibitMidUpdates");
-        public static final ConfigInteger MASS_CRAFT_INTERVAL                   = new ConfigInteger("massCraftInterval",                    2, 1, 60, "itemscroller.config.generic.comment.massCraftInterval").translatedName("itemscroller.config.generic.name.massCraftInterval");
-        public static final ConfigInteger MASS_CRAFT_ITERATIONS                 = new ConfigInteger("massCraftIterations",                  36, 1, 256, "itemscroller.config.generic.comment.massCraftIterations").translatedName("itemscroller.config.generic.name.massCraftIterations");
-        public static final ConfigBoolean MASS_CRAFT_SWAPS                      = new ConfigBoolean("massCraftSwapsOnly",                   false, "itemscroller.config.generic.comment.massCraftSwapsOnly").translatedName("itemscroller.config.generic.name.massCraftSwapsOnly");
-        public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook", false, "itemscroller.config.generic.comment.massCraftUseRecipeBook").translatedName("itemscroller.config.generic.name.massCraftUseRecipeBook");
-        public static final ConfigInteger PACKET_RATE_LIMIT                     = new ConfigInteger("packetRateLimit",                      4, 1, 1024, "itemscroller.config.generic.comment.packetRateLimit").translatedName("itemscroller.config.generic.name.packetRateLimit");
-        public static final ConfigBoolean SCROLL_CRAFT_STORE_RECIPES_TO_FILE    = new ConfigBoolean("craftingRecipesSaveToFile",            true, "itemscroller.config.generic.comment.craftingRecipesSaveToFile").translatedName("itemscroller.config.generic.name.craftingRecipesSaveToFile");
-        public static final ConfigBoolean SCROLL_CRAFT_RECIPE_FILE_GLOBAL       = new ConfigBoolean("craftingRecipesSaveFileIsGlobal",      false, "itemscroller.config.generic.comment.craftingRecipesSaveFileIsGlobal").translatedName("itemscroller.config.generic.name.craftingRecipesSaveFileIsGlobal");
-        public static final ConfigBoolean RATE_LIMIT_CLICK_PACKETS              = new ConfigBoolean("rateLimitClickPackets",                false, "itemscroller.config.generic.comment.rateLimitClickPackets").translatedName("itemscroller.config.generic.name.rateLimitClickPackets");
-        public static final ConfigBoolean REVERSE_SCROLL_DIRECTION_SINGLE       = new ConfigBoolean("reverseScrollDirectionSingle",         false, "itemscroller.config.generic.comment.reverseScrollDirectionSingle").translatedName("itemscroller.config.generic.name.reverseScrollDirectionSingle");
-        public static final ConfigBoolean REVERSE_SCROLL_DIRECTION_STACKS       = new ConfigBoolean("reverseScrollDirectionStacks",         false, "itemscroller.config.generic.comment.reverseScrollDirectionStacks").translatedName("itemscroller.config.generic.name.reverseScrollDirectionStacks");
-        public static final ConfigBoolean USE_RECIPE_CACHING                    = new ConfigBoolean("useRecipeCaching",                     true, "itemscroller.config.generic.comment.useRecipeCaching").translatedName("itemscroller.config.generic.name.useRecipeCaching");
-        public static final ConfigBoolean SLOT_POSITION_AWARE_SCROLL_DIRECTION  = new ConfigBoolean("useSlotPositionAwareScrollDirection",  false, "itemscroller.config.generic.comment.useSlotPositionAwareScrollDirection").translatedName("itemscroller.config.generic.name.useSlotPositionAwareScrollDirection");
-        public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",      true, "itemscroller.config.generic.comment.villagerTradeUseGlobalFavorites").translatedName("itemscroller.config.generic.name.villagerTradeUseGlobalFavorites");
-        public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true, "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition").translatedName("itemscroller.config.generic.name.villagerTradeListRememberScrollPosition");
-        public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",             true, "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks").translatedName("itemscroller.config.generic.name.sortAssumeEmptyBoxStacks");
-        public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                true, "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd").translatedName("itemscroller.config.generic.name.sortShulkerBoxesAtEnd");
+        public static final ConfigBoolean CARPET_CTRL_Q_CRAFTING                = new ConfigBoolean("carpetCtrlQCraftingEnabledOnServer",      false).apply(GENERIC_KEY);
+        public static final ConfigBoolean CLIENT_CRAFTING_FIX                   = new ConfigBoolean("clientCraftingFixOn1.12",                 true).apply(GENERIC_KEY);
+        public static final ConfigBoolean CRAFTING_RENDER_RECIPE_ITEMS          = new ConfigBoolean("craftingRenderRecipeItems",               true).apply(GENERIC_KEY);
+        //public static final ConfigBoolean DEBUG_MESSAGES                        = new ConfigBoolean("debugMessages",                           false).apply(GENERIC_KEY);
+        public static final ConfigBoolean MOD_MAIN_TOGGLE                       = new ConfigBoolean("modMainToggle",                           true).apply(GENERIC_KEY);
+        public static final ConfigBoolean MASS_CRAFT_INHIBIT_MID_UPDATES        = new ConfigBoolean("massCraftInhibitMidUpdates",              true).apply(GENERIC_KEY);
+        public static final ConfigInteger MASS_CRAFT_INTERVAL                   = new ConfigInteger("massCraftInterval",                       2, 1, 60).apply(GENERIC_KEY);
+        public static final ConfigInteger MASS_CRAFT_ITERATIONS                 = new ConfigInteger("massCraftIterations",                     36, 1, 256).apply(GENERIC_KEY);
+        public static final ConfigBoolean MASS_CRAFT_SWAPS                      = new ConfigBoolean("massCraftSwapsOnly",                      false).apply(GENERIC_KEY);
+        public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook",                  false).apply(GENERIC_KEY);
+        public static final ConfigInteger PACKET_RATE_LIMIT                     = new ConfigInteger("packetRateLimit",                         4, 1, 1024).apply(GENERIC_KEY);
+        public static final ConfigBoolean SCROLL_CRAFT_STORE_RECIPES_TO_FILE    = new ConfigBoolean("craftingRecipesSaveToFile",               true).apply(GENERIC_KEY);
+        public static final ConfigBoolean SCROLL_CRAFT_RECIPE_FILE_GLOBAL       = new ConfigBoolean("craftingRecipesSaveFileIsGlobal",         false).apply(GENERIC_KEY);
+        public static final ConfigBoolean RATE_LIMIT_CLICK_PACKETS              = new ConfigBoolean("rateLimitClickPackets",                   false).apply(GENERIC_KEY);
+        public static final ConfigBoolean REVERSE_SCROLL_DIRECTION_SINGLE       = new ConfigBoolean("reverseScrollDirectionSingle",            false).apply(GENERIC_KEY);
+        public static final ConfigBoolean REVERSE_SCROLL_DIRECTION_STACKS       = new ConfigBoolean("reverseScrollDirectionStacks",            false).apply(GENERIC_KEY);
+        public static final ConfigBoolean USE_RECIPE_CACHING                    = new ConfigBoolean("useRecipeCaching",                        true).apply(GENERIC_KEY);
+        public static final ConfigBoolean SLOT_POSITION_AWARE_SCROLL_DIRECTION  = new ConfigBoolean("useSlotPositionAwareScrollDirection",     false).apply(GENERIC_KEY);
+        public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",         true).apply(GENERIC_KEY);
+        public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true).apply(GENERIC_KEY);
+        public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",                true).apply(GENERIC_KEY);
+        public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                   true).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
@@ -78,18 +84,18 @@ public class Configs implements IConfigHandler
 
     public static class Toggles
     {
-        public static final ConfigBoolean CRAFTING_FEATURES         = new ConfigBoolean("enableCraftingFeatures",           true, "itemscroller.config.toggles.comment.enableCraftingFeatures").translatedName("itemscroller.config.toggles.name.enableCraftingFeatures");
-        public static final ConfigBoolean DROP_MATCHING             = new ConfigBoolean("enableDropkeyDropMatching",        true, "itemscroller.config.toggles.comment.enableDropkeyDropMatching").translatedName("itemscroller.config.toggles.name.enableDropkeyDropMatching");
-        public static final ConfigBoolean RIGHT_CLICK_CRAFT_STACK   = new ConfigBoolean("enableRightClickCraftingOneStack", true, "itemscroller.config.toggles.comment.enableRightClickCraftingOneStack").translatedName("itemscroller.config.toggles.name.enableRightClickCraftingOneStack");
-        public static final ConfigBoolean SCROLL_EVERYTHING         = new ConfigBoolean("enableScrollingEverything",        true, "itemscroller.config.toggles.comment.enableScrollingEverything").translatedName("itemscroller.config.toggles.name.enableScrollingEverything");
-        public static final ConfigBoolean SCROLL_MATCHING           = new ConfigBoolean("enableScrollingMatchingStacks",    true, "itemscroller.config.toggles.comment.enableScrollingMatchingStacks").translatedName("itemscroller.config.toggles.name.enableScrollingMatchingStacks");
-        public static final ConfigBoolean SCROLL_SINGLE             = new ConfigBoolean("enableScrollingSingle",            true, "itemscroller.config.toggles.comment.enableScrollingSingle").translatedName("itemscroller.config.toggles.name.enableScrollingSingle");
-        public static final ConfigBoolean SCROLL_STACKS             = new ConfigBoolean("enableScrollingStacks",            true, "itemscroller.config.toggles.comment.enableScrollingStacks").translatedName("itemscroller.config.toggles.name.enableScrollingStacks");
-        public static final ConfigBoolean SCROLL_STACKS_FALLBACK    = new ConfigBoolean("enableScrollingStacksFallback",    true, "itemscroller.config.toggles.comment.enableScrollingStacksFallback").translatedName("itemscroller.config.toggles.name.enableScrollingStacksFallback");
-        public static final ConfigBoolean SCROLL_VILLAGER           = new ConfigBoolean("enableScrollingVillager",          true, "itemscroller.config.toggles.comment.enableScrollingVillager").translatedName("itemscroller.config.toggles.name.enableScrollingVillager");
-        public static final ConfigBoolean SHIFT_DROP_ITEMS          = new ConfigBoolean("enableShiftDropItems",             true, "itemscroller.config.toggles.comment.enableShiftDropItems").translatedName("itemscroller.config.toggles.name.enableShiftDropItems");
-        public static final ConfigBoolean SHIFT_PLACE_ITEMS         = new ConfigBoolean("enableShiftPlaceItems",            true, "itemscroller.config.toggles.comment.enableShiftPlaceItems").translatedName("itemscroller.config.toggles.name.enableShiftPlaceItems");
-        public static final ConfigBoolean VILLAGER_TRADE_FEATURES   = new ConfigBoolean("enableVillagerTradeFeatures",      true, "itemscroller.config.toggles.comment.enableVillagerTradeFeatures").translatedName("itemscroller.config.toggles.name.enableVillagerTradeFeatures");
+        public static final ConfigBoolean CRAFTING_FEATURES         = new ConfigBoolean("enableCraftingFeatures",           true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean DROP_MATCHING             = new ConfigBoolean("enableDropkeyDropMatching",        true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean RIGHT_CLICK_CRAFT_STACK   = new ConfigBoolean("enableRightClickCraftingOneStack", true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SCROLL_EVERYTHING         = new ConfigBoolean("enableScrollingEverything",        true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SCROLL_MATCHING           = new ConfigBoolean("enableScrollingMatchingStacks",    true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SCROLL_SINGLE             = new ConfigBoolean("enableScrollingSingle",            true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SCROLL_STACKS             = new ConfigBoolean("enableScrollingStacks",            true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SCROLL_STACKS_FALLBACK    = new ConfigBoolean("enableScrollingStacksFallback",    true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SCROLL_VILLAGER           = new ConfigBoolean("enableScrollingVillager",          true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SHIFT_DROP_ITEMS          = new ConfigBoolean("enableShiftDropItems",             true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SHIFT_PLACE_ITEMS         = new ConfigBoolean("enableShiftPlaceItems",            true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean VILLAGER_TRADE_FEATURES   = new ConfigBoolean("enableVillagerTradeFeatures",      true).apply(TOGGLES_KEY);
 
         public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(
                 CRAFTING_FEATURES,
