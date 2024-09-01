@@ -20,8 +20,8 @@
     "itemscroller.config.generic.name.villagerTradeListRememberScrollPosition": "交易书签",
     "itemscroller.config.generic.name.sortAssumeEmptyBoxStacks": "sortAssumeEmptyBoxStacks",
     "itemscroller.config.generic.name.sortShulkerBoxesAtEnd": "sortShulkerBoxesAtEnd",
-    "itemscroller.config.generic.name.topPrioritySortingInventory": "优先排序物品清单",
-    "itemscroller.config.generic.name.bottomPrioritySortingInventory": "最后排序物品清单",
+    "itemscroller.config.generic.name.sortTopPriorityInventory": "优先排序物品清单",
+    "itemscroller.config.generic.name.sortBottomPriorityInventory": "最后排序物品清单",
 
     "itemscroller.config.generic.comment.carpetCtrlQCraftingEnabledOnServer": "如果服务器正在运行地毯端则建议开启\n这将改变物品滚轮整组丢弃的使用方式\n变为丢弃+Shift+右击丢弃整组。",
     "itemscroller.config.generic.comment.clientCraftingFixOn1_12": "在客户端直接更新合成配方输出\n这修正了在1.12中快速/批量制造和右键点击制造所产生的不可使用的问题。",
@@ -44,8 +44,8 @@
     "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition": "启用后，退出村民交易GUI将不会重置滚动条。",
     "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks": "整理物品栏时假设空潜影盒可以堆叠。\n当你在远程服务器启用此特性时会很有用。\n这会多发送一个网络包来确保服务器同步",
     "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd": "整理物品栏时将潜影盒放在最后。",
-    "itemscroller.config.generic.comment.topPrioritySortingInventory": "这些物品将优先排序。\n你可以输入物品ID（例如 \"minecraft:diamond_sword\"）或自定义名称（例如 \"凋零杀手\"）。\n如果输入了自定义名称，则优先使用自定义名称。\n列表中的物品将根据列表顺序排在前面。",
-    "itemscroller.config.generic.comment.bottomPrioritySortingInventory": "这些物品将最后排序。\n你可以输入物品ID（例如 \"minecraft:diamond_sword\"）或自定义名称（例如 \"凋零杀手\"）。\n如果输入了自定义名称，则优先使用自定义名称。\n列表中的物品将根据列表顺序排在后面。",
+    "itemscroller.config.generic.comment.sortTopPriorityInventory": "这些物品将优先排序。\n你可以输入物品ID（例如 \"minecraft:diamond_sword\"）或自定义名称（例如 \"凋零杀手\"）。\n如果输入了自定义名称，则优先使用自定义名称。\n列表中的物品将根据列表顺序排在前面。",
+    "itemscroller.config.generic.comment.sortBottomPriorityInventory": "这些物品将最后排序。\n你可以输入物品ID（例如 \"minecraft:diamond_sword\"）或自定义名称（例如 \"凋零杀手\"）。\n如果输入了自定义名称，则优先使用自定义名称。\n列表中的物品将根据列表顺序排在后面。",
 
     "itemscroller.config.toggles.name.enableCraftingFeatures": "启用配方视图",
     "itemscroller.config.toggles.name.enableDropkeyDropMatching": "全部丢弃",

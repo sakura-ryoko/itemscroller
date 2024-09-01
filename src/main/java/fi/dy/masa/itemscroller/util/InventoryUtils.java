@@ -26,6 +26,7 @@ import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -77,8 +78,8 @@ public class InventoryUtils
     private static boolean inhibitCraftResultUpdate;
     private static Runnable selectedSlotUpdateTask;
     public static boolean assumeEmptyShulkerStacking = false;
-    private static List<String> topSortingPriorityList = Configs.Generic.TOP_PRIORITY_SORTING_INVENTORY.getStrings();
-    private static List<String> bottomSortingPriorityList = Configs.Generic.BOTTOM_PRIORITY_SORTING_INVENTORY.getStrings();
+    private static List<String> topSortingPriorityList = Configs.Generic.SORT_TOP_PRIORITY_INVENTORY.getStrings();
+    private static List<String> bottomSortingPriorityList = Configs.Generic.SORT_BOTTOM_PRIORITY_INVENTORY.getStrings();
     public static boolean bufferInvUpdates = false;
     public static List<Packet<ClientPlayPacketListener>> invUpdatesBuffer = new ArrayList<>();
 
@@ -2779,14 +2780,31 @@ public class InventoryUtils
                 return Integer.compare(contents1.size(), contents2.size());
             }
         }
+
         if (stack1.getItem() != stack2.getItem())
         {
-            return Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem()));
+            if (Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue().equals(SortingMethod.ITEM_NAME))
+            {
+                // Sort by ItemName
+                return stack1.getName().getString().compareTo(stack2.getName().getString()) >= 0 ? 1 : -1;
+            }
+            else if (Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue().equals(SortingMethod.ITEM_RARITY))
+            {
+                // Sort by Rarity
+                return stack1.getRarity().compareTo(stack2.getRarity());
+            }
+            else
+            {
+                // Sort by RawID
+                return Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem()));
+            }
         }
         if (!areStacksEqual(stack1, stack2))
         {
+            // Sort's Data Components by Hash Code
             return Integer.compare(stack1.getComponents().hashCode(), stack2.getComponents().hashCode());
         }
+
         return Integer.compare(-stack1.getCount(), -stack2.getCount());
     }
 

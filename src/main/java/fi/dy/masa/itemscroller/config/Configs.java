@@ -18,16 +18,21 @@ import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
+import fi.dy.masa.malilib.config.options.ConfigOptionList;
 import fi.dy.masa.malilib.config.options.ConfigStringList;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.JsonUtils;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
+import fi.dy.masa.itemscroller.util.SortingMethod;
 
 public class Configs implements IConfigHandler
 {
     private static final String CONFIG_FILE_NAME = Reference.MOD_ID + ".json";
+
+    private static final ImmutableList<String> DEFAULT_TOP_SORTING = ImmutableList.of("minecraft:diamond_sword","minecraft:diamond_pickaxe","minecraft:diamond_axe","minecraft:diamond_shovel","minecraft:diamond_hoe","minecraft:netherite_sword","minecraft:netherite_pickaxe","minecraft:netherite_axe","minecraft:netherite_shovel","minecraft:netherite_hoe");
+    private static final ImmutableList<String> DEFAULT_BOTTOM_SORTING = ImmutableList.of();
 
     private static final String GENERIC_KEY = Reference.MOD_ID+".config.generic";
     private static final String TOGGLES_KEY = Reference.MOD_ID+".config.toggles";
@@ -54,10 +59,12 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean SLOT_POSITION_AWARE_SCROLL_DIRECTION  = new ConfigBoolean("useSlotPositionAwareScrollDirection",     false).apply(GENERIC_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",         true).apply(GENERIC_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true).apply(GENERIC_KEY);
+
         public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",                true).apply(GENERIC_KEY);
         public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                   true).apply(GENERIC_KEY);
-        public static final ConfigStringList TOP_PRIORITY_SORTING_INVENTORY     = new ConfigStringList("topPrioritySortingInventory",          ImmutableList.of("minecraft:diamond_sword","minecraft:diamond_pickaxe","minecraft:diamond_axe","minecraft:diamond_shovel","minecraft:diamond_hoe","minecraft:netherite_sword","minecraft:netherite_pickaxe","minecraft:netherite_axe","minecraft:netherite_shovel","minecraft:netherite_hoe")).apply(GENERIC_KEY);
-        public static final ConfigStringList BOTTOM_PRIORITY_SORTING_INVENTORY  = new ConfigStringList("bottomPrioritySortingInventory",       ImmutableList.of()).apply(GENERIC_KEY);
+        public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",              DEFAULT_TOP_SORTING).apply(GENERIC_KEY);
+        public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",           DEFAULT_BOTTOM_SORTING).apply(GENERIC_KEY);
+        public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.ITEM_NAME).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
@@ -83,8 +90,9 @@ public class Configs implements IConfigHandler
 
                 SORT_ASSUME_EMPTY_BOX_STACKS,
                 SORT_SHULKER_BOXES_AT_END,
-                TOP_PRIORITY_SORTING_INVENTORY,
-                BOTTOM_PRIORITY_SORTING_INVENTORY
+                SORT_TOP_PRIORITY_INVENTORY,
+                SORT_BOTTOM_PRIORITY_INVENTORY,
+                SORT_METHOD_DEFAULT
         );
     }
 
