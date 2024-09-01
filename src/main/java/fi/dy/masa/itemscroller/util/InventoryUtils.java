@@ -2798,7 +2798,9 @@ public class InventoryUtils
         // Get item ID and name to check against custom priority lists
         String itemID = Registries.ITEM.getId(stack.getItem()).toString();
         String itemName = stack.getName().getString();
-        if (itemID.equals(itemName)) {
+
+        if (itemID.equals(itemName))
+        {
             itemName = null;
         }
 
@@ -2811,18 +2813,22 @@ public class InventoryUtils
         int nameBottomPriority = itemName != null ? bottomSortingPriorityList.indexOf(itemName) : -1;
 
         // Sort at the top: Prefer name priority if it exists
-        if (nameTopPriority != -1) {
+        if (nameTopPriority != -1)
+        {
             return topSortingPriorityList.size() - nameTopPriority;
         }
-        if (idTopPriority != -1) {
+        if (idTopPriority != -1)
+        {
             return topSortingPriorityList.size() - idTopPriority;
         }
 
         // Sort at the bottom: Prefer name priority if it exists
-        if (nameBottomPriority != -1) {
+        if (nameBottomPriority != -1)
+        {
             return -bottomSortingPriorityList.size() - nameBottomPriority - 2;
         }
-        if (idBottomPriority != -1) {
+        if (idBottomPriority != -1)
+        {
             return -bottomSortingPriorityList.size() - idBottomPriority - 2;
         }
 
@@ -2855,7 +2861,7 @@ public class InventoryUtils
     {
         if (stack.isEmpty())
         {
-            return 64;
+            return 1;
         }
 
         if (assumeShulkerStacking && Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())

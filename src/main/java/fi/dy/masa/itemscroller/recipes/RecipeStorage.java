@@ -171,7 +171,7 @@ public class RecipeStorage
         this.changeSelectedRecipe(nbt.getByte("Selected"));
     }
 
-    private NbtCompound writeToNBT(DynamicRegistryManager registryManager)
+    private NbtCompound writeToNBT(@Nonnull DynamicRegistryManager registryManager)
     {
         NbtList tagRecipes = new NbtList();
         NbtCompound nbt = new NbtCompound();
