@@ -8,9 +8,12 @@ import fi.dy.masa.itemscroller.Reference;
 
 public enum SortingMethod implements IConfigOptionListEntry
 {
-    ITEM_NAME       ("item_name",   "item_name"),
-    ITEM_RARITY     ("item_rarity", "item_rarity"),
-    ITEM_RAWID      ("item_rawid",  "item_rawid");
+    CATEGORY_NAME       ("category_name",   "category_name"),
+    CATEGORY_RARITY     ("category_rarity", "category_rarity"),
+    CATEGORY_RAWID      ("category_rawid",  "category_rawid"),
+    ITEM_NAME           ("item_name",       "item_name"),
+    ITEM_RARITY         ("item_rarity",     "item_rarity"),
+    ITEM_RAWID          ("item_rawid",      "item_rawid");
 
     public static final ImmutableList<SortingMethod> VALUES = ImmutableList.copyOf(values());
 

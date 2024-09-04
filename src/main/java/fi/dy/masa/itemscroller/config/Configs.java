@@ -25,6 +25,7 @@ import fi.dy.masa.malilib.util.JsonUtils;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
+import fi.dy.masa.itemscroller.util.SortingCategory;
 import fi.dy.masa.itemscroller.util.SortingMethod;
 
 public class Configs implements IConfigHandler
@@ -60,11 +61,13 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",         true).apply(GENERIC_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true).apply(GENERIC_KEY);
 
+        public static final ConfigBoolean SORT_INVENTORY_TOGGLE                 = new ConfigBoolean("sortInventoryToggle",                     false).apply(GENERIC_KEY);
         public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",                true).apply(GENERIC_KEY);
         public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                   true).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",              DEFAULT_TOP_SORTING).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",           DEFAULT_BOTTOM_SORTING).apply(GENERIC_KEY);
         public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.ITEM_NAME).apply(GENERIC_KEY);
+        public static final ConfigStringList SORT_CATEGORY_ORDER                = new ConfigStringList("sortCategoryOrder",                     SortingCategory.toImmutableList()).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
@@ -88,11 +91,13 @@ public class Configs implements IConfigHandler
                 VILLAGER_TRADE_USE_GLOBAL_FAVORITES,
                 VILLAGER_TRADE_LIST_REMEMBER_SCROLL,
 
+                SORT_INVENTORY_TOGGLE,
                 SORT_ASSUME_EMPTY_BOX_STACKS,
                 SORT_SHULKER_BOXES_AT_END,
                 SORT_TOP_PRIORITY_INVENTORY,
                 SORT_BOTTOM_PRIORITY_INVENTORY,
-                SORT_METHOD_DEFAULT
+                SORT_METHOD_DEFAULT,
+                SORT_CATEGORY_ORDER
         );
     }
 

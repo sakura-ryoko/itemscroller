@@ -82,6 +82,7 @@ public class InventoryUtils
     private static List<String> bottomSortingPriorityList = Configs.Generic.SORT_BOTTOM_PRIORITY_INVENTORY.getStrings();
     public static boolean bufferInvUpdates = false;
     public static List<Packet<ClientPlayPacketListener>> invUpdatesBuffer = new ArrayList<>();
+    private static ItemGroup.DisplayContext displayContext;
 
     public static void setInhibitCraftingOutputUpdate(boolean inhibitUpdate)
     {
@@ -2742,7 +2743,6 @@ public class InventoryUtils
 
     private static int compareStacks(ItemStack stack1, ItemStack stack2)
     {
-
         // Check if they have a custom priority
         int priority1 = getCustomPriority(stack1);
         int priority2 = getCustomPriority(stack2);
@@ -2780,15 +2780,53 @@ public class InventoryUtils
                 return Integer.compare(contents1.size(), contents2.size());
             }
         }
+        SortingMethod method = (SortingMethod) Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue();
+
+        if (method.equals(SortingMethod.CATEGORY_NAME) || method.equals(SortingMethod.CATEGORY_RARITY) || method.equals(SortingMethod.CATEGORY_RAWID))
+        {
+            // Sort by Catagory
+            MinecraftClient mc = MinecraftClient.getInstance();
+
+            if (mc.world != null)
+            {
+                if (displayContext == null)
+                {
+                    displayContext = SortingCategory.buildDisplayContext(mc.world.getEnabledFeatures(), mc.world.getRegistryManager());
+                    // This isn't used here, but it is required to build the list of items, as if we are opening the Creative Inventory Screen.
+                }
+
+                SortingCategory cat1 = SortingCategory.fromItemStack(stack1);
+                SortingCategory cat2 = SortingCategory.fromItemStack(stack2);
+
+                if (cat1.getStringValue().equals(cat2.getStringValue()) == false)
+                {
+                    int index1 = SortingCategory.getConfigIndex(cat1);
+                    int index2 = SortingCategory.getConfigIndex(cat2);
+
+                    ItemScroller.logger.error("SORT - Category1[{}]: [{}] // Category2[{}]: [{}]", index1, cat1.getDisplayName(), index2, cat2.getDisplayName());
+
+                    if (index1 < 0)
+                    {
+                        return 1;
+                    }
+                    else if (index2 < 0)
+                    {
+                        return -1;
+                    }
+
+                    return Integer.compare(index1, index2);
+                }
+            }
+        }
 
         if (stack1.getItem() != stack2.getItem())
         {
-            if (Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue().equals(SortingMethod.ITEM_NAME))
+            if (method.equals(SortingMethod.CATEGORY_NAME) || method.equals(SortingMethod.ITEM_NAME))
             {
                 // Sort by ItemName
                 return stack1.getName().getString().compareTo(stack2.getName().getString()) >= 0 ? 1 : -1;
             }
-            else if (Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue().equals(SortingMethod.ITEM_RARITY))
+            else if (method.equals(SortingMethod.CATEGORY_RARITY) || method.equals(SortingMethod.ITEM_RARITY))
             {
                 // Sort by Rarity
                 return stack1.getRarity().compareTo(stack2.getRarity());

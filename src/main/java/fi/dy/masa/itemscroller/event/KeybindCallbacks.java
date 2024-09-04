@@ -172,8 +172,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         }
         else if (key == Hotkeys.SORT_INVENTORY.getKeybind())
         {
-            InventoryUtils.sortInventory(gui);
-            return true;
+            if (Configs.Generic.SORT_INVENTORY_TOGGLE.getBooleanValue())
+            {
+                InventoryUtils.sortInventory(gui);
+                return true;
+            }
         }
 
         return false;
