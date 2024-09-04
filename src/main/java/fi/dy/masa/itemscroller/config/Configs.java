@@ -16,10 +16,7 @@ import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
-import fi.dy.masa.malilib.config.options.ConfigBoolean;
-import fi.dy.masa.malilib.config.options.ConfigInteger;
-import fi.dy.masa.malilib.config.options.ConfigOptionList;
-import fi.dy.masa.malilib.config.options.ConfigStringList;
+import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.JsonUtils;
 import fi.dy.masa.itemscroller.Reference;
@@ -67,7 +64,7 @@ public class Configs implements IConfigHandler
         public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",              DEFAULT_TOP_SORTING).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",           DEFAULT_BOTTOM_SORTING).apply(GENERIC_KEY);
         public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.ITEM_NAME).apply(GENERIC_KEY);
-        public static final ConfigStringList SORT_CATEGORY_ORDER                = new ConfigStringList("sortCategoryOrder",                     SortingCategory.toImmutableList()).apply(GENERIC_KEY);
+        public static final ConfigLockedStringList SORT_CATEGORY_ORDER          = new ConfigLockedStringList("sortCategoryOrder",               SortingCategory.toImmutableList()).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
