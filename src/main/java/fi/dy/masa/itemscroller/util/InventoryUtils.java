@@ -2803,7 +2803,7 @@ public class InventoryUtils
                     int index1 = SortingCategory.getConfigIndex(cat1);
                     int index2 = SortingCategory.getConfigIndex(cat2);
 
-                    ItemScroller.logger.error("SORT - Category1[{}]: [{}] // Category2[{}]: [{}]", index1, cat1.getDisplayName(), index2, cat2.getDisplayName());
+                    //ItemScroller.logger.error("SORT - Category1[{}]: [{}] // Category2[{}]: [{}]", index1, cat1.getDisplayName(), index2, cat2.getDisplayName());
 
                     if (index1 < 0)
                     {
