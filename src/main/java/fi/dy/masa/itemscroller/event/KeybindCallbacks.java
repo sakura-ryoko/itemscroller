@@ -242,9 +242,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                     for (int i = 0; i < limit; ++i)
                     {
                         // todo
-//                        InventoryUtils.tryClearCursor(gui);
-//                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
-                        InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+                        //InventoryUtils.setInhibitCraftingOutputUpdate(true);
 
                         RecipeInputInventory craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
                         if (!recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
@@ -277,8 +275,12 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         }
 
                         InventoryUtils.shiftClickSlot(gui, outputSlot.id);
+                        InventoryUtils.dropStack(gui, outputSlot.id);
                         recipeBookClicks = true;
                     }
+
+                    InventoryUtils.tryClearCursor(gui);
+                    InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
                 }
                 else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
                 {
