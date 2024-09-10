@@ -64,7 +64,7 @@ public class Configs implements IConfigHandler
         public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",              DEFAULT_TOP_SORTING).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",           DEFAULT_BOTTOM_SORTING).apply(GENERIC_KEY);
         public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.ITEM_NAME).apply(GENERIC_KEY);
-        public static final ConfigLockedStringList SORT_CATEGORY_ORDER          = new ConfigLockedStringList("sortCategoryOrder",               SortingCategory.toImmutableList()).apply(GENERIC_KEY);
+        public static final ConfigLockedList SORT_CATEGORY_ORDER                = new ConfigLockedList("sortCategoryOrder",                     SortingCategory.INSTANCE).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,

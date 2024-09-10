@@ -2795,13 +2795,13 @@ public class InventoryUtils
                     // This isn't used here, but it is required to build the list of items, as if we are opening the Creative Inventory Screen.
                 }
 
-                SortingCategory cat1 = SortingCategory.fromItemStack(stack1);
-                SortingCategory cat2 = SortingCategory.fromItemStack(stack2);
+                SortingCategory.Entry cat1 = SortingCategory.fromItemStack(stack1);
+                SortingCategory.Entry cat2 = SortingCategory.fromItemStack(stack2);
 
                 if (cat1.getStringValue().equals(cat2.getStringValue()) == false)
                 {
-                    int index1 = SortingCategory.getConfigIndex(cat1);
-                    int index2 = SortingCategory.getConfigIndex(cat2);
+                    int index1 = Configs.Generic.SORT_CATEGORY_ORDER.getEntryIndex(cat1);
+                    int index2 = Configs.Generic.SORT_CATEGORY_ORDER.getEntryIndex(cat2);
 
                     //ItemScroller.logger.error("SORT - Category1[{}]: [{}] // Category2[{}]: [{}]", index1, cat1.getDisplayName(), index2, cat2.getDisplayName());
 
