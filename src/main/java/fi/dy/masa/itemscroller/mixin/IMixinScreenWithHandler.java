@@ -8,7 +8,8 @@ import net.minecraft.screen.slot.Slot;
 @Mixin(net.minecraft.client.gui.screen.ingame.HandledScreen.class)
 public interface IMixinScreenWithHandler
 {
-    @Invoker("getSlotAt")
+    // FIXME -- getSlotAt()
+    @Invoker("method_64240")
     Slot itemscroller_getSlotAtPositionInvoker(double x, double y);
 
     @Invoker("onMouseClick")

@@ -55,12 +55,19 @@ public class RecipePattern
         this.clearRecipe();
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
-    public <T extends RecipeInput> Recipe<T> lookupVanillaRecipe(World world) {
+    public <T extends RecipeInput> Recipe<T> lookupVanillaRecipe(World world)
+    {
         //Assume all recipes here are of type CraftingRecipe
         this.vanillaRecipe = null;
         var mc = MinecraftClient.getInstance();
         int recipeSize;
+
+        if (mc.world == null)
+        {
+            return null;
+        }
         if (recipe.length == 4)
         {
             recipeSize = 2;
