@@ -172,8 +172,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         }
         else if (key == Hotkeys.SORT_INVENTORY.getKeybind())
         {
-            InventoryUtils.sortInventory(gui);
-            return true;
+            if (Configs.Generic.SORT_INVENTORY_TOGGLE.getBooleanValue())
+            {
+                InventoryUtils.sortInventory(gui);
+                return true;
+            }
         }
 
         return false;
@@ -239,9 +242,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                     for (int i = 0; i < limit; ++i)
                     {
                         // todo
-//                        InventoryUtils.tryClearCursor(gui);
-//                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
-                        InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+                        //InventoryUtils.setInhibitCraftingOutputUpdate(true);
+                        //InventoryUtils.tryClearCursor(gui);
+                        //InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
 
                         RecipeInputInventory craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
                         if (!recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
@@ -274,8 +277,18 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         }
 
                         InventoryUtils.shiftClickSlot(gui, outputSlot.id);
+
+                        // This isn't required after 1.21, it only needs a single dropStack
+                        for (int k = 0; k < recipe.getResult().getMaxCount(); k++)
+                        {
+                            InventoryUtils.dropStack(gui, outputSlot.id);
+                        }
+
                         recipeBookClicks = true;
                     }
+
+                    InventoryUtils.tryClearCursor(gui);
+                    InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
                 }
                 else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
                 {

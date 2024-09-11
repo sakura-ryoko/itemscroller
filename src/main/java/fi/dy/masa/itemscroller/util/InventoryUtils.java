@@ -26,6 +26,7 @@ import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -77,8 +78,11 @@ public class InventoryUtils
     private static boolean inhibitCraftResultUpdate;
     private static Runnable selectedSlotUpdateTask;
     public static boolean assumeEmptyShulkerStacking = false;
+    private static List<String> topSortingPriorityList = Configs.Generic.SORT_TOP_PRIORITY_INVENTORY.getStrings();
+    private static List<String> bottomSortingPriorityList = Configs.Generic.SORT_BOTTOM_PRIORITY_INVENTORY.getStrings();
     public static boolean bufferInvUpdates = false;
     public static List<Packet<ClientPlayPacketListener>> invUpdatesBuffer = new ArrayList<>();
+    private static ItemGroup.DisplayContext displayContext;
 
     public static void setInhibitCraftingOutputUpdate(boolean inhibitUpdate)
     {
@@ -2739,6 +2743,16 @@ public class InventoryUtils
 
     private static int compareStacks(ItemStack stack1, ItemStack stack2)
     {
+        // Check if they have a custom priority
+        int priority1 = getCustomPriority(stack1);
+        int priority2 = getCustomPriority(stack2);
+
+        if (priority1 != -1 || priority2 != -1)
+        {
+            // Any of both has a priority, compare them using that
+            return Integer.compare(priority2, priority1);
+        }
+
         if (Configs.Generic.SORT_SHULKER_BOXES_AT_END.getBooleanValue())
         {
             if (isShulkerBox(stack1) && !isShulkerBox(stack2))
@@ -2766,15 +2780,126 @@ public class InventoryUtils
                 return Integer.compare(contents1.size(), contents2.size());
             }
         }
+        SortingMethod method = (SortingMethod) Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue();
+
+        if (method.equals(SortingMethod.CATEGORY_NAME) ||
+                method.equals(SortingMethod.CATEGORY_COUNT) ||
+                method.equals(SortingMethod.CATEGORY_RARITY) ||
+                method.equals(SortingMethod.CATEGORY_RAWID))
+        {
+            // Sort by Catagory
+            MinecraftClient mc = MinecraftClient.getInstance();
+
+            if (mc.world != null)
+            {
+                if (displayContext == null)
+                {
+                    displayContext = SortingCategory.INSTANCE.buildDisplayContext(mc);
+                    // This isn't used here, but it is required to build the list of items, as if we are opening the Creative Inventory Screen.
+                }
+
+                SortingCategory.Entry cat1 = SortingCategory.INSTANCE.fromItemStack(stack1);
+                SortingCategory.Entry cat2 = SortingCategory.INSTANCE.fromItemStack(stack2);
+
+                if (cat1.getStringValue().equals(cat2.getStringValue()) == false)
+                {
+                    int index1 = Configs.Generic.SORT_CATEGORY_ORDER.getEntryIndex(cat1);
+                    int index2 = Configs.Generic.SORT_CATEGORY_ORDER.getEntryIndex(cat2);
+
+                    //ItemScroller.logger.error("SORT - Category1[{}]: [{}] // Category2[{}]: [{}]", index1, cat1.getDisplayName(), index2, cat2.getDisplayName());
+
+                    if (index1 < 0)
+                    {
+                        return 1;
+                    }
+                    else if (index2 < 0)
+                    {
+                        return -1;
+                    }
+
+                    return Integer.compare(index1, index2);
+                }
+            }
+        }
+
         if (stack1.getItem() != stack2.getItem())
         {
-            return Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem()));
+            if (method.equals(SortingMethod.CATEGORY_NAME) || method.equals(SortingMethod.ITEM_NAME))
+            {
+                // Sort by Item Name
+                return stack1.getName().getString().compareTo(stack2.getName().getString()) >= 0 ? 1 : -1;
+            }
+            else if (method.equals(SortingMethod.CATEGORY_COUNT) || method.equals(SortingMethod.ITEM_COUNT))
+            {
+                // Sort by Item Count
+                int result = Integer.compare(-stack1.getCount(), -stack2.getCount());
+                return result == 0 ? Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem())) : result;
+            }
+            else if (method.equals(SortingMethod.CATEGORY_RARITY) || method.equals(SortingMethod.ITEM_RARITY))
+            {
+                // Sort by Item Rarity
+                int result = stack1.getRarity().compareTo(stack2.getRarity());
+                return result == 0 ? Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem())) : result;
+            }
+            else
+            {
+                // Sort by Item RawID
+                return Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem()));
+            }
         }
         if (!areStacksEqual(stack1, stack2))
         {
+            // Sort's Data Components by Hash Code
             return Integer.compare(stack1.getComponents().hashCode(), stack2.getComponents().hashCode());
         }
+
         return Integer.compare(-stack1.getCount(), -stack2.getCount());
+    }
+
+    private static int getCustomPriority(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return -1; // No priority for empty stacks
+        }
+
+        // Get item ID and name to check against custom priority lists
+        String itemID = Registries.ITEM.getId(stack.getItem()).toString();
+        String itemName = stack.getName().getString();
+
+        if (itemID.equals(itemName))
+        {
+            itemName = null;
+        }
+
+        // Top priority check
+        int idTopPriority = topSortingPriorityList.indexOf(itemID);
+        int nameTopPriority = itemName != null ? topSortingPriorityList.indexOf(itemName) : -1;
+
+        // Bottom priority check
+        int idBottomPriority = bottomSortingPriorityList.indexOf(itemID);
+        int nameBottomPriority = itemName != null ? bottomSortingPriorityList.indexOf(itemName) : -1;
+
+        // Sort at the top: Prefer name priority if it exists
+        if (nameTopPriority != -1)
+        {
+            return topSortingPriorityList.size() - nameTopPriority;
+        }
+        if (idTopPriority != -1)
+        {
+            return topSortingPriorityList.size() - idTopPriority;
+        }
+
+        // Sort at the bottom: Prefer name priority if it exists
+        if (nameBottomPriority != -1)
+        {
+            return -bottomSortingPriorityList.size() - nameBottomPriority - 2;
+        }
+        if (idBottomPriority != -1)
+        {
+            return -bottomSortingPriorityList.size() - idBottomPriority - 2;
+        }
+
+        // Default: no specific priority found
+        return -1;
     }
 
     public static boolean onPong(StatisticsS2CPacket packet)

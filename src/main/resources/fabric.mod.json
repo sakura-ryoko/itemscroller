@@ -34,6 +34,6 @@
 	"accessWidener": "itemscroller.accesswidener",
 	"depends": {
 		"minecraft": ">=1.21 <=1.21.1",
-		"malilib": ">=0.20.0"
+		"malilib": ">=0.20.3-sakura.1"
 	}
 }
