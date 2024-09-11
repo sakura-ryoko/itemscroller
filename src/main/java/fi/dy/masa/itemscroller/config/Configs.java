@@ -59,11 +59,11 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true).apply(GENERIC_KEY);
 
         public static final ConfigBoolean SORT_INVENTORY_TOGGLE                 = new ConfigBoolean("sortInventoryToggle",                     false).apply(GENERIC_KEY);
-        public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",                true).apply(GENERIC_KEY);
+        public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",                false).apply(GENERIC_KEY);
         public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                   true).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",              DEFAULT_TOP_SORTING).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",           DEFAULT_BOTTOM_SORTING).apply(GENERIC_KEY);
-        public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.ITEM_NAME).apply(GENERIC_KEY);
+        public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.CATEGORY_NAME).apply(GENERIC_KEY);
         public static final ConfigLockedList SORT_CATEGORY_ORDER                = new ConfigLockedList("sortCategoryOrder",                     SortingCategory.INSTANCE).apply(GENERIC_KEY);
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(

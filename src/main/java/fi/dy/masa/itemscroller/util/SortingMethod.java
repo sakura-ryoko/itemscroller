@@ -9,9 +9,11 @@ import fi.dy.masa.itemscroller.Reference;
 public enum SortingMethod implements IConfigOptionListEntry
 {
     CATEGORY_NAME       ("category_name",   "category_name"),
+    CATEGORY_COUNT      ("category_count",  "category_count"),
     CATEGORY_RARITY     ("category_rarity", "category_rarity"),
     CATEGORY_RAWID      ("category_rawid",  "category_rawid"),
     ITEM_NAME           ("item_name",       "item_name"),
+    ITEM_COUNT          ("item_count",      "item_count"),
     ITEM_RARITY         ("item_rarity",     "item_rarity"),
     ITEM_RAWID          ("item_rawid",      "item_rawid");
 
@@ -77,6 +79,6 @@ public enum SortingMethod implements IConfigOptionListEntry
             }
         }
 
-        return SortingMethod.ITEM_NAME;
+        return SortingMethod.CATEGORY_NAME;
     }
 }

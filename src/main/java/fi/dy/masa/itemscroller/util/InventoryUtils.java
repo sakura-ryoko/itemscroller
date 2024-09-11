@@ -2782,7 +2782,10 @@ public class InventoryUtils
         }
         SortingMethod method = (SortingMethod) Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue();
 
-        if (method.equals(SortingMethod.CATEGORY_NAME) || method.equals(SortingMethod.CATEGORY_RARITY) || method.equals(SortingMethod.CATEGORY_RAWID))
+        if (method.equals(SortingMethod.CATEGORY_NAME) ||
+            method.equals(SortingMethod.CATEGORY_COUNT) ||
+            method.equals(SortingMethod.CATEGORY_RARITY) ||
+            method.equals(SortingMethod.CATEGORY_RAWID))
         {
             // Sort by Catagory
             MinecraftClient mc = MinecraftClient.getInstance();
@@ -2791,12 +2794,12 @@ public class InventoryUtils
             {
                 if (displayContext == null)
                 {
-                    displayContext = SortingCategory.buildDisplayContext(mc.world.getEnabledFeatures(), mc.world.getRegistryManager());
+                    displayContext = SortingCategory.INSTANCE.buildDisplayContext(mc);
                     // This isn't used here, but it is required to build the list of items, as if we are opening the Creative Inventory Screen.
                 }
 
-                SortingCategory.Entry cat1 = SortingCategory.fromItemStack(stack1);
-                SortingCategory.Entry cat2 = SortingCategory.fromItemStack(stack2);
+                SortingCategory.Entry cat1 = SortingCategory.INSTANCE.fromItemStack(stack1);
+                SortingCategory.Entry cat2 = SortingCategory.INSTANCE.fromItemStack(stack2);
 
                 if (cat1.getStringValue().equals(cat2.getStringValue()) == false)
                 {
@@ -2823,17 +2826,24 @@ public class InventoryUtils
         {
             if (method.equals(SortingMethod.CATEGORY_NAME) || method.equals(SortingMethod.ITEM_NAME))
             {
-                // Sort by ItemName
+                // Sort by Item Name
                 return stack1.getName().getString().compareTo(stack2.getName().getString()) >= 0 ? 1 : -1;
+            }
+            else if (method.equals(SortingMethod.CATEGORY_COUNT) || method.equals(SortingMethod.ITEM_COUNT))
+            {
+                // Sort by Item Count
+                int result = Integer.compare(-stack1.getCount(), -stack2.getCount());
+                return result == 0 ? Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem())) : result;
             }
             else if (method.equals(SortingMethod.CATEGORY_RARITY) || method.equals(SortingMethod.ITEM_RARITY))
             {
-                // Sort by Rarity
-                return stack1.getRarity().compareTo(stack2.getRarity());
+                // Sort by Item Rarity
+                int result = stack1.getRarity().compareTo(stack2.getRarity());
+                return result == 0 ? Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem())) : result;
             }
             else
             {
-                // Sort by RawID
+                // Sort by Item RawID
                 return Integer.compare(Registries.ITEM.getRawId(stack1.getItem()), Registries.ITEM.getRawId(stack2.getItem()));
             }
         }
