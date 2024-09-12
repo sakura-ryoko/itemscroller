@@ -17,7 +17,9 @@ public class MixinItemStack
     private void dontCap(int maxCount, CallbackInfo ci)
     {
         // Client-side fx for empty shulker box stacking
-        if (MinecraftClient.getInstance().isOnThread() && Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
+        if (MinecraftClient.getInstance().isOnThread() &&
+            Configs.Generic.SORT_INVENTORY_TOGGLE.getBooleanValue() &&
+            Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
         {
             ci.cancel();
         }
@@ -27,7 +29,10 @@ public class MixinItemStack
     private void getMaxCount(CallbackInfoReturnable<Integer> cir)
     {
         // Client-side fx for empty shulker box stacking
-        if (MinecraftClient.getInstance().isOnThread() && Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue() && InventoryUtils.assumeEmptyShulkerStacking)
+        if (MinecraftClient.getInstance().isOnThread() &&
+            Configs.Generic.SORT_INVENTORY_TOGGLE.getBooleanValue() &&
+            Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue() &&
+            InventoryUtils.assumeEmptyShulkerStacking)
         {
             cir.setReturnValue(InventoryUtils.stackMaxSize((ItemStack) (Object) this, true));
         }
