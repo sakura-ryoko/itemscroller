@@ -61,6 +61,9 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean SORT_INVENTORY_TOGGLE                 = new ConfigBoolean("sortInventoryToggle",                     false).apply(GENERIC_KEY);
         public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",                false).apply(GENERIC_KEY);
         public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                   true).apply(GENERIC_KEY);
+        public static final ConfigBoolean SORT_SHULKER_BOXES_INVERTED           = new ConfigBoolean("sortShulkerBoxesInverted",                false).apply(GENERIC_KEY);
+        public static final ConfigBoolean SORT_BUNDLES_AT_END                   = new ConfigBoolean("sortBundlesAtEnd",                        true).apply(GENERIC_KEY);
+        public static final ConfigBoolean SORT_BUNDLES_INVERTED                 = new ConfigBoolean("sortBundlesInverted",                     false).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",              DEFAULT_TOP_SORTING).apply(GENERIC_KEY);
         public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",           DEFAULT_BOTTOM_SORTING).apply(GENERIC_KEY);
         public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.CATEGORY_NAME).apply(GENERIC_KEY);
@@ -91,6 +94,9 @@ public class Configs implements IConfigHandler
                 SORT_INVENTORY_TOGGLE,
                 SORT_ASSUME_EMPTY_BOX_STACKS,
                 SORT_SHULKER_BOXES_AT_END,
+                SORT_SHULKER_BOXES_INVERTED,
+                SORT_BUNDLES_AT_END,
+                SORT_BUNDLES_INVERTED,
                 SORT_TOP_PRIORITY_INVENTORY,
                 SORT_BOTTOM_PRIORITY_INVENTORY,
                 SORT_METHOD_DEFAULT,
