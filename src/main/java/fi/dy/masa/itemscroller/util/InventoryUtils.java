@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
 
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
+
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -141,8 +142,8 @@ public class InventoryUtils
             if (recipe != null)
             {
                 if ((recipe.isIgnoredInRecipeBook() ||
-                     world.getGameRules().getBoolean(GameRules.DO_LIMITED_CRAFTING) == false ||
-                     ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
+                    world.getGameRules().getBoolean(GameRules.DO_LIMITED_CRAFTING) == false ||
+                    ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
                     stack = recipe.craft(recipeInput, world.getRegistryManager());
@@ -265,7 +266,7 @@ public class InventoryUtils
         if ((Configs.Generic.REVERSE_SCROLL_DIRECTION_SINGLE.getBooleanValue() && nonSingleMove == false) ||
             (Configs.Generic.REVERSE_SCROLL_DIRECTION_STACKS.getBooleanValue() && nonSingleMove))
         {
-            moveToOtherInventory = ! moveToOtherInventory;
+            moveToOtherInventory = !moveToOtherInventory;
         }
 
         // Check that the slot is valid, (don't require items in case of the villager output slot or a crafting slot)
@@ -1962,13 +1963,14 @@ public class InventoryUtils
      * Return the slot numbers of slots that have items identical to stackReference.
      * If preferPartial is true, then stacks with a stackSize less that getMaxStackSize() are
      * at the beginning of the list (not ordered though) and full stacks are at the end, otherwise the reverse is true.
+     *
      * @param container
      * @param slotReference
-     * @param sameInventory if true, then the returned slots are from the same inventory, if false, then from a different inventory
+     * @param sameInventory          if true, then the returned slots are from the same inventory, if false, then from a different inventory
      * @param stackReference
      * @param preferPartial
      * @param treatHotbarAsDifferent
-     * @param reverse if true, returns the slots starting from the end of the inventory
+     * @param reverse                if true, returns the slots starting from the end of the inventory
      * @return
      */
     @SuppressWarnings("SameParameterValue")
@@ -2161,8 +2163,8 @@ public class InventoryUtils
             ItemStack stackNew = slots.get(i).getStack();
 
             if ((isStackEmpty(stackOrig) && isStackEmpty(stackNew) == false) ||
-               (isStackEmpty(stackOrig) == false && isStackEmpty(stackNew) == false &&
-               getStackSize(stackNew) == (getStackSize(stackOrig) + 1)))
+                (isStackEmpty(stackOrig) == false && isStackEmpty(stackNew) == false &&
+                getStackSize(stackNew) == (getStackSize(stackOrig) + 1)))
             {
                 return i;
             }
@@ -2307,6 +2309,7 @@ public class InventoryUtils
 
     /**
      * Try move items from slotFrom to slotTo
+     *
      * @return true if at least some items were moved
      */
     private static boolean clickSlotsToMoveItems(HandledScreen<? extends ScreenHandler> gui,
@@ -2533,8 +2536,8 @@ public class InventoryUtils
     }
 
     private static IntArrayList getVerticallyFurthestSuitableSlotsForStackInSlot(ScreenHandler container,
-                                                                                  Slot slotIn,
-                                                                                  boolean above)
+                                                                                 Slot slotIn,
+                                                                                 boolean above)
     {
         if (slotIn == null || slotIn.hasStack() == false)
         {
@@ -2625,11 +2628,19 @@ public class InventoryUtils
     {
         Pair<Integer, Integer> range = new IntIntMutablePair(Integer.MAX_VALUE, 0);
         Slot focusedSlot = AccessorUtils.getSlotUnderMouse(gui);
-        if (focusedSlot == null) {
+
+        if (focusedSlot == null || focusedSlot.hasStack() == false)
+        {
             return;
         }
+        //System.out.printf("sort - focusedSlot[%d]: %s\n", focusedSlot.id, focusedSlot.hasStack() ? focusedSlot.getStack().getName().getString() : "<EMPTY>");
         ScreenHandler container = gui.getScreenHandler();
+
         if (gui instanceof CreativeInventoryScreen creative && !creative.isInventoryTabSelected())
+        {
+            return;
+        }
+        if (gui instanceof InventoryScreen && (focusedSlot.id < 9 || focusedSlot.id > 44))
         {
             return;
         }
@@ -2638,6 +2649,8 @@ public class InventoryUtils
         for (int i = 0; i < container.slots.size(); i++)
         {
             Slot slot = container.slots.get(i);
+            //System.out.printf("sort - slot[%d]: %s\n", i, slot.hasStack() ? slot.getStack().getName().getString() : "<EMPTY>");
+
             if (slot == focusedSlot)
             {
                 focusedIndex = i;
@@ -2686,8 +2699,8 @@ public class InventoryUtils
             }
         }
 
-        //System.out.printf("Sorting [%d, %d)\n", range.first(), range.second());
-        //ItemScroller.printDebug("Sorting [{}, {}]", range.first(), range.second());
+        //System.out.printf("Sorting [%d, %d] (first, second)\n", range.first(), range.second());
+        //System.out.printf("Sorting [%d, %d] (left, right)\n", range.left(), range.right());
         tryClearCursor(gui);
         tryMergeItems(gui, range.left(), range.right() - 1);
 
@@ -2708,8 +2721,12 @@ public class InventoryUtils
      */
     private static void quickSort(HandledScreen<?> gui, int start, int end)
     {
-        if (start >= end) return;
+        if (start >= end)
+        {
+            return;
+        }
 
+        //System.out.printf("quickSort - start %d, end %d\n", start, end);
         ItemStack mid = gui.getScreenHandler().getSlot(end).getStack();
         int l = start;
         int r = end - 1;
@@ -2765,11 +2782,17 @@ public class InventoryUtils
             }
         }
         if (stack1.isEmpty() && stack2.isEmpty())
+        {
             return 0;
+        }
         else if (stack1.isEmpty())
+        {
             return 1;
+        }
         else if (stack2.isEmpty())
+        {
             return -1;
+        }
 
         if (isShulkerBox(stack1) && isShulkerBox(stack2))
         {
@@ -2856,8 +2879,10 @@ public class InventoryUtils
         return Integer.compare(-stack1.getCount(), -stack2.getCount());
     }
 
-    private static int getCustomPriority(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) {
+    private static int getCustomPriority(ItemStack stack)
+    {
+        if (stack == null || stack.isEmpty())
+        {
             return -1; // No priority for empty stacks
         }
 
@@ -3001,7 +3026,8 @@ public class InventoryUtils
             {
                 ItemStack stack = slot.getStack();
 
-                if (stack.getCount() >= stackMaxSize(stack, true)) {
+                if (stack.getCount() >= stackMaxSize(stack, true))
+                {
                     // ignore overstacking items.
                     continue;
                 }
@@ -3234,8 +3260,12 @@ public class InventoryUtils
     public static ItemStack copyStack(ItemStack stack, boolean empty)
     {
         if (empty)
+        {
             return stack.copyAndEmpty();
+        }
         else
+        {
             return stack.copy();
+        }
     }
 }
