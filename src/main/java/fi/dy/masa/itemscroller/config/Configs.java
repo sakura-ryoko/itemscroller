@@ -53,13 +53,16 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",      true, "itemscroller.config.generic.comment.villagerTradeUseGlobalFavorites").translatedName("itemscroller.config.generic.name.villagerTradeUseGlobalFavorites");
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true, "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition").translatedName("itemscroller.config.generic.name.villagerTradeListRememberScrollPosition");
 
-        public static final ConfigBoolean SORT_INVENTORY_TOGGLE                 = new ConfigBoolean("sortInventoryToggle",                     false, "itemscroller.config.generic.comment.sortInventoryToggle").translatedName("itemscroller.config.generic.name.sortInventoryToggle");
+        public static final ConfigBoolean SORT_INVENTORY_TOGGLE                 = new ConfigBoolean("sortInventoryToggle",                  false, "itemscroller.config.generic.comment.sortInventoryToggle").translatedName("itemscroller.config.generic.name.sortInventoryToggle");
         public static final ConfigBoolean SORT_ASSUME_EMPTY_BOX_STACKS          = new ConfigBoolean("sortAssumeEmptyBoxStacks",             true, "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks").translatedName("itemscroller.config.generic.name.sortAssumeEmptyBoxStacks");
         public static final ConfigBoolean SORT_SHULKER_BOXES_AT_END             = new ConfigBoolean("sortShulkerBoxesAtEnd",                true, "itemscroller.config.generic.comment.sortShulkerBoxesAtEnd").translatedName("itemscroller.config.generic.name.sortShulkerBoxesAtEnd");
-        public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",              DEFAULT_TOP_SORTING, "itemscroller.config.generic.comment.sortTopPriorityInventory").translatedName("itemscroller.config.generic.name.sortTopPriorityInventory");
-        public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",           DEFAULT_BOTTOM_SORTING, "itemscroller.config.generic.comment.sortBottomPriorityInventory").translatedName("itemscroller.config.generic.name.sortBottomPriorityInventory");
-        public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.CATEGORY_NAME, "itemscroller.config.generic.comment.sortMethodDefault").translatedName("itemscroller.config.generic.name.sortMethodDefault");
-        public static final ConfigLockedList SORT_CATEGORY_ORDER                = new ConfigLockedList("sortCategoryOrder",                     SortingCategory.INSTANCE, "itemscroller.config.generic.comment.sortCategoryOrder").translatedName("itemscroller.config.generic.name.sortCategoryOrder");
+        public static final ConfigBoolean SORT_SHULKER_BOXES_INVERTED           = new ConfigBoolean("sortShulkerBoxesInverted",             false, "itemscroller.config.generic.comment.sortShulkerBoxesInverted").translatedName("itemscroller.config.generic.name.sortShulkerBoxesInverted");
+        public static final ConfigBoolean SORT_BUNDLES_AT_END                   = new ConfigBoolean("sortBundlesAtEnd",                     true, "itemscroller.config.generic.comment.sortBundlesAtEnd").translatedName("itemscroller.config.generic.name.sortBundlesAtEnd");
+        public static final ConfigBoolean SORT_BUNDLES_INVERTED                 = new ConfigBoolean("sortBundlesInverted",                  false, "itemscroller.config.generic.comment.sortBundlesInverted").translatedName("itemscroller.config.generic.name.sortBundlesInverted");
+        public static final ConfigStringList SORT_TOP_PRIORITY_INVENTORY        = new ConfigStringList("sortTopPriorityInventory",           DEFAULT_TOP_SORTING, "itemscroller.config.generic.comment.sortTopPriorityInventory").translatedName("itemscroller.config.generic.name.sortTopPriorityInventory");
+        public static final ConfigStringList SORT_BOTTOM_PRIORITY_INVENTORY     = new ConfigStringList("sortBottomPriorityInventory",        DEFAULT_BOTTOM_SORTING, "itemscroller.config.generic.comment.sortBottomPriorityInventory").translatedName("itemscroller.config.generic.name.sortBottomPriorityInventory");
+        public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                  SortingMethod.CATEGORY_NAME, "itemscroller.config.generic.comment.sortMethodDefault").translatedName("itemscroller.config.generic.name.sortMethodDefault");
+        public static final ConfigLockedList SORT_CATEGORY_ORDER                = new ConfigLockedList("sortCategoryOrder",                  SortingCategory.INSTANCE, "itemscroller.config.generic.comment.sortCategoryOrder").translatedName("itemscroller.config.generic.name.sortCategoryOrder");
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
@@ -86,6 +89,9 @@ public class Configs implements IConfigHandler
                 SORT_INVENTORY_TOGGLE,
                 SORT_ASSUME_EMPTY_BOX_STACKS,
                 SORT_SHULKER_BOXES_AT_END,
+                SORT_SHULKER_BOXES_INVERTED,
+                SORT_BUNDLES_AT_END,
+                SORT_BUNDLES_INVERTED,
                 SORT_TOP_PRIORITY_INVENTORY,
                 SORT_BOTTOM_PRIORITY_INVENTORY,
                 SORT_METHOD_DEFAULT,

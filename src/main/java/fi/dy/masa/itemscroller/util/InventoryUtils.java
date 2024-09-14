@@ -9,25 +9,25 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
 
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
+import org.apache.commons.lang3.math.Fraction;
+
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.screen.ingame.MerchantScreen;
+import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.component.type.ContainerComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
@@ -44,6 +44,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
@@ -83,6 +84,9 @@ public class InventoryUtils
     public static boolean bufferInvUpdates = false;
     public static List<Packet<ClientPlayPacketListener>> invUpdatesBuffer = new ArrayList<>();
     private static ItemGroup.DisplayContext displayContext;
+
+    private static Pair<Integer, Integer> lastSwapTry = Pair.of(-1, -1);
+    private static List<Pair<Integer, Integer>> hotbarSwaps = new ArrayList<>();
 
     public static void setInhibitCraftingOutputUpdate(boolean inhibitUpdate)
     {
@@ -1709,6 +1713,7 @@ public class InventoryUtils
                         if (index >= 0)
                         {
                             Slot ingredientSlot = gui.getScreenHandler().getSlot(index);
+
                             if (ingredientSlot.inventory instanceof PlayerInventory && ingredientSlot.getIndex() < 9)
                             {
                                 // hotbar
@@ -2625,19 +2630,47 @@ public class InventoryUtils
     {
         Pair<Integer, Integer> range = new IntIntMutablePair(Integer.MAX_VALUE, 0);
         Slot focusedSlot = AccessorUtils.getSlotUnderMouse(gui);
-        if (focusedSlot == null) {
+        lastSwapTry = Pair.of(-1, -1);
+        hotbarSwaps.clear();
+
+        if (focusedSlot == null || focusedSlot.hasStack() == false)
+        {
             return;
         }
+        //System.out.printf("sort - focusedSlot[%d]: %s\n", focusedSlot.id, focusedSlot.hasStack() ? focusedSlot.getStack().getName().getString() : "<EMPTY>");
         ScreenHandler container = gui.getScreenHandler();
+        int limit = container.slots.size();
+
         if (gui instanceof CreativeInventoryScreen creative && !creative.isInventoryTabSelected())
         {
             return;
         }
+        if (gui instanceof InventoryScreen && (focusedSlot.id < 9 || focusedSlot.id > 44))
+        {
+            return;
+        }
+        if (gui instanceof ShulkerBoxScreen)
+        {
+            //System.out.printf("sort - ShulkerBoxScreen %s\n", true);
+
+            // Free Hotbar slots if sorting inside the Shulker Box
+            //      Might cause an endless loop if hotbar is full.
+            if (focusedSlot.id < 27)
+            {
+                if (tryFreeHotbarForShulkerSwaps(gui, container) == false)
+                {
+                    ItemScroller.logger.warn("sortInventory: Free Hotbar slots are required in order to complete a Shulker box sorting task.");
+                    return;
+                }
+            }
+        }
 
         int focusedIndex = -1;
-        for (int i = 0; i < container.slots.size(); i++)
+        for (int i = 0; i < limit; i++)
         {
             Slot slot = container.slots.get(i);
+
+            //System.out.printf("sort - slot[%d]: %s\n", i, slot.hasStack() ? slot.getStack().getName().getString() : "<EMPTY>");
             if (slot == focusedSlot)
             {
                 focusedIndex = i;
@@ -2686,8 +2719,8 @@ public class InventoryUtils
             }
         }
 
-        //System.out.printf("Sorting [%d, %d)\n", range.first(), range.second());
-        //ItemScroller.printDebug("Sorting [{}, {}]", range.first(), range.second());
+        //System.out.printf("Sorting [%d, %d] (first, second)\n", range.first(), range.second());
+        //System.out.printf("Sorting [%d, %d] (left, right)\n", range.left(), range.right());
         tryClearCursor(gui);
         tryMergeItems(gui, range.left(), range.right() - 1);
 
@@ -2701,6 +2734,82 @@ public class InventoryUtils
         {
             quickSort(gui, range.first(), range.second() - 1);
         }
+
+        if (hotbarSwaps.isEmpty() == false)
+        {
+            restoreHotbarForShulkerSwaps(gui, container);
+        }
+    }
+
+    /**
+     * Free Hotbar slots for sorting operation.  Restore to Original locations when done using restoreHotbarForShulkerSwaps()
+     *
+     * @param gui
+     * @param container
+     */
+    private static boolean tryFreeHotbarForShulkerSwaps(HandledScreen<?> gui, ScreenHandler container)
+    {
+        final int lastSlot = container.slots.size() - 1;
+        final int firstSlot = lastSlot - 9;
+        final int freeTarget = 2;
+        int emptySlot = -1;
+        int freeCount = 0;
+
+        //System.out.printf("tryFreeHotbarForShulkerSwaps first %d, last %d, target %d\n", firstSlot, lastSlot, freeTarget);
+
+        for (int i = lastSlot; i > firstSlot; i--)
+        {
+            Slot slot = container.slots.get(i);
+
+            if (slot.hasStack() == false && freeCount < freeTarget)
+            {
+                freeCount++;
+            }
+            else if (freeCount > freeTarget)
+            {
+                break;
+            }
+            else if (slot.hasStack())
+            {
+                emptySlot = fi.dy.masa.malilib.util.InventoryUtils.findEmptySlotInPlayerInventory(container, false, true);
+
+                if (emptySlot >= 0)
+                {
+                    //System.out.printf("tryFreeHotbarForShulkerSwaps SWAP [%d -> %d]\n", i, emptySlot);
+
+                    hotbarSwaps.add(Pair.of(i, emptySlot));
+                    swapSlots(gui, i, emptySlot);
+                    emptySlot = -1;
+                    freeCount++;
+                }
+            }
+        }
+
+        return freeCount > 0;
+    }
+
+    /**
+     * Restore Temporary Hotbar Swaps to their original locations.
+     *
+     * @param gui
+     * @param container
+     */
+    private static void restoreHotbarForShulkerSwaps(HandledScreen<?> gui, ScreenHandler container)
+    {
+        //System.out.printf("sort - restoring hotbar slots\n");
+
+        hotbarSwaps.reversed().forEach((pair) ->
+                    {
+                        swapSlots(gui, pair.right(), pair.left());
+                    });
+
+        // Seem that we need to swap the first entry a second time inverted, for it to be correct
+        if (hotbarSwaps.isEmpty() == false)
+        {
+            swapSlots(gui, hotbarSwaps.getFirst().left(), hotbarSwaps.getFirst().right());
+        }
+
+        hotbarSwaps.clear();
     }
 
     /**
@@ -2710,9 +2819,11 @@ public class InventoryUtils
     {
         if (start >= end) return;
 
+        //System.out.printf("quickSort - start %d, end %d\n", start, end);
         ItemStack mid = gui.getScreenHandler().getSlot(end).getStack();
         int l = start;
         int r = end - 1;
+
         while (l < r)
         {
             while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid) < 0)
@@ -2723,9 +2834,17 @@ public class InventoryUtils
             {
                 r--;
             }
-            if (l != r)
+
+            // This is ugly, but it stops infinite loops.
+            if (l != r && lastSwapTry.left() != l && lastSwapTry.right() != r)
             {
                 swapSlots(gui, l, r);
+                lastSwapTry = Pair.of(l, r);
+            }
+            else if (l != r)
+            {
+                ItemScroller.logger.warn("quickSort: Item swap failure. Duplicate pair of [{}, {}], cancelling sort task", l, r);
+                return;
             }
         }
         if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack()) >= 0)
@@ -2764,6 +2883,18 @@ public class InventoryUtils
                 return -1;
             }
         }
+        if (Configs.Generic.SORT_BUNDLES_AT_END.getBooleanValue())
+        {
+            if (isBundle(stack1) && !isBundle(stack2))
+            {
+                return 1;
+            }
+            if (!isBundle(stack1) && isBundle(stack2))
+            {
+                return -1;
+            }
+        }
+
         if (stack1.isEmpty() && stack2.isEmpty())
             return 0;
         else if (stack1.isEmpty())
@@ -2771,21 +2902,57 @@ public class InventoryUtils
         else if (stack2.isEmpty())
             return -1;
 
+        //System.out.printf("sort - compareStacks stack1 [%s], stack2 [%s]\n", stack1.toString(), stack2.toString());
+
         if (isShulkerBox(stack1) && isShulkerBox(stack2))
         {
             List<ItemStack> contents1 = stack1.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().toList();
             List<ItemStack> contents2 = stack2.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().toList();
+
             if (contents1.size() != contents2.size())
             {
-                return Integer.compare(contents1.size(), contents2.size());
+                if (Configs.Generic.SORT_SHULKER_BOXES_INVERTED.getBooleanValue())
+                {
+                    return Integer.compare(contents1.size(), contents2.size());
+                }
+
+                return Integer.compare(contents2.size(), contents1.size());
             }
         }
+        if (isBundle(stack1) && isBundle(stack2))
+        {
+            if (isEmptyBundle(stack1) && isEmptyBundle(stack2))
+            {
+                return 0;
+            }
+            else if (isEmptyBundle(stack1))
+            {
+                return 1;
+            }
+            else if (isEmptyBundle(stack2))
+            {
+                return -1;
+            }
+
+            BundleContentsComponent bundle1 = stack1.getOrDefault(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT);
+            BundleContentsComponent bundle2 = stack2.getOrDefault(DataComponentTypes.BUNDLE_CONTENTS, BundleContentsComponent.DEFAULT);
+            Fraction occupancy1 = bundle1.getOccupancy();
+            Fraction occupancy2 = bundle2.getOccupancy();
+
+            if (Configs.Generic.SORT_BUNDLES_INVERTED.getBooleanValue())
+            {
+                return occupancy1.compareTo(occupancy2);
+            }
+
+            return occupancy2.compareTo(occupancy1);
+        }
+
         SortingMethod method = (SortingMethod) Configs.Generic.SORT_METHOD_DEFAULT.getOptionListValue();
 
         if (method.equals(SortingMethod.CATEGORY_NAME) ||
-                method.equals(SortingMethod.CATEGORY_COUNT) ||
-                method.equals(SortingMethod.CATEGORY_RARITY) ||
-                method.equals(SortingMethod.CATEGORY_RAWID))
+            method.equals(SortingMethod.CATEGORY_COUNT) ||
+            method.equals(SortingMethod.CATEGORY_RARITY) ||
+            method.equals(SortingMethod.CATEGORY_RAWID))
         {
             // Sort by Catagory
             MinecraftClient mc = MinecraftClient.getInstance();
@@ -2921,6 +3088,16 @@ public class InventoryUtils
     private static boolean isEmptyShulkerBox(ItemStack stack)
     {
         return isShulkerBox(stack) && stack.getOrDefault(DataComponentTypes.CONTAINER, ContainerComponent.DEFAULT).streamNonEmpty().findAny().isEmpty();
+    }
+
+    private static boolean isBundle(ItemStack stack)
+    {
+        return stack.isOf(Items.BUNDLE) || stack.getComponents().contains(DataComponentTypes.BUNDLE_CONTENTS);
+    }
+
+    private static boolean isEmptyBundle(ItemStack stack)
+    {
+        return isBundle(stack) && fi.dy.masa.malilib.util.InventoryUtils.bundleCountItems(stack) < 1;
     }
 
     public static int stackMaxSize(ItemStack stack, boolean assumeShulkerStacking)
@@ -3167,6 +3344,8 @@ public class InventoryUtils
 
     public static void swapSlots(HandledScreen<? extends ScreenHandler> gui, int slotNum, int otherSlot)
     {
+        //System.out.printf("swapSlots: [%d -> %d]\n", slotNum, otherSlot);
+
         clickSlot(gui, slotNum, 8, SlotActionType.SWAP);
         clickSlot(gui, otherSlot, 8, SlotActionType.SWAP);
         clickSlot(gui, slotNum, 8, SlotActionType.SWAP);
