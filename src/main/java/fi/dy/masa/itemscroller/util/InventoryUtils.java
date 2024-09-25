@@ -142,11 +142,14 @@ public class InventoryUtils
                 recipeEntry = optional.orElse(null);
             }
 
+            // TODO -- See if this works (GameRules)
             if (recipe != null)
             {
+                GameRules rules = new GameRules(((ClientPlayerEntity) player).networkHandler.getEnabledFeatures());
+
                 if ((recipe.isIgnoredInRecipeBook() ||
-                     world.getGameRules().getBoolean(GameRules.DO_LIMITED_CRAFTING) == false ||
-                     ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
+                    rules.getBoolean(GameRules.DO_LIMITED_CRAFTING) == false ||
+                    ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
                     stack = recipe.craft(recipeInput, world.getRegistryManager());
