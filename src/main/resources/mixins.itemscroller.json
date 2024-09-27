@@ -10,7 +10,6 @@
     "IMixinRecipeBookWidget",
     "IMixinScreenWithHandler",
     "IMixinSlot",
-    "MixinAbstractInventoryScreen",
     "MixinAbstractCraftingRecipeBookWidget",
     "MixinClientPlayerInteractionManager",
     "MixinClientPlayNetworkHandler",
@@ -19,7 +18,8 @@
     "MixinMerchantScreen",
     "MixinMerchantScreenHandler",
     "MixinRecipeBookWidget",
-    "MixinScreen"
+    "MixinScreen",
+    "MixinStatusEffectsDisplay"
   ],
   "injectors": {
     "defaultRequire": 1
