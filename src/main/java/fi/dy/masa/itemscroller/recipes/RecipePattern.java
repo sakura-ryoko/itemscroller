@@ -55,6 +55,8 @@ public class RecipePattern
         this.clearRecipe();
     }
 
+    // FIXME
+    /*
     @SuppressWarnings("unchecked")
     @Nullable
     public <T extends RecipeInput> Recipe<T> lookupVanillaRecipe(World world)
@@ -91,6 +93,7 @@ public class RecipePattern
         }
         return null;
     }
+     */
 
     public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty)
     {
@@ -112,7 +115,8 @@ public class RecipePattern
                 }
 
                 this.result = slot.getStack().copy();
-                this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
+                // FIXME
+                //this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
             }
             else if (clearIfEmpty)
             {

@@ -16,7 +16,6 @@ public class ItemScroller implements ModInitializer
         InitializationHandler.getInstance().registerInitializationHandler(new InitHandler());
     }
 
-    /*
     public static void printDebug(String key, Object... args)
     {
         if (Configs.Generic.DEBUG_MESSAGES.getBooleanValue())
@@ -24,5 +23,4 @@ public class ItemScroller implements ModInitializer
             logger.info(key, args);
         }
     }
-     */
 }

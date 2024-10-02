@@ -225,6 +225,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             InventoryUtils.bufferInvUpdates = true;
             Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
 
+            // FIXME
+                /*
             if (outputSlot != null)
             {
                 if (Configs.Generic.RATE_LIMIT_CLICK_PACKETS.getBooleanValue())
@@ -356,6 +358,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                 packet.apply(mc.getNetworkHandler());
                 return true;
             });
+                 */
         }
     }
 

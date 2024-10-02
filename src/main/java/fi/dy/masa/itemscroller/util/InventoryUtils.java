@@ -93,6 +93,8 @@ public class InventoryUtils
         inhibitCraftResultUpdate = inhibitUpdate;
     }
 
+    // FIXME
+    /*
     public static void onSlotChangedCraftingGrid(PlayerEntity player,
                                                  RecipeInputInventory craftMatrix,
                                                  CraftingResultInventory inventoryCraftResult)
@@ -120,7 +122,10 @@ public class InventoryUtils
             updateCraftingOutputSlot(player, craftingInv, resultInv, true);
         }
     }
+     */
 
+    // FIXME
+    /*
     public static void updateCraftingOutputSlot(PlayerEntity player,
                                                 RecipeInputInventory craftMatrix,
                                                 CraftingResultInventory inventoryCraftResult,
@@ -165,6 +170,7 @@ public class InventoryUtils
             lastRecipe = recipe;
         }
     }
+     */
 
     public static String getStackString(ItemStack stack)
     {
@@ -1680,6 +1686,8 @@ public class InventoryUtils
         }
     }
 
+    // FIXME
+    /*
     public static void setCraftingGridContentsUsingSwaps(HandledScreen<? extends ScreenHandler> gui,
                                                          PlayerInventory inv,
                                                          RecipePattern recipe,
@@ -1752,6 +1760,7 @@ public class InventoryUtils
             }
         }
     }
+     */
 
     private static int putSingleItemIntoSlots(HandledScreen<? extends ScreenHandler> gui,
                                               IntArrayList targetSlots,

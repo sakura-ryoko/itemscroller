@@ -40,13 +40,13 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean CARPET_CTRL_Q_CRAFTING                = new ConfigBoolean("carpetCtrlQCraftingEnabledOnServer",      false).apply(GENERIC_KEY);
         public static final ConfigBoolean CLIENT_CRAFTING_FIX                   = new ConfigBoolean("clientCraftingFixOn1.12",                 true).apply(GENERIC_KEY);
         public static final ConfigBoolean CRAFTING_RENDER_RECIPE_ITEMS          = new ConfigBoolean("craftingRenderRecipeItems",               true).apply(GENERIC_KEY);
-        //public static final ConfigBoolean DEBUG_MESSAGES                        = new ConfigBoolean("debugMessages",                           false).apply(GENERIC_KEY);
+        public static final ConfigBoolean DEBUG_MESSAGES                        = new ConfigBoolean("debugMessages",                           false).apply(GENERIC_KEY);
         public static final ConfigBoolean MOD_MAIN_TOGGLE                       = new ConfigBoolean("modMainToggle",                           true).apply(GENERIC_KEY);
         public static final ConfigBoolean MASS_CRAFT_INHIBIT_MID_UPDATES        = new ConfigBoolean("massCraftInhibitMidUpdates",              true).apply(GENERIC_KEY);
         public static final ConfigInteger MASS_CRAFT_INTERVAL                   = new ConfigInteger("massCraftInterval",                       2, 1, 60).apply(GENERIC_KEY);
         public static final ConfigInteger MASS_CRAFT_ITERATIONS                 = new ConfigInteger("massCraftIterations",                     36, 1, 256).apply(GENERIC_KEY);
         public static final ConfigBoolean MASS_CRAFT_SWAPS                      = new ConfigBoolean("massCraftSwapsOnly",                      false).apply(GENERIC_KEY);
-        public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook",                  false).apply(GENERIC_KEY);
+        //public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook",                  false).apply(GENERIC_KEY);
         public static final ConfigInteger PACKET_RATE_LIMIT                     = new ConfigInteger("packetRateLimit",                         4, 1, 1024).apply(GENERIC_KEY);
         public static final ConfigBoolean SCROLL_CRAFT_STORE_RECIPES_TO_FILE    = new ConfigBoolean("craftingRecipesSaveToFile",               true).apply(GENERIC_KEY);
         public static final ConfigBoolean SCROLL_CRAFT_RECIPE_FILE_GLOBAL       = new ConfigBoolean("craftingRecipesSaveFileIsGlobal",         false).apply(GENERIC_KEY);
@@ -73,12 +73,12 @@ public class Configs implements IConfigHandler
                 CARPET_CTRL_Q_CRAFTING,
                 CLIENT_CRAFTING_FIX,
                 CRAFTING_RENDER_RECIPE_ITEMS,
-                //DEBUG_MESSAGES,
+                DEBUG_MESSAGES,
                 MASS_CRAFT_INHIBIT_MID_UPDATES,
                 MASS_CRAFT_INTERVAL,
                 MASS_CRAFT_ITERATIONS,
                 MASS_CRAFT_SWAPS,
-                MASS_CRAFT_RECIPE_BOOK,
+                //MASS_CRAFT_RECIPE_BOOK,
                 MOD_MAIN_TOGGLE,
                 PACKET_RATE_LIMIT,
                 RATE_LIMIT_CLICK_PACKETS,
