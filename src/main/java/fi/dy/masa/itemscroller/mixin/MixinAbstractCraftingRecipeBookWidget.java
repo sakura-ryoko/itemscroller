@@ -1,19 +1,16 @@
 package fi.dy.masa.itemscroller.mixin;
 
-import net.minecraft.class_10295;
-import net.minecraft.class_10302;
+import fi.dy.masa.itemscroller.util.InventoryUtils;
 import net.minecraft.client.gui.screen.recipebook.AbstractCraftingRecipeBookWidget;
 import net.minecraft.client.gui.screen.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection;
-import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeFinder;
-import net.minecraft.recipe.book.RecipeBook;
+import net.minecraft.recipe.display.RecipeDisplay;
+import net.minecraft.recipe.display.SlotDisplay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 @Mixin(AbstractCraftingRecipeBookWidget.class)
 public class MixinAbstractCraftingRecipeBookWidget
@@ -34,7 +31,7 @@ public class MixinAbstractCraftingRecipeBookWidget
             at = @At("HEAD"),
             cancellable = true
     )
-    private void itemscroller_nShowGhostRecipe(GhostRecipe ghostRecipe, class_10295 arg, class_10302.class_10308 arg2, CallbackInfo ci)
+    private void itemscroller_nShowGhostRecipe(GhostRecipe ghostRecipe, RecipeDisplay recipeDisplay, SlotDisplay.Context context, CallbackInfo ci)
     {
         /*
         if (((IMixinRecipeBookWidget) this).itemscroller_getGhostSlots() == recipe) {

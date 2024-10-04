@@ -2,6 +2,8 @@ package fi.dy.masa.itemscroller.event;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import fi.dy.masa.itemscroller.data.DataManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.DynamicRegistryManager;
@@ -22,18 +24,24 @@ public class WorldLoadListener implements IWorldLoadListener
             this.writeData(worldBefore.getRegistryManager());
             VillagerDataStorage.getInstance().writeToDisk();
         }
+        if (worldAfter != null)
+        {
+            DataManager.getInstance().onWorldLoadPre();
+        }
     }
 
     @Override
     public void onWorldLoadPost(@Nullable ClientWorld worldBefore, @Nullable ClientWorld worldAfter, MinecraftClient mc)
     {
         RecipeStorage.getInstance().reset(worldAfter == null);
+        DataManager.getInstance().reset(worldAfter == null);
 
         // Logging in to a world, load the data
         if (worldBefore == null && worldAfter != null)
         {
             this.readStoredData(worldAfter.getRegistryManager());
             VillagerDataStorage.getInstance().readFromDisk();
+            DataManager.getInstance().onWorldJoin();
         }
 
         // Logging out
