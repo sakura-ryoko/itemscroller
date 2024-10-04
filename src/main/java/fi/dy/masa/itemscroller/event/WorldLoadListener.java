@@ -16,6 +16,12 @@ import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 public class WorldLoadListener implements IWorldLoadListener
 {
     @Override
+    public void onWorldLoadImmutable(DynamicRegistryManager.Immutable immutable)
+    {
+        DataManager.getInstance().setWorldRegistryManager(immutable);
+    }
+
+    @Override
     public void onWorldLoadPre(@Nullable ClientWorld worldBefore, @Nullable ClientWorld worldAfter, MinecraftClient mc)
     {
         // Quitting to main menu, save the settings before the integrated server gets shut down
