@@ -1,24 +1,30 @@
 package fi.dy.masa.itemscroller.data;
 
-import fi.dy.masa.itemscroller.ItemScroller;
-import fi.dy.masa.itemscroller.network.ServuxScrollerHandler;
-import fi.dy.masa.itemscroller.network.ServuxScrollerPacket;
-import fi.dy.masa.malilib.network.ClientPlayHandler;
-import fi.dy.masa.malilib.network.IPluginClientPlayHandler;
-import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
+import java.util.Collection;
+import javax.annotation.Nullable;
+
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.NbtByteArray;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.PreparedRecipes;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import fi.dy.masa.malilib.network.ClientPlayHandler;
+import fi.dy.masa.malilib.network.IPluginClientPlayHandler;
+import fi.dy.masa.malilib.util.Constants;
+import fi.dy.masa.itemscroller.ItemScroller;
+import fi.dy.masa.itemscroller.Reference;
+import fi.dy.masa.itemscroller.network.ServuxScrollerHandler;
+import fi.dy.masa.itemscroller.network.ServuxScrollerPacket;
 
 public class DataManager
 {
@@ -32,7 +38,8 @@ public class DataManager
     private String servuxVersion;
     private DynamicRegistryManager registryManager;
 
-    private PreparedRecipes preparedRecipes = PreparedRecipes.EMPTY;
+    private PreparedRecipes preparedRecipes;
+    private int recipeCount;
 
     public DataManager()
     {
@@ -40,6 +47,8 @@ public class DataManager
         this.hasInValidServux = false;
         this.servuxVersion = "";
         this.registryManager = DynamicRegistryManager.EMPTY;
+        this.preparedRecipes = PreparedRecipes.EMPTY;
+        this.recipeCount = 0;
     }
 
     public static DataManager getInstance() { return INSTANCE; }
@@ -64,8 +73,10 @@ public class DataManager
 
             this.servuxServer = false;
             this.hasInValidServux = false;
+            this.servuxVersion = "";
             this.registryManager = DynamicRegistryManager.EMPTY;
             this.preparedRecipes = PreparedRecipes.EMPTY;
+            this.recipeCount = 0;
         }
     }
 
@@ -156,9 +167,33 @@ public class DataManager
         return !this.preparedRecipes.equals(PreparedRecipes.EMPTY);
     }
 
-    public PreparedRecipes getPreparedRecipes()
+    public @Nullable PreparedRecipes getPreparedRecipes()
     {
-        return this.preparedRecipes;
+        if (!mc.isIntegratedServerRunning())
+        {
+            return this.preparedRecipes;
+        }
+
+        return null;
+    }
+
+    public int getRecipeCount()
+    {
+        return this.recipeCount;
+    }
+
+    public @Nullable RecipeManager getRecipeManager()
+    {
+        if (mc.isIntegratedServerRunning() && mc.getServer() != null)
+        {
+            return mc.getServer().getRecipeManager();
+        }
+        else if (mc.world != null)
+        {
+            return mc.world.getRecipeManager();
+        }
+
+        return null;
     }
 
     public boolean receiveMetadata(NbtCompound data)
@@ -174,10 +209,23 @@ public class DataManager
 
             this.setServuxVersion(data.getString("servux"));
             this.setIsServuxServer();
+            this.requestRecipeManager();
+
             return true;
         }
 
         return false;
+    }
+
+    public void requestRecipeManager()
+    {
+        if (!mc.isIntegratedServerRunning() && this.hasServuxServer())
+        {
+            NbtCompound nbt = new NbtCompound();
+            nbt.putString("version", Reference.MOD_STRING);
+
+            HANDLER.encodeClientData(ServuxScrollerPacket.RecipeManagerRequest(nbt));
+        }
     }
 
     public void receiveRecipeManager(NbtCompound data)
@@ -185,18 +233,30 @@ public class DataManager
         if (!mc.isIntegratedServerRunning() && data.contains("RecipeManager"))
         {
             Collection<RecipeEntry<?>> recipes = new ArrayList<>();
-            NbtList list = data.getList("RecipeManager", NbtElement.BYTE_ARRAY_TYPE);
-            ItemScroller.printDebug("DataManager#receiveRecipeManager(): from Servux");
+            NbtList list = data.getList("RecipeManager", Constants.NBT.TAG_COMPOUND);
+            int count = 0;
+
+            this.preparedRecipes = PreparedRecipes.EMPTY;
+            this.recipeCount = 0;
 
             for (int i = 0; i < list.size(); i++)
             {
+                NbtCompound item = list.getCompound(i);
+                Identifier idReg = Identifier.tryParse(item.getString("id_reg"));
+                Identifier idValue = Identifier.tryParse(item.getString("id_value"));
+
+                if (idReg == null || idValue == null)
+                {
+                    continue;
+                }
+
                 try
                 {
-                    NbtByteArray byteArray = (NbtByteArray) list.get(i);
-                    RegistryByteBuf buf = new RegistryByteBuf(Unpooled.buffer(), this.getWorldRegistryManager());
-                    buf.writeByteArray(byteArray.getByteArray());
-                    RecipeEntry<?> entry = RecipeEntry.PACKET_CODEC.decode(buf);
+                    RegistryKey<Recipe<?>> key = RegistryKey.of(RegistryKey.ofRegistry(idReg), idValue);
+                    Pair<Recipe<?>, NbtElement> pair = Recipe.CODEC.decode(this.getWorldRegistryManager().getOps(NbtOps.INSTANCE), item.getCompound("recipe")).getOrThrow();
+                    RecipeEntry<?> entry = new RecipeEntry<>(key, pair.getFirst());
                     recipes.add(entry);
+                    count++;
                 }
                 catch (Exception e)
                 {
@@ -207,7 +267,8 @@ public class DataManager
             if (!recipes.isEmpty())
             {
                 this.preparedRecipes = PreparedRecipes.of(recipes);
-                ItemScroller.printDebug("DataManager#receiveRecipeManager(): finished loading Recipe Manager -> Prepared Recipes from Servux");
+                this.recipeCount = count;
+                ItemScroller.printDebug("DataManager#receiveRecipeManager(): finished loading Recipe Manager: Read [{}] Recipes from Servux", count);
             }
             else
             {

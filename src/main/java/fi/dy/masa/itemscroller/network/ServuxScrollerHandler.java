@@ -86,7 +86,7 @@ public abstract class ServuxScrollerHandler<T extends CustomPayload> implements 
                     this.readingSessionKey = Random.create(Util.getMeasuringTimeMs()).nextLong();
                 }
 
-                ItemScroller.printDebug("ServuxHudHandler#decodeClientData(): received Entity Data Packet Slice of size {} (in bytes) // reading session key [{}]", packet.getTotalSize(), this.readingSessionKey);
+                ItemScroller.printDebug("ServuxScrollerHandler#decodeClientData(): received Recipe Data Packet Slice of size {} (in bytes) // reading session key [{}]", packet.getTotalSize(), this.readingSessionKey);
                 PacketByteBuf fullPacket = PacketSplitter.receive(this, this.readingSessionKey, packet.getBuffer());
 
                 if (fullPacket != null)
@@ -98,11 +98,11 @@ public abstract class ServuxScrollerHandler<T extends CustomPayload> implements 
                     }
                     catch (Exception e)
                     {
-                        ItemScroller.logger.error("ServuxHudHandler#decodeClientData(): Entity Data: error reading fullBuffer [{}]", e.getLocalizedMessage());
+                        ItemScroller.logger.error("ServuxScrollerHandler#decodeClientData(): Recipe Data: error reading fullBuffer [{}]", e.getLocalizedMessage());
                     }
                 }
             }
-            default -> ItemScroller.logger.warn("ServuxHudHandler#decodeClientData(): received unhandled packetType {} of size {} bytes.", packet.getPacketType(), packet.getTotalSize());
+            default -> ItemScroller.logger.warn("ServuxScrollerHandler#decodeClientData(): received unhandled packetType {} of size {} bytes.", packet.getPacketType(), packet.getTotalSize());
         }
     }
 

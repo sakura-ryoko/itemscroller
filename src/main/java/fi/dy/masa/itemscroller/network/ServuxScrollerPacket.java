@@ -170,7 +170,7 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#toPacket: error writing buffer data to packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#toPacket: error writing buffer data to packet: [{}]", e.getLocalizedMessage());
                 }
             }
             case PACKET_C2S_METADATA_REQUEST, PACKET_S2C_METADATA, PACKET_C2S_MASS_CRAFT_REQUEST, PACKET_S2C_MASS_CRAFT_RESPONSE, PACKET_C2S_RECIPE_MANAGER_REQUEST ->
@@ -182,10 +182,10 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#toPacket: error writing NBT to packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#toPacket: error writing NBT to packet: [{}]", e.getLocalizedMessage());
                 }
             }
-            default -> ItemScroller.logger.error("ServuxHudPacket#toPacket: Unknown packet type!");
+            default -> ItemScroller.logger.error("ServuxScrollerPacket#toPacket: Unknown packet type!");
         }
     }
 
@@ -198,7 +198,7 @@ public class ServuxScrollerPacket implements IClientPayloadData
         if (type == null)
         {
             // Invalid Type
-            ItemScroller.logger.warn("ServuxHudPacket#fromPacket: invalid packet type received");
+            ItemScroller.logger.warn("ServuxScrollerPacket#fromPacket: invalid packet type received");
             return null;
         }
         switch (type)
@@ -212,7 +212,7 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#fromPacket: error reading S2C Bulk Response Buffer from packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#fromPacket: error reading S2C Bulk Response Buffer from packet: [{}]", e.getLocalizedMessage());
                 }
             }
             case PACKET_C2S_METADATA_REQUEST ->
@@ -224,7 +224,7 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#fromPacket: error reading Metadata Request from packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#fromPacket: error reading Metadata Request from packet: [{}]", e.getLocalizedMessage());
                 }
             }
             case PACKET_S2C_METADATA ->
@@ -236,7 +236,7 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#fromPacket: error reading Metadata Response from packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#fromPacket: error reading Metadata Response from packet: [{}]", e.getLocalizedMessage());
                 }
             }
             case PACKET_C2S_MASS_CRAFT_REQUEST ->
@@ -248,7 +248,7 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#fromPacket: error reading Mass Craft Request from packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#fromPacket: error reading Mass Craft Request from packet: [{}]", e.getLocalizedMessage());
                 }
             }
             case PACKET_S2C_MASS_CRAFT_RESPONSE ->
@@ -260,7 +260,7 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#fromPacket: error reading Mass Craft Response from packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#fromPacket: error reading Mass Craft Response from packet: [{}]", e.getLocalizedMessage());
                 }
             }
             case PACKET_C2S_RECIPE_MANAGER_REQUEST ->
@@ -272,10 +272,10 @@ public class ServuxScrollerPacket implements IClientPayloadData
                 }
                 catch (Exception e)
                 {
-                    ItemScroller.logger.error("ServuxHudPacket#fromPacket: error reading Recipe Request from packet: [{}]", e.getLocalizedMessage());
+                    ItemScroller.logger.error("ServuxScrollerPacket#fromPacket: error reading Recipe Request from packet: [{}]", e.getLocalizedMessage());
                 }
             }
-            default -> ItemScroller.logger.error("ServuxHudPacket#fromPacket: Unknown packet type!");
+            default -> ItemScroller.logger.error("ServuxScrollerPacket#fromPacket: Unknown packet type!");
         }
 
         return null;
