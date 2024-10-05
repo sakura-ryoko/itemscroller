@@ -23,6 +23,7 @@ import fi.dy.masa.malilib.network.IPluginClientPlayHandler;
 import fi.dy.masa.malilib.util.Constants;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
+import fi.dy.masa.itemscroller.mixin.IMixinServerRecipeManager;
 import fi.dy.masa.itemscroller.network.ServuxScrollerHandler;
 import fi.dy.masa.itemscroller.network.ServuxScrollerPacket;
 
@@ -169,7 +170,11 @@ public class DataManager
 
     public @Nullable PreparedRecipes getPreparedRecipes()
     {
-        if (!mc.isIntegratedServerRunning())
+        if (mc.isIntegratedServerRunning() && this.getRecipeManager() != null)
+        {
+            return ((IMixinServerRecipeManager) this.getRecipeManager()).itemscroller_getPreparedRecipes();
+        }
+        else if (this.hasRecipes())
         {
             return this.preparedRecipes;
         }
