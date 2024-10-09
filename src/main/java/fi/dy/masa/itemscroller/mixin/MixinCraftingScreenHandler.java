@@ -27,14 +27,12 @@ public abstract class MixinCraftingScreenHandler
     private void onSlotChangedCraftingGrid(net.minecraft.inventory.Inventory inventory, CallbackInfo ci)
     {
         // FIXME
-        /*
         if (MinecraftClient.getInstance().isOnThread())
         {
             InventoryUtils.onSlotChangedCraftingGrid(this.player,
                     ((IMixinAbstractCraftingScreenHandler) this).itemscroller_getCraftingInventory(),
                     ((IMixinAbstractCraftingScreenHandler) this).itemscroller_getCraftingResultInventory());
         }
-         */
     }
 
     // FIXME
@@ -43,11 +41,9 @@ public abstract class MixinCraftingScreenHandler
             ScreenHandler handler, ServerWorld serverWorld, PlayerEntity player, RecipeInputInventory craftingInventory, CraftingResultInventory resultInventory, RecipeEntry<CraftingRecipe> recipe, CallbackInfo ci)
     {
         // FIXME
-        /*
         if (MinecraftClient.getInstance().isOnThread())
         {
             InventoryUtils.onSlotChangedCraftingGrid(player, craftingInventory, resultInventory);
         }
-         */
     }
 }

@@ -43,6 +43,7 @@ import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.village.TradeOffer;
@@ -53,6 +54,7 @@ import net.minecraft.world.World;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
+import fi.dy.masa.itemscroller.data.DataManager;
 import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
@@ -94,7 +96,6 @@ public class InventoryUtils
     }
 
     // FIXME
-    /*
     public static void onSlotChangedCraftingGrid(PlayerEntity player,
                                                  RecipeInputInventory craftMatrix,
                                                  CraftingResultInventory inventoryCraftResult)
@@ -122,15 +123,14 @@ public class InventoryUtils
             updateCraftingOutputSlot(player, craftingInv, resultInv, true);
         }
     }
-     */
 
     // FIXME
-    /*
     public static void updateCraftingOutputSlot(PlayerEntity player,
                                                 RecipeInputInventory craftMatrix,
                                                 CraftingResultInventory inventoryCraftResult,
                                                 boolean setEmptyStack)
     {
+        ServerWorld serverWorld = DataManager.getInstance().getServerWorld();
         World world = player.getEntityWorld();
 
         if ((world instanceof ClientWorld) && player instanceof ClientPlayerEntity)
@@ -140,11 +140,19 @@ public class InventoryUtils
             RecipeEntry<?> recipeEntry = null;
             CraftingRecipeInput recipeInput = craftMatrix.createRecipeInput();
 
-            if (recipe == null || recipe.matches(recipeInput, world) == false)
+            if ((recipe == null || recipe.matches(recipeInput, world) == false) &&
+                (serverWorld != null))
             {
-                Optional<RecipeEntry<CraftingRecipe>> optional = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, recipeInput, world);
-                recipe = optional.map(RecipeEntry::value).orElse(null);
-                recipeEntry = optional.orElse(null);
+                Optional<RecipeEntry<CraftingRecipe>> opt = serverWorld.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, recipeInput, serverWorld);
+                recipe = opt.map(RecipeEntry::value).orElse(null);
+                recipeEntry = opt.orElse(null);
+            }
+            else if ((recipe == null || recipe.matches(recipeInput, world) == false) &&
+                    (DataManager.getInstance().getPreparedRecipes() != null))
+            {
+                Optional<RecipeEntry<CraftingRecipe>> opt = DataManager.getInstance().getPreparedRecipes().find(RecipeType.CRAFTING, recipeInput, world).findFirst();
+                recipe = opt.map(RecipeEntry::value).orElse(null);
+                recipeEntry = opt.orElse(null);
             }
 
             // TODO -- See if this works (GameRules)
@@ -153,8 +161,9 @@ public class InventoryUtils
                 GameRules rules = new GameRules(((ClientPlayerEntity) player).networkHandler.getEnabledFeatures());
 
                 if ((recipe.isIgnoredInRecipeBook() ||
-                    rules.getBoolean(GameRules.DO_LIMITED_CRAFTING) == false ||
-                    ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
+                    rules.getBoolean(GameRules.DO_LIMITED_CRAFTING) == false))
+                    // FIXME
+                    //|| ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
                     stack = recipe.craft(recipeInput, world.getRegistryManager());
@@ -170,7 +179,6 @@ public class InventoryUtils
             lastRecipe = recipe;
         }
     }
-     */
 
     public static String getStackString(ItemStack stack)
     {
@@ -1687,7 +1695,6 @@ public class InventoryUtils
     }
 
     // FIXME
-    /*
     public static void setCraftingGridContentsUsingSwaps(HandledScreen<? extends ScreenHandler> gui,
                                                          PlayerInventory inv,
                                                          RecipePattern recipe,
@@ -1760,7 +1767,6 @@ public class InventoryUtils
             }
         }
     }
-     */
 
     private static int putSingleItemIntoSlots(HandledScreen<? extends ScreenHandler> gui,
                                               IntArrayList targetSlots,

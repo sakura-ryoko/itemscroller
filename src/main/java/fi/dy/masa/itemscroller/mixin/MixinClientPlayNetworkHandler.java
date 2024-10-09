@@ -36,8 +36,7 @@ public class MixinClientPlayNetworkHandler
                     value = "INVOKE",
                     target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
                     shift = At.Shift.AFTER
-            ),
-            cancellable = true
+            )
     )
     private void onCraftFailedResponse(CraftFailedResponseS2CPacket packet, CallbackInfo ci)
     {

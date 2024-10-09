@@ -16,7 +16,9 @@ import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 
 import fi.dy.masa.malilib.network.ClientPlayHandler;
 import fi.dy.masa.malilib.network.IPluginClientPlayHandler;
@@ -133,6 +135,22 @@ public class DataManager
     }
 
     public boolean hasServuxServer() { return this.servuxServer; }
+
+    public boolean hasIntegratedServer()
+    {
+        return mc.isIntegratedServerRunning();
+    }
+
+    public @Nullable ServerWorld getServerWorld()
+    {
+        if (this.hasIntegratedServer() &&
+            mc.getServer() != null && mc.world != null)
+        {
+            return mc.getServer().getWorld(mc.world.getRegistryKey());
+        }
+
+        return null;
+    }
 
     /**
      * Store's the world registry manager for Dynamic Lookup for various data
