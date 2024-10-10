@@ -1,15 +1,14 @@
 package fi.dy.masa.itemscroller;
 
-import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.event.InputHandler;
-import fi.dy.masa.itemscroller.event.KeybindCallbacks;
-import fi.dy.masa.itemscroller.event.WorldLoadListener;
-import fi.dy.masa.itemscroller.data.DataManager;
 import fi.dy.masa.malilib.config.ConfigManager;
 import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.event.TickHandler;
 import fi.dy.masa.malilib.event.WorldLoadHandler;
 import fi.dy.masa.malilib.interfaces.IInitializationHandler;
+import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.event.InputHandler;
+import fi.dy.masa.itemscroller.event.KeybindCallbacks;
+import fi.dy.masa.itemscroller.event.WorldLoadListener;
 
 public class InitHandler implements IInitializationHandler
 {
@@ -17,7 +16,6 @@ public class InitHandler implements IInitializationHandler
     public void registerModHandlers()
     {
         ConfigManager.getInstance().registerConfigHandler(Reference.MOD_ID, new Configs());
-        DataManager.getInstance().onGameInit();
 
         InputHandler handler = new InputHandler();
         InputEventHandler.getKeybindManager().registerKeybindProvider(handler);

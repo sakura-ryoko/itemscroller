@@ -46,7 +46,7 @@ public class Configs implements IConfigHandler
         public static final ConfigInteger MASS_CRAFT_INTERVAL                   = new ConfigInteger("massCraftInterval",                       2, 1, 60).apply(GENERIC_KEY);
         public static final ConfigInteger MASS_CRAFT_ITERATIONS                 = new ConfigInteger("massCraftIterations",                     36, 1, 256).apply(GENERIC_KEY);
         public static final ConfigBoolean MASS_CRAFT_SWAPS                      = new ConfigBoolean("massCraftSwapsOnly",                      false).apply(GENERIC_KEY);
-        //public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook",                  false).apply(GENERIC_KEY);
+        public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook",                  true).apply(GENERIC_KEY);
         public static final ConfigInteger PACKET_RATE_LIMIT                     = new ConfigInteger("packetRateLimit",                         4, 1, 1024).apply(GENERIC_KEY);
         public static final ConfigBoolean SCROLL_CRAFT_STORE_RECIPES_TO_FILE    = new ConfigBoolean("craftingRecipesSaveToFile",               true).apply(GENERIC_KEY);
         public static final ConfigBoolean SCROLL_CRAFT_RECIPE_FILE_GLOBAL       = new ConfigBoolean("craftingRecipesSaveFileIsGlobal",         false).apply(GENERIC_KEY);
@@ -78,7 +78,7 @@ public class Configs implements IConfigHandler
                 MASS_CRAFT_INTERVAL,
                 MASS_CRAFT_ITERATIONS,
                 MASS_CRAFT_SWAPS,
-                //MASS_CRAFT_RECIPE_BOOK,
+                MASS_CRAFT_RECIPE_BOOK,
                 MOD_MAIN_TOGGLE,
                 PACKET_RATE_LIMIT,
                 RATE_LIMIT_CLICK_PACKETS,

@@ -1,33 +1,44 @@
 package fi.dy.masa.itemscroller.recipes;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
+import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.*;
+import net.minecraft.recipe.display.SlotDisplayContexts;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.recipe.input.RecipeInput;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.context.ContextParameterMap;
+import net.minecraft.world.World;
+
+import fi.dy.masa.itemscroller.mixin.IMixinClientRecipeBook;
+import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookScreen;
+import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookWidget;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.util.Constants;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
-import net.minecraft.world.World;
 
 public class RecipePattern
 {
     private ItemStack result = InventoryUtils.EMPTY_STACK;
     private ItemStack[] recipe = new ItemStack[9];
     private RecipeEntry<?> vanillaRecipe;
+    private NetworkRecipeId networkRecipeId;
+    private RecipeDisplayEntry displayEntry;
 
     public RecipePattern()
     {
@@ -47,6 +58,8 @@ public class RecipePattern
         Arrays.fill(this.recipe, InventoryUtils.EMPTY_STACK);
         this.result = InventoryUtils.EMPTY_STACK;
         this.vanillaRecipe = null;
+        this.networkRecipeId = null;
+        this.displayEntry = null;
     }
 
     public void ensureRecipeSizeAndClearRecipe(int size)
@@ -55,15 +68,13 @@ public class RecipePattern
         this.clearRecipe();
     }
 
-    // FIXME
-    /*
     @SuppressWarnings("unchecked")
     @Nullable
     public <T extends RecipeInput> Recipe<T> lookupVanillaRecipe(World world)
     {
         //Assume all recipes here are of type CraftingRecipe
         this.vanillaRecipe = null;
-        var mc = MinecraftClient.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
         int recipeSize;
 
         if (mc.world == null)
@@ -83,17 +94,193 @@ public class RecipePattern
             return null;
         }
 
-        for (RecipeEntry<CraftingRecipe> match : mc.world.getRecipeManager().getAllMatches(RecipeType.CRAFTING, CraftingRecipeInput.create(recipeSize, recipeSize, Arrays.asList(recipe)), world))
+        ServerWorld serverWorld = mc.getServer() != null ? mc.getServer().getWorld(mc.world.getRegistryKey()) : null;
+
+        if (mc.isIntegratedServerRunning() && serverWorld != null)
         {
-            if (InventoryUtils.areStacksEqual(result, match.value().getResult(world.getRegistryManager())))
+            CraftingRecipeInput input = CraftingRecipeInput.create(recipeSize, recipeSize, Arrays.asList(recipe));
+            Optional<RecipeEntry<CraftingRecipe>> opt = serverWorld.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, serverWorld);
+
+            if (opt.isPresent())
             {
-                this.vanillaRecipe = match;
-                return (Recipe<T>) match.value();
+                RecipeEntry<CraftingRecipe> recipeEntry = opt.get();
+                Recipe<CraftingRecipeInput> match = opt.get().value();
+                ItemStack result = match.craft(input, serverWorld.getRegistryManager());
+
+                if (result != null && !result.isEmpty())
+                {
+                    this.vanillaRecipe = recipeEntry;
+                    this.storeIdFromClientRecipeBook(mc);
+                    return (Recipe<T>) match;
+                }
             }
         }
+        else
+        {
+            this.storeIdFromClientRecipeBook(mc);
+        }
+
         return null;
     }
-     */
+
+    public void storeIdFromClientRecipeBook(MinecraftClient mc)
+    {
+        Pair<NetworkRecipeId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
+
+        if (pair == null || pair.getLeft() == null || pair.getRight() == null)
+        {
+            return;
+        }
+
+        this.networkRecipeId = pair.getLeft();
+        this.displayEntry = pair.getRight();
+    }
+
+    public void storeNetworkRecipeId(NetworkRecipeId id)
+    {
+        this.networkRecipeId = id;
+    }
+
+    public void storeRecipeDisplayEntry(RecipeDisplayEntry entry)
+    {
+        this.displayEntry = entry;
+    }
+
+    public @Nullable NetworkRecipeId getNetworkRecipeId()
+    {
+        return this.networkRecipeId;
+    }
+
+    public @Nullable RecipeDisplayEntry getRecipeDisplayEntry()
+    {
+        return this.displayEntry;
+    }
+
+    public Pair<NetworkRecipeId, RecipeDisplayEntry> matchClientRecipeBook(MinecraftClient mc)
+    {
+        AtomicReference<Pair<NetworkRecipeId, RecipeDisplayEntry>> pair = new AtomicReference<>();
+
+        if (mc.player == null || mc.world == null)
+        {
+            return null;
+        }
+
+        ClientRecipeBook recipeBook = mc.player.getRecipeBook();
+        ContextParameterMap ctx = SlotDisplayContexts.createParameters(mc.world);
+        Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
+        List<ItemStack> recipeStacks = this.combineStacks(Arrays.stream(this.getRecipeItems()).toList());
+
+        recipeMap.forEach((id, entry) ->
+        {
+            List<ItemStack> stacks = entry.getStacks(ctx);
+
+            if (recipeStacks.equals(stacks))
+            {
+                pair.set(Pair.of(id, entry));
+            }
+        });
+
+        return pair.get();
+    }
+
+    private List<ItemStack> combineStacks(List<ItemStack> stacks)
+    {
+        List<ItemStack> list = new ArrayList<>();
+        ItemStack previous = ItemStack.EMPTY;
+        ItemStack entry = ItemStack.EMPTY;
+
+        for (int i = 0; i < stacks.size(); i++)
+        {
+            entry = stacks.get(i);
+
+            if (!previous.isEmpty() && ItemStack.areItemsAndComponentsEqual(previous, entry))
+            {
+                int prevCount = previous.getCount();
+                int maxCount = previous.getMaxCount();
+                int entryCount = entry.getCount();
+
+                if ((prevCount + entryCount) <= maxCount)
+                {
+                    previous.setCount(prevCount + entryCount);
+                    entry = ItemStack.EMPTY;
+                }
+                else
+                {
+                    previous.setCount(maxCount);
+                    entry.setCount((prevCount + entryCount) - maxCount);
+                    list.add(previous.copy());
+                    previous = entry.copy();
+                    entry = ItemStack.EMPTY;
+                }
+            }
+            else
+            {
+                if (!previous.isEmpty())
+                {
+                    list.add(previous.copy());
+                }
+
+                previous = entry.copy();
+                entry = ItemStack.EMPTY;
+            }
+        }
+
+        if (!previous.isEmpty())
+        {
+            list.add(previous.copy());
+        }
+        if (!entry.isEmpty())
+        {
+            list.add(entry.copy());
+        }
+
+        return list;
+    }
+
+    public boolean verifyClientRecipeBook(MinecraftClient mc, @Nullable NetworkRecipeId id)
+    {
+        if (id != null)
+        {
+            if (id.equals(this.getNetworkRecipeId()))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        Pair<NetworkRecipeId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
+
+        if (pair == null || pair.getLeft() == null || pair.getRight() == null)
+        {
+            return false;
+        }
+
+        if (pair.getLeft() == this.getNetworkRecipeId())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean matchClientRecipeBookEntry(RecipeDisplayEntry entry, MinecraftClient mc)
+    {
+        if (mc.world == null)
+        {
+            return false;
+        }
+
+        List<ItemStack> recipeStacks = this.combineStacks(Arrays.stream(this.getRecipeItems()).toList());
+        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
+
+        if (recipeStacks.equals(stacks))
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty)
     {
@@ -115,12 +302,40 @@ public class RecipePattern
                 }
 
                 this.result = slot.getStack().copy();
-                // FIXME
-                //this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
+                this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
+                this.storeSelectedRecipeIdFromGui(gui);
             }
             else if (clearIfEmpty)
             {
                 this.clearRecipe();
+            }
+        }
+    }
+
+    public void storeSelectedRecipeIdFromGui(HandledScreen<? extends ScreenHandler> gui)
+    {
+        MinecraftClient mc = MinecraftClient.getInstance();
+
+        if (gui instanceof RecipeBookScreen rbs)
+        {
+            RecipeBookWidget<?> widget = ((IMixinRecipeBookScreen) rbs).itemscroller_getRecipeBookWidget();
+
+            if (widget != null)
+            {
+                NetworkRecipeId id = ((IMixinRecipeBookWidget) widget).itemscroller_getSelectedRecipe();
+
+                if (id != null)
+                {
+                    ClientRecipeBook recipeBook = mc.player.getRecipeBook();
+                    Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
+
+                    this.storeNetworkRecipeId(id);
+
+                    if (recipeMap.containsKey(id))
+                    {
+                        this.storeRecipeDisplayEntry(recipeMap.get(id));
+                    }
+                }
             }
         }
     }
@@ -139,6 +354,8 @@ public class RecipePattern
 
         this.result = InventoryUtils.isStackEmpty(other.getResult()) == false ? other.getResult().copy() : InventoryUtils.EMPTY_STACK;
         this.vanillaRecipe = other.vanillaRecipe;
+        this.networkRecipeId = other.networkRecipeId;
+        this.displayEntry = other.displayEntry;
     }
 
     public void readFromNBT(@Nonnull NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
@@ -231,7 +448,7 @@ public class RecipePattern
     @Nullable
     public RecipeEntry<?> getVanillaRecipeEntry()
     {
-        return vanillaRecipe;
+        return this.vanillaRecipe;
     }
 
     @SuppressWarnings("unchecked")
@@ -242,6 +459,12 @@ public class RecipePattern
         {
             return null;
         }
-        return (Recipe<T>) vanillaRecipe.value();
+
+        if (this.vanillaRecipe != null)
+        {
+            return (Recipe<T>) this.vanillaRecipe.value();
+        }
+
+        return null;
     }
 }

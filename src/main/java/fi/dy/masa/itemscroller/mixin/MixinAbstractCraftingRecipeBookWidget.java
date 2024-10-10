@@ -2,13 +2,12 @@ package fi.dy.masa.itemscroller.mixin;
 
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
-import net.minecraft.class_10352;
 import net.minecraft.client.gui.screen.recipebook.AbstractCraftingRecipeBookWidget;
 import net.minecraft.client.gui.screen.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection;
 import net.minecraft.recipe.RecipeFinder;
 import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
+import net.minecraft.util.context.ContextParameterMap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,15 +25,13 @@ public class MixinAbstractCraftingRecipeBookWidget
         }
     }
 
-
-    // FIXME -- Annoying code to deal with
     // Seems to be (intended) bug from Mojang
     @Inject(
             method = "showGhostRecipe",
             at = @At("HEAD"),
             cancellable = true
     )
-    private void itemscroller_onShowGhostRecipe(GhostRecipe ghostRecipe, RecipeDisplay recipeDisplay, class_10352 context, CallbackInfo ci)
+    private void itemscroller_onShowGhostRecipe(GhostRecipe ghostRecipe, RecipeDisplay display, ContextParameterMap context, CallbackInfo ci)
     {
         if (((IMixinRecipeBookWidget) this).itemscroller_getGhostSlots() == ghostRecipe)
         {

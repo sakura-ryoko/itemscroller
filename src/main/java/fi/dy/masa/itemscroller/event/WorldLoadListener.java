@@ -3,10 +3,10 @@ package fi.dy.masa.itemscroller.event;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import fi.dy.masa.itemscroller.data.DataManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.DynamicRegistryManager;
+
 import fi.dy.masa.malilib.interfaces.IWorldLoadListener;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
@@ -16,12 +16,6 @@ import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 public class WorldLoadListener implements IWorldLoadListener
 {
     @Override
-    public void onWorldLoadImmutable(DynamicRegistryManager.Immutable immutable)
-    {
-        DataManager.getInstance().setWorldRegistryManager(immutable);
-    }
-
-    @Override
     public void onWorldLoadPre(@Nullable ClientWorld worldBefore, @Nullable ClientWorld worldAfter, MinecraftClient mc)
     {
         // Quitting to main menu, save the settings before the integrated server gets shut down
@@ -30,24 +24,18 @@ public class WorldLoadListener implements IWorldLoadListener
             this.writeData(worldBefore.getRegistryManager());
             VillagerDataStorage.getInstance().writeToDisk();
         }
-        if (worldAfter != null)
-        {
-            DataManager.getInstance().onWorldLoadPre();
-        }
     }
 
     @Override
     public void onWorldLoadPost(@Nullable ClientWorld worldBefore, @Nullable ClientWorld worldAfter, MinecraftClient mc)
     {
         RecipeStorage.getInstance().reset(worldAfter == null);
-        DataManager.getInstance().reset(worldAfter == null);
 
         // Logging in to a world, load the data
         if (worldBefore == null && worldAfter != null)
         {
             this.readStoredData(worldAfter.getRegistryManager());
             VillagerDataStorage.getInstance().readFromDisk();
-            DataManager.getInstance().onWorldJoin();
         }
 
         // Logging out

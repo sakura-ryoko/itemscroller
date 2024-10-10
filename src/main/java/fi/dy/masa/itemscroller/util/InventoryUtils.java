@@ -1,13 +1,11 @@
 package fi.dy.masa.itemscroller.util;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.*;
-
+import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
-
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import org.apache.commons.lang3.math.Fraction;
 
@@ -17,8 +15,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.component.type.ContainerComponent;
@@ -27,7 +23,10 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.*;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
@@ -45,16 +44,15 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
+import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
-import fi.dy.masa.itemscroller.data.DataManager;
 import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
@@ -62,7 +60,6 @@ import fi.dy.masa.itemscroller.recipes.RecipePattern;
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 import fi.dy.masa.itemscroller.villager.VillagerUtils;
-import fi.dy.masa.malilib.util.GuiUtils;
 
 public class InventoryUtils
 {
@@ -95,7 +92,6 @@ public class InventoryUtils
         inhibitCraftResultUpdate = inhibitUpdate;
     }
 
-    // FIXME
     public static void onSlotChangedCraftingGrid(PlayerEntity player,
                                                  RecipeInputInventory craftMatrix,
                                                  CraftingResultInventory inventoryCraftResult)
@@ -124,13 +120,13 @@ public class InventoryUtils
         }
     }
 
-    // FIXME
     public static void updateCraftingOutputSlot(PlayerEntity player,
                                                 RecipeInputInventory craftMatrix,
                                                 CraftingResultInventory inventoryCraftResult,
                                                 boolean setEmptyStack)
     {
-        ServerWorld serverWorld = DataManager.getInstance().getServerWorld();
+        MinecraftClient mc = MinecraftClient.getInstance();
+        ServerWorld serverWorld = mc.getServer() != null ? mc.getServer().getWorld(mc.world.getRegistryKey()) : null;
         World world = player.getEntityWorld();
 
         if ((world instanceof ClientWorld) && player instanceof ClientPlayerEntity)
@@ -147,23 +143,13 @@ public class InventoryUtils
                 recipe = opt.map(RecipeEntry::value).orElse(null);
                 recipeEntry = opt.orElse(null);
             }
-            else if ((recipe == null || recipe.matches(recipeInput, world) == false) &&
-                    (DataManager.getInstance().getPreparedRecipes() != null))
-            {
-                Optional<RecipeEntry<CraftingRecipe>> opt = DataManager.getInstance().getPreparedRecipes().find(RecipeType.CRAFTING, recipeInput, world).findFirst();
-                recipe = opt.map(RecipeEntry::value).orElse(null);
-                recipeEntry = opt.orElse(null);
-            }
 
-            // TODO -- See if this works (GameRules)
             if (recipe != null)
             {
                 GameRules rules = new GameRules(((ClientPlayerEntity) player).networkHandler.getEnabledFeatures());
 
                 if ((recipe.isIgnoredInRecipeBook() ||
                     rules.getBoolean(GameRules.DO_LIMITED_CRAFTING) == false))
-                    // FIXME
-                    //|| ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
                     stack = recipe.craft(recipeInput, world.getRegistryManager());
@@ -173,7 +159,6 @@ public class InventoryUtils
                 {
                     inventoryCraftResult.setStack(0, stack);
                 }
-
             }
 
             lastRecipe = recipe;
@@ -1694,7 +1679,6 @@ public class InventoryUtils
         }
     }
 
-    // FIXME
     public static void setCraftingGridContentsUsingSwaps(HandledScreen<? extends ScreenHandler> gui,
                                                          PlayerInventory inv,
                                                          RecipePattern recipe,

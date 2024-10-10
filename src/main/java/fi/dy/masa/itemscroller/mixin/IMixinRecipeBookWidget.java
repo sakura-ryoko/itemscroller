@@ -11,4 +11,20 @@ public interface IMixinRecipeBookWidget
 {
     @Accessor("ghostRecipe")
     GhostRecipe itemscroller_getGhostSlots();
+
+    /*
+    @Accessor("recipesArea")
+    RecipeBookResults itemscroller_getRecipeArea();
+
+    @Accessor("selectedRecipeResults")
+    RecipeResultCollection itemscroller_getSelectedRecipeResults();
+     */
+
+    @Accessor("selectedRecipe")
+    NetworkRecipeId itemscroller_getSelectedRecipe();
+
+    /*
+    @Invoker("select")
+    boolean itemscroller_select(RecipeResultCollection results, NetworkRecipeId recipeId);
+     */
 }
