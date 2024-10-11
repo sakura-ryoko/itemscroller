@@ -25,6 +25,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.context.ContextParameterMap;
 import net.minecraft.world.World;
 
+import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.mixin.IMixinClientRecipeBook;
 import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookScreen;
 import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookWidget;
@@ -132,8 +133,8 @@ public class RecipePattern
             return;
         }
 
-        this.networkRecipeId = pair.getLeft();
-        this.displayEntry = pair.getRight();
+        this.storeNetworkRecipeId(pair.getLeft());
+        this.storeRecipeDisplayEntry(pair.getRight());
     }
 
     public void storeNetworkRecipeId(NetworkRecipeId id)
@@ -168,13 +169,14 @@ public class RecipePattern
         ClientRecipeBook recipeBook = mc.player.getRecipeBook();
         ContextParameterMap ctx = SlotDisplayContexts.createParameters(mc.world);
         Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
-        List<ItemStack> recipeStacks = this.combineStacks(Arrays.stream(this.getRecipeItems()).toList());
+        List<ItemStack> recipeStacks = this.combineStacks(Arrays.stream(this.getRecipeItems()).toList(), 3);
 
         recipeMap.forEach((id, entry) ->
         {
             List<ItemStack> stacks = entry.getStacks(ctx);
 
-            if (recipeStacks.equals(stacks))
+            // Combine Stacks so that they can equal
+            if (this.compareRecipeStacks(recipeStacks, this.combineStacks(stacks, 3)))
             {
                 pair.set(Pair.of(id, entry));
             }
@@ -183,7 +185,26 @@ public class RecipePattern
         return pair.get();
     }
 
-    private List<ItemStack> combineStacks(List<ItemStack> stacks)
+    private List<ItemStack> combineStacks(List<ItemStack> stacks, int iterations)
+    {
+        if (iterations > 3 || iterations < 1)
+        {
+            iterations = 3;
+        }
+
+        List<ItemStack> list = new ArrayList<>(stacks);
+        int i = 0;
+
+        while (i < iterations)
+        {
+            list = this.combineStacksEach(list);
+            i++;
+        }
+
+        return list;
+    }
+
+    private List<ItemStack> combineStacksEach(List<ItemStack> stacks)
     {
         List<ItemStack> list = new ArrayList<>();
         ItemStack previous = ItemStack.EMPTY;
@@ -237,6 +258,31 @@ public class RecipePattern
         return list;
     }
 
+    private boolean compareRecipeStacks(List<ItemStack> left, List<ItemStack> right)
+    {
+        if (left.size() != right.size())
+        {
+            return false;
+        }
+
+        for (int i = 0; i < left.size(); i++)
+        {
+            ItemStack l = left.get(i);
+            ItemStack r = right.get(i);
+
+            if (ItemStack.areItemsEqual(l, r) == false)
+            {
+                return false;
+            }
+            else if (l.getCount() != r.getCount())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public boolean verifyClientRecipeBook(MinecraftClient mc, @Nullable NetworkRecipeId id)
     {
         if (id != null)
@@ -271,10 +317,11 @@ public class RecipePattern
             return false;
         }
 
-        List<ItemStack> recipeStacks = this.combineStacks(Arrays.stream(this.getRecipeItems()).toList());
-        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
+        // Compact the stacks so that they equal
+        List<ItemStack> recipeStacks = this.combineStacks(Arrays.stream(this.getRecipeItems()).toList(), 3);
+        List<ItemStack> stacks = this.combineStacks(entry.getStacks(SlotDisplayContexts.createParameters(mc.world)), 3);
 
-        if (recipeStacks.equals(stacks))
+        if (this.compareRecipeStacks(recipeStacks, stacks))
         {
             return true;
         }
@@ -335,6 +382,9 @@ public class RecipePattern
                     {
                         this.storeRecipeDisplayEntry(recipeMap.get(id));
                     }
+
+                    // Clear crafting grid
+                    InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
                 }
             }
         }

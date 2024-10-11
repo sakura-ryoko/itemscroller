@@ -2632,6 +2632,7 @@ public class InventoryUtils
     {
         Pair<Integer, Integer> range = new IntIntMutablePair(Integer.MAX_VALUE, 0);
         Slot focusedSlot = AccessorUtils.getSlotUnderMouse(gui);
+        boolean shulkerBoxFix;
         lastSwapTry = Pair.of(-1, -1);
         hotbarSwaps.clear();
 
@@ -2665,6 +2666,12 @@ public class InventoryUtils
                     return;
                 }
             }
+
+            shulkerBoxFix = true;
+        }
+        else
+        {
+            shulkerBoxFix = false;
         }
 
         int focusedIndex = -1;
@@ -2730,11 +2737,11 @@ public class InventoryUtils
         {
             ClientStatusC2SPacket packet = new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS);
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(packet);
-            selectedSlotUpdateTask = () -> quickSort(gui, range.first(), range.second() - 1);
+            selectedSlotUpdateTask = () -> quickSort(gui, range.first(), range.second() - 1, shulkerBoxFix);
         }
         else
         {
-            quickSort(gui, range.first(), range.second() - 1);
+            quickSort(gui, range.first(), range.second() - 1, shulkerBoxFix);
         }
 
         if (hotbarSwaps.isEmpty() == false)
@@ -2817,7 +2824,7 @@ public class InventoryUtils
     /**
      * sort inventory
      */
-    private static void quickSort(HandledScreen<?> gui, int start, int end)
+    private static void quickSort(HandledScreen<?> gui, int start, int end, boolean shulkerBoxFix)
     {
         if (start >= end) return;
 
@@ -2828,11 +2835,11 @@ public class InventoryUtils
 
         while (l < r)
         {
-            while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid) < 0)
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid, shulkerBoxFix) < 0)
             {
                 l++;
             }
-            while (l < r && compareStacks(gui.getScreenHandler().getSlot(r).getStack(), mid) >= 0)
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(r).getStack(), mid, shulkerBoxFix) >= 0)
             {
                 r--;
             }
@@ -2849,7 +2856,7 @@ public class InventoryUtils
                 return;
             }
         }
-        if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack()) >= 0)
+        if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack(), shulkerBoxFix) >= 0)
         {
             swapSlots(gui, l, end);
         }
@@ -2858,11 +2865,11 @@ public class InventoryUtils
             l++;
         }
 
-        quickSort(gui, start, l - 1);
-        quickSort(gui, l + 1, end);
+        quickSort(gui, start, l - 1, shulkerBoxFix);
+        quickSort(gui, l + 1, end, shulkerBoxFix);
     }
 
-    private static int compareStacks(ItemStack stack1, ItemStack stack2)
+    private static int compareStacks(ItemStack stack1, ItemStack stack2, boolean shulkerBoxFix)
     {
         // Check if they have a custom priority
         int priority1 = getCustomPriority(stack1);
@@ -2872,6 +2879,14 @@ public class InventoryUtils
         {
             // Any of both has a priority, compare them using that
             return Integer.compare(priority2, priority1);
+        }
+
+        // Don't sort shulker boxes if 'fix' is enabled; such as if we are in the ShulkerBox Screen,
+        // since we can't insert shulkers into a Shulker Box.
+        if (shulkerBoxFix &&
+            (isShulkerBox(stack1) || isShulkerBox(stack2)))
+        {
+            return 0;
         }
 
         if (Configs.Generic.SORT_SHULKER_BOXES_AT_END.getBooleanValue())
