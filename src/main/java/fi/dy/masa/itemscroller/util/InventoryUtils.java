@@ -2665,9 +2665,14 @@ public class InventoryUtils
                     ItemScroller.logger.warn("sortInventory: Free Hotbar slots are required in order to complete a Shulker box sorting task.");
                     return;
                 }
-            }
 
-            shulkerBoxFix = true;
+                // Don't sort Shulkers into a shulker.
+                shulkerBoxFix = true;
+            }
+            else
+            {
+                shulkerBoxFix = false;
+            }
         }
         else
         {

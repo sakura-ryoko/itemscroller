@@ -33,8 +33,6 @@ public class Configs implements IConfigHandler
     private static final ImmutableList<String> DEFAULT_BOTTOM_SORTING = ImmutableList.of();
 
     private static final String GENERIC_KEY = Reference.MOD_ID+".config.generic";
-    private static final String TOGGLES_KEY = Reference.MOD_ID+".config.toggles";
-
     public static class Generic
     {
         public static final ConfigBoolean CARPET_CTRL_Q_CRAFTING                = new ConfigBoolean("carpetCtrlQCraftingEnabledOnServer",      false).apply(GENERIC_KEY);
@@ -104,6 +102,7 @@ public class Configs implements IConfigHandler
         );
     }
 
+    private static final String TOGGLES_KEY = Reference.MOD_ID+".config.toggles";
     public static class Toggles
     {
         public static final ConfigBoolean CRAFTING_FEATURES         = new ConfigBoolean("enableCraftingFeatures",           true).apply(TOGGLES_KEY);
