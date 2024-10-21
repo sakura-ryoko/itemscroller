@@ -2660,11 +2660,13 @@ public class InventoryUtils
             //      Might cause an endless loop if hotbar is full.
             if (focusedSlot.id < 27)
             {
+            /*
                 if (tryFreeHotbarForShulkerSwaps(gui, container) == false)
                 {
                     ItemScroller.logger.warn("sortInventory: Free Hotbar slots are required in order to complete a Shulker box sorting task.");
                     return;
                 }
+             */
 
                 // Don't sort Shulkers into a shulker.
                 shulkerBoxFix = true;
