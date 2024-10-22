@@ -19,7 +19,7 @@ import fi.dy.masa.itemscroller.Reference;
 public class SortingCategory implements IConfigLockedListType
 {
     public static final SortingCategory INSTANCE = new SortingCategory();
-    public ImmutableList<SortingCategory.Entry> VALUES = ImmutableList.copyOf(SortingCategory.Entry.values());
+    public ImmutableList<Entry> VALUES = ImmutableList.copyOf(Entry.values());
 
     @Nullable
     public ItemGroup.DisplayContext buildDisplayContext(MinecraftClient mc)
