@@ -1,13 +1,11 @@
 package fi.dy.masa.itemscroller.util;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.*;
-
+import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparator;
-
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import org.apache.commons.lang3.math.Fraction;
 
@@ -27,7 +25,10 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.*;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
@@ -43,6 +44,7 @@ import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.village.TradeOffer;
@@ -50,6 +52,7 @@ import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
+import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
@@ -60,7 +63,6 @@ import fi.dy.masa.itemscroller.recipes.RecipePattern;
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 import fi.dy.masa.itemscroller.villager.VillagerUtils;
-import fi.dy.masa.malilib.util.GuiUtils;
 
 public class InventoryUtils
 {
@@ -126,6 +128,8 @@ public class InventoryUtils
                                                 CraftingResultInventory inventoryCraftResult,
                                                 boolean setEmptyStack)
     {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        ServerWorld serverWorld = mc.getServer() != null ? mc.getServer().getWorld(mc.world.getRegistryKey()) : null;
         World world = player.getEntityWorld();
 
         if ((world instanceof ClientWorld) && player instanceof ClientPlayerEntity)
@@ -135,18 +139,20 @@ public class InventoryUtils
             RecipeEntry<?> recipeEntry = null;
             CraftingRecipeInput recipeInput = craftMatrix.createRecipeInput();
 
-            if (recipe == null || recipe.matches(recipeInput, world) == false)
+            if ((recipe == null || recipe.matches(recipeInput, world) == false) &&
+                (serverWorld != null))
             {
-                Optional<RecipeEntry<CraftingRecipe>> optional = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, recipeInput, world);
-                recipe = optional.map(RecipeEntry::value).orElse(null);
-                recipeEntry = optional.orElse(null);
+                Optional<RecipeEntry<CraftingRecipe>> opt = serverWorld.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, recipeInput, serverWorld);
+                recipe = opt.map(RecipeEntry::value).orElse(null);
+                recipeEntry = opt.orElse(null);
             }
 
             if (recipe != null)
             {
+                GameRules rules = new GameRules(((ClientPlayerEntity) player).networkHandler.getEnabledFeatures());
+
                 if ((recipe.isIgnoredInRecipeBook() ||
-                     world.getGameRules().getBoolean(GameRules.DO_LIMITED_CRAFTING) == false ||
-                     ((ClientPlayerEntity) player).getRecipeBook().contains(recipeEntry)))
+                    rules.getBoolean(GameRules.DO_LIMITED_CRAFTING) == false))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
                     stack = recipe.craft(recipeInput, world.getRegistryManager());
@@ -156,7 +162,6 @@ public class InventoryUtils
                 {
                     inventoryCraftResult.setStack(0, stack);
                 }
-
             }
 
             lastRecipe = recipe;
@@ -2630,6 +2635,7 @@ public class InventoryUtils
     {
         Pair<Integer, Integer> range = new IntIntMutablePair(Integer.MAX_VALUE, 0);
         Slot focusedSlot = AccessorUtils.getSlotUnderMouse(gui);
+        boolean shulkerBoxFix;
         lastSwapTry = Pair.of(-1, -1);
         hotbarSwaps.clear();
 
@@ -2657,12 +2663,25 @@ public class InventoryUtils
             //      Might cause an endless loop if hotbar is full.
             if (focusedSlot.id < 27)
             {
+            /*
                 if (tryFreeHotbarForShulkerSwaps(gui, container) == false)
                 {
                     ItemScroller.logger.warn("sortInventory: Free Hotbar slots are required in order to complete a Shulker box sorting task.");
                     return;
                 }
+             */
+
+                // Don't sort Shulkers into a shulker.
+                shulkerBoxFix = true;
             }
+            else
+            {
+                shulkerBoxFix = false;
+            }
+        }
+        else
+        {
+            shulkerBoxFix = false;
         }
 
         int focusedIndex = -1;
@@ -2728,11 +2747,11 @@ public class InventoryUtils
         {
             ClientStatusC2SPacket packet = new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS);
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(packet);
-            selectedSlotUpdateTask = () -> quickSort(gui, range.first(), range.second() - 1);
+            selectedSlotUpdateTask = () -> quickSort(gui, range.first(), range.second() - 1, shulkerBoxFix);
         }
         else
         {
-            quickSort(gui, range.first(), range.second() - 1);
+            quickSort(gui, range.first(), range.second() - 1, shulkerBoxFix);
         }
 
         if (hotbarSwaps.isEmpty() == false)
@@ -2815,7 +2834,7 @@ public class InventoryUtils
     /**
      * sort inventory
      */
-    private static void quickSort(HandledScreen<?> gui, int start, int end)
+    private static void quickSort(HandledScreen<?> gui, int start, int end, boolean shulkerBoxFix)
     {
         if (start >= end) return;
 
@@ -2826,11 +2845,11 @@ public class InventoryUtils
 
         while (l < r)
         {
-            while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid) < 0)
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(l).getStack(), mid, shulkerBoxFix) < 0)
             {
                 l++;
             }
-            while (l < r && compareStacks(gui.getScreenHandler().getSlot(r).getStack(), mid) >= 0)
+            while (l < r && compareStacks(gui.getScreenHandler().getSlot(r).getStack(), mid, shulkerBoxFix) >= 0)
             {
                 r--;
             }
@@ -2847,7 +2866,7 @@ public class InventoryUtils
                 return;
             }
         }
-        if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack()) >= 0)
+        if (compareStacks(gui.getScreenHandler().getSlot(l).getStack(), gui.getScreenHandler().getSlot(end).getStack(), shulkerBoxFix) >= 0)
         {
             swapSlots(gui, l, end);
         }
@@ -2856,11 +2875,11 @@ public class InventoryUtils
             l++;
         }
 
-        quickSort(gui, start, l - 1);
-        quickSort(gui, l + 1, end);
+        quickSort(gui, start, l - 1, shulkerBoxFix);
+        quickSort(gui, l + 1, end, shulkerBoxFix);
     }
 
-    private static int compareStacks(ItemStack stack1, ItemStack stack2)
+    private static int compareStacks(ItemStack stack1, ItemStack stack2, boolean shulkerBoxFix)
     {
         // Check if they have a custom priority
         int priority1 = getCustomPriority(stack1);
@@ -2870,6 +2889,14 @@ public class InventoryUtils
         {
             // Any of both has a priority, compare them using that
             return Integer.compare(priority2, priority1);
+        }
+
+        // Don't sort shulker boxes if 'fix' is enabled; such as if we are in the ShulkerBox Screen,
+        // since we can't insert shulkers into a Shulker Box.
+        if (shulkerBoxFix &&
+            (isShulkerBox(stack1) || isShulkerBox(stack2)))
+        {
+            return 0;
         }
 
         if (Configs.Generic.SORT_SHULKER_BOXES_AT_END.getBooleanValue())

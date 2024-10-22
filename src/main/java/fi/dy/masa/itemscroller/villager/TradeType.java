@@ -1,5 +1,6 @@
 package fi.dy.masa.itemscroller.villager;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 import net.minecraft.item.Item;
@@ -7,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.village.TradeOffer;
 
@@ -66,7 +68,17 @@ public class TradeType
         try
         {
             Identifier id = Identifier.tryParse(name);
-            return Registries.ITEM.get(id);
+            //return Registries.ITEM.get(id);
+            Optional<RegistryEntry.Reference<Item>> opt = Registries.ITEM.getEntry(id);
+
+            if (opt.isPresent())
+            {
+                return opt.get().value();
+            }
+            else
+            {
+                return Items.AIR;
+            }
         }
         catch (Exception e)
         {

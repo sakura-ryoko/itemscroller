@@ -5,11 +5,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import javax.annotation.Nonnull;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtSizeTracker;
+import net.minecraft.recipe.NetworkRecipeId;
+import net.minecraft.recipe.RecipeDisplayEntry;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.screen.slot.Slot;
 
@@ -141,6 +144,20 @@ public class RecipeStorage
         this.dirty = true;
     }
 
+    public void onAddToRecipeBook(RecipeDisplayEntry entry)
+    {
+        MinecraftClient mc = MinecraftClient.getInstance();
+
+        for (RecipePattern recipe : this.recipes)
+        {
+            if (recipe.matchClientRecipeBookEntry(entry, mc))
+            {
+                recipe.storeNetworkRecipeId(entry.id());
+                recipe.storeRecipeDisplayEntry(entry);
+            }
+        }
+    }
+
     private void readFromNBT(NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
     {
         if (nbt == null || nbt.contains("Recipes", Constants.NBT.TAG_LIST) == false)
@@ -165,13 +182,18 @@ public class RecipeStorage
             if (index >= 0 && index < this.recipes.length)
             {
                 this.recipes[index].readFromNBT(tag, registryManager);
+
+                if (tag.contains("LastNetworkId"))
+                {
+                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId")));
+                }
             }
         }
 
         this.changeSelectedRecipe(nbt.getByte("Selected"));
     }
 
-    private NbtCompound writeToNBT(DynamicRegistryManager registryManager)
+    private NbtCompound writeToNBT(@Nonnull DynamicRegistryManager registryManager)
     {
         NbtList tagRecipes = new NbtList();
         NbtCompound nbt = new NbtCompound();
@@ -180,9 +202,14 @@ public class RecipeStorage
         {
             if (this.recipes[i].isValid())
             {
-
-                NbtCompound tag = this.recipes[i].writeToNBT(registryManager);
+                RecipePattern entry = this.recipes[i];
+                NbtCompound tag = entry.writeToNBT(registryManager);
                 tag.putByte("RecipeIndex", (byte) i);
+
+                if (entry.getNetworkRecipeId() != null)
+                {
+                    tag.putInt("LastNetworkId", entry.getNetworkRecipeId().index());
+                }
                 tagRecipes.add(tag);
             }
         }
