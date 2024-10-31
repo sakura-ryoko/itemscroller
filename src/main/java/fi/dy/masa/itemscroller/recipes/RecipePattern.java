@@ -1,7 +1,6 @@
 package fi.dy.masa.itemscroller.recipes;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
@@ -25,7 +24,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.context.ContextParameterMap;
 import net.minecraft.world.World;
 
-import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.mixin.IMixinClientRecipeBook;
 import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookScreen;
 import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookWidget;
@@ -157,9 +155,9 @@ public class RecipePattern
         return this.displayEntry;
     }
 
-    public Pair<NetworkRecipeId, RecipeDisplayEntry> matchClientRecipeBook(MinecraftClient mc)
+    public @Nullable Pair<NetworkRecipeId, RecipeDisplayEntry> matchClientRecipeBook(MinecraftClient mc)
     {
-        AtomicReference<Pair<NetworkRecipeId, RecipeDisplayEntry>> pair = new AtomicReference<>();
+        Pair<NetworkRecipeId, RecipeDisplayEntry> pair = null;
 
         if (mc.player == null || mc.world == null)
         {
@@ -171,21 +169,26 @@ public class RecipePattern
         Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
         List<ItemStack> recipeStacks = this.combineStacks(Arrays.stream(this.getRecipeItems()).toList(), 3);
 
-        recipeMap.forEach((id, entry) ->
+        if (recipeMap.size() < 1)
         {
-            List<ItemStack> stacks = entry.getStacks(ctx);
+            return null;
+        }
 
-            // Combine Stacks so that they can equal
+        for (NetworkRecipeId id : recipeMap.keySet())
+        {
+            List<ItemStack> stacks = recipeMap.get(id).getStacks(ctx);
+
             if (this.compareRecipeStacks(recipeStacks, this.combineStacks(stacks, 3)))
             {
-                pair.set(Pair.of(id, entry));
+                pair = Pair.of(id, recipeMap.get(id));
+                return pair;
             }
-        });
+        }
 
-        return pair.get();
+        return null;
     }
 
-    private List<ItemStack> combineStacks(List<ItemStack> stacks, int iterations)
+    public static List<ItemStack> combineStacks(List<ItemStack> stacks, int iterations)
     {
         if (iterations > 3 || iterations < 1)
         {
@@ -197,14 +200,14 @@ public class RecipePattern
 
         while (i < iterations)
         {
-            list = this.combineStacksEach(list);
+            list = combineStacksEach(list);
             i++;
         }
 
         return list;
     }
 
-    private List<ItemStack> combineStacksEach(List<ItemStack> stacks)
+    private static List<ItemStack> combineStacksEach(List<ItemStack> stacks)
     {
         List<ItemStack> list = new ArrayList<>();
         ItemStack previous = ItemStack.EMPTY;
@@ -258,7 +261,7 @@ public class RecipePattern
         return list;
     }
 
-    private boolean compareRecipeStacks(List<ItemStack> left, List<ItemStack> right)
+    public static boolean compareRecipeStacks(List<ItemStack> left, List<ItemStack> right)
     {
         if (left.size() != right.size())
         {
@@ -270,16 +273,21 @@ public class RecipePattern
             ItemStack l = left.get(i);
             ItemStack r = right.get(i);
 
+            //System.out.printf("compare() [%d] left [%s] / right [%s] --> ", i, l.toString(), r.toString());
+
             if (ItemStack.areItemsEqual(l, r) == false)
             {
+                //System.out.print(" not equal\n");
                 return false;
             }
             else if (l.getCount() != r.getCount())
             {
+                //System.out.print(" count not equal\n");
                 return false;
             }
         }
 
+        //System.out.print(" PASS\n");
         return true;
     }
 
@@ -297,12 +305,12 @@ public class RecipePattern
 
         Pair<NetworkRecipeId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
 
-        if (pair == null || pair.getLeft() == null || pair.getRight() == null)
+        if (pair == null || pair.getLeft() == null)
         {
             return false;
         }
 
-        if (pair.getLeft() == this.getNetworkRecipeId())
+        if (pair.getLeft().index() == this.getNetworkRecipeId().index())
         {
             return true;
         }
