@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(AbstractCraftingRecipeBookWidget.class)
 public class MixinAbstractCraftingRecipeBookWidget
 {
+    /*
     @Inject(method = "populateRecipes", at = @At("HEAD"), cancellable = true)
     private void itemscroller_populateRecipes(RecipeResultCollection recipeResultCollection, RecipeFinder recipeFinder, CallbackInfo ci)
     {
@@ -24,8 +25,10 @@ public class MixinAbstractCraftingRecipeBookWidget
             ci.cancel();
         }
     }
+     */
 
     // Seems to be (intended) bug from Mojang
+    /*
     @Inject(
             method = "showGhostRecipe",
             at = @At("HEAD"),
@@ -38,4 +41,5 @@ public class MixinAbstractCraftingRecipeBookWidget
             ci.cancel();
         }
     }
+     */
 }
