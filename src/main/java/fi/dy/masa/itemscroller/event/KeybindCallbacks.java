@@ -355,8 +355,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             this.massCraftTicker = 0;
             InventoryUtils.bufferInvUpdates = false;
             InventoryUtils.invUpdatesBuffer.removeIf(packet -> {
-                // FIXME apply()
-                packet.method_65081(mc.getNetworkHandler());
+                packet.apply(mc.getNetworkHandler());
                 return true;
             });
         }
