@@ -127,14 +127,14 @@ public class RecipeStorage
         return this.getRecipe(this.getSelection());
     }
 
-    public void storeCraftingRecipeToCurrentSelection(Slot slot, HandledScreen<?> gui, boolean clearIfEmpty)
+    public void storeCraftingRecipeToCurrentSelection(Slot slot, HandledScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
     {
-        this.storeCraftingRecipe(this.getSelection(), slot, gui, clearIfEmpty);
+        this.storeCraftingRecipe(this.getSelection(), slot, gui, clearIfEmpty, fromKeybind, mc);
     }
 
-    public void storeCraftingRecipe(int index, Slot slot, HandledScreen<?> gui, boolean clearIfEmpty)
+    public void storeCraftingRecipe(int index, Slot slot, HandledScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
     {
-        this.getRecipe(index).storeCraftingRecipe(slot, gui, clearIfEmpty);
+        this.getRecipe(index).storeCraftingRecipe(slot, gui, clearIfEmpty, fromKeybind, mc);
         this.dirty = true;
     }
 
@@ -152,7 +152,8 @@ public class RecipeStorage
         {
             if (recipe.matchClientRecipeBookEntry(entry, mc))
             {
-                recipe.storeNetworkRecipeId(entry.id());
+                recipe.storeNetworkRecipeId(entry.id(), true);
+                recipe.swapGhostNetworkRecipeId();
                 recipe.storeRecipeDisplayEntry(entry);
             }
         }
@@ -185,7 +186,11 @@ public class RecipeStorage
 
                 if (tag.contains("LastNetworkId"))
                 {
-                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId")));
+                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId")), false);
+                }
+                if (tag.contains("GhostNetworkId"))
+                {
+                    this.recipes[index].storeGhostNetworkRecipeId(new NetworkRecipeId(tag.getInt("GhostNetworkId")));
                 }
             }
         }
@@ -209,6 +214,10 @@ public class RecipeStorage
                 if (entry.getNetworkRecipeId() != null)
                 {
                     tag.putInt("LastNetworkId", entry.getNetworkRecipeId().index());
+                }
+                if (entry.getGhostNetworkRecipeId() != null)
+                {
+                    tag.putInt("GhostNetworkId", entry.getGhostNetworkRecipeId().index());
                 }
                 tagRecipes.add(tag);
             }

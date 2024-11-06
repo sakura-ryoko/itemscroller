@@ -8,6 +8,7 @@ import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
+import net.minecraft.client.gui.screen.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.item.ItemStack;
@@ -18,6 +19,7 @@ import net.minecraft.recipe.display.SlotDisplayContexts;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.recipe.input.RecipeInput;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.world.ServerWorld;
@@ -37,7 +39,10 @@ public class RecipePattern
     private ItemStack[] recipe = new ItemStack[9];
     private RecipeEntry<?> vanillaRecipe;
     private NetworkRecipeId networkRecipeId;
+    private NetworkRecipeId ghostNetworkRecipeId;
     private RecipeDisplayEntry displayEntry;
+    private long lastMassCraft;
+    private long altTimeoutMillis = 6000L;
 
     public RecipePattern()
     {
@@ -58,7 +63,9 @@ public class RecipePattern
         this.result = InventoryUtils.EMPTY_STACK;
         this.vanillaRecipe = null;
         this.networkRecipeId = null;
+        this.ghostNetworkRecipeId = null;
         this.displayEntry = null;
+        this.lastMassCraft = -1;
     }
 
     public void ensureRecipeSizeAndClearRecipe(int size)
@@ -131,13 +138,39 @@ public class RecipePattern
             return;
         }
 
-        this.storeNetworkRecipeId(pair.getLeft());
+        this.storeNetworkRecipeId(pair.getLeft(), false);
         this.storeRecipeDisplayEntry(pair.getRight());
     }
 
-    public void storeNetworkRecipeId(NetworkRecipeId id)
+    public void storeNetworkRecipeId(NetworkRecipeId id, boolean saveGhost)
     {
+        if (this.networkRecipeId != null && id.index() != this.networkRecipeId.index() && saveGhost)
+        {
+            this.storeGhostNetworkRecipeId(this.networkRecipeId);
+        }
+        else
+        {
+            this.ghostNetworkRecipeId = null;
+        }
+
         this.networkRecipeId = id;
+    }
+
+    public void storeGhostNetworkRecipeId(NetworkRecipeId id)
+    {
+        this.ghostNetworkRecipeId = id;
+    }
+
+    public void swapGhostNetworkRecipeId()
+    {
+        // The 'Ghost' RecipeId is usually a higher index() number than the real recipe, or the "Inverse" recipe of the one being crafted.
+        // We just need to be able to handle the swap at the correct time.
+        if (this.getGhostNetworkRecipeId() != null)
+        {
+            NetworkRecipeId last = this.getNetworkRecipeId();
+            this.storeNetworkRecipeId(this.getGhostNetworkRecipeId(), false);
+            this.storeGhostNetworkRecipeId(last);
+        }
     }
 
     public void storeRecipeDisplayEntry(RecipeDisplayEntry entry)
@@ -148,6 +181,11 @@ public class RecipePattern
     public @Nullable NetworkRecipeId getNetworkRecipeId()
     {
         return this.networkRecipeId;
+    }
+
+    public @Nullable NetworkRecipeId getGhostNetworkRecipeId()
+    {
+        return this.ghostNetworkRecipeId;
     }
 
     public @Nullable RecipeDisplayEntry getRecipeDisplayEntry()
@@ -310,7 +348,11 @@ public class RecipePattern
             return false;
         }
 
-        if (pair.getLeft().index() == this.getNetworkRecipeId().index())
+        if (this.getNetworkRecipeId() != null && pair.getLeft().index() == this.getNetworkRecipeId().index())
+        {
+            return true;
+        }
+        else if (this.getGhostNetworkRecipeId() != null && pair.getLeft().index() == this.getGhostNetworkRecipeId().index())
         {
             return true;
         }
@@ -337,7 +379,7 @@ public class RecipePattern
         return false;
     }
 
-    public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty)
+    public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
     {
         SlotRange range = CraftingHandler.getCraftingGridSlots(gui, slot);
 
@@ -346,18 +388,22 @@ public class RecipePattern
             if (slot.hasStack())
             {
                 int gridSize = range.getSlotCount();
-                int numSlots = gui.getScreenHandler().slots.size();
 
-                this.ensureRecipeSizeAndClearRecipe(gridSize);
-
-                for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlots; i++, s++)
+                if (fromKeybind)
                 {
-                    Slot slotTmp = gui.getScreenHandler().getSlot(s);
-                    this.recipe[i] = slotTmp.hasStack() ? slotTmp.getStack().copy() : InventoryUtils.EMPTY_STACK;
+                    // Slots are only populated from the Keybinds Callback
+                    int numSlots = gui.getScreenHandler().slots.size();
+                    this.ensureRecipeSizeAndClearRecipe(gridSize);
+
+                    for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlots; i++, s++)
+                    {
+                        Slot slotTmp = gui.getScreenHandler().getSlot(s);
+                        this.recipe[i] = slotTmp.hasStack() ? slotTmp.getStack().copy() : InventoryUtils.EMPTY_STACK;
+                    }
                 }
 
                 this.result = slot.getStack().copy();
-                this.lookupVanillaRecipe(MinecraftClient.getInstance().world);
+                this.lookupVanillaRecipe(mc.world);
                 this.storeSelectedRecipeIdFromGui(gui);
             }
             else if (clearIfEmpty)
@@ -384,18 +430,22 @@ public class RecipePattern
                     ClientRecipeBook recipeBook = mc.player.getRecipeBook();
                     Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
 
-                    this.storeNetworkRecipeId(id);
+                    this.storeNetworkRecipeId(id, false);
 
                     if (recipeMap.containsKey(id))
                     {
                         this.storeRecipeDisplayEntry(recipeMap.get(id));
                     }
-
-                    // Clear crafting grid
-                    InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
                 }
             }
         }
+    }
+
+    private void storeGhostRecipe(GhostRecipe ghostRecipe)
+    {
+        System.out.printf("GhostRecipe:\n");
+
+
     }
 
     public void copyRecipeFrom(RecipePattern other)
@@ -496,6 +546,21 @@ public class RecipePattern
     public ItemStack[] getRecipeItems()
     {
         return this.recipe;
+    }
+
+    public boolean hasRecipeItems()
+    {
+        boolean empty = true;
+
+        for (int i = 0; i < this.getRecipeLength(); i++)
+        {
+            if (this.getRecipeItems()[i].isEmpty() == false)
+            {
+                empty = false;
+            }
+        }
+
+        return empty;
     }
 
     public boolean isValid()

@@ -57,6 +57,7 @@ import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
+import fi.dy.masa.itemscroller.mixin.IMixinScreenHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
@@ -1423,6 +1424,18 @@ public class InventoryUtils
         }
 
         return clearedAll;
+    }
+
+    public static void clearCraftingGridCursorStack(HandledScreen<? extends ScreenHandler> gui, MinecraftClient mc)
+    {
+        ItemStack stack = gui.getScreenHandler().getCursorStack();
+        PlayerEntity player = mc.player;
+
+        if (stack.isEmpty() == false && player != null)
+        {
+            ((IMixinScreenHandler) gui).itemscroller_offerOrDropStack(player, stack);
+            gui.getScreenHandler().setCursorStack(ItemStack.EMPTY);
+        }
     }
 
     private static boolean tryMoveItemsToCraftingGridSlots(RecipePattern recipe,

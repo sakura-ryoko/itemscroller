@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface IMixinRecipeBookWidget
 {
     @Accessor("ghostRecipe")
-    GhostRecipe itemscroller_getGhostSlots();
+    GhostRecipe itemscroller_getGhostRecipe();
 
     /*
     @Accessor("recipesArea")

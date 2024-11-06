@@ -200,7 +200,9 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                         // Pick-blocking over a crafting output slot with the recipe view open, store the recipe
                         else if (isPickBlock && InputUtils.isRecipeViewOpen() && InventoryUtils.isCraftingSlot(gui, slot))
                         {
-                            recipes.storeCraftingRecipeToCurrentSelection(slot, gui, true);
+                            recipes.storeCraftingRecipeToCurrentSelection(slot, gui, true, false, mc);
+                            InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
+                            InventoryUtils.clearCraftingGridCursorStack(gui, mc);
                             cancel = true;
                         }
                     }
