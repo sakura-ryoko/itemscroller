@@ -15,8 +15,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.component.type.ContainerComponent;
@@ -46,7 +44,6 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.TradeOutputSlot;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 import net.minecraft.world.GameRules;
@@ -57,7 +54,6 @@ import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
-import fi.dy.masa.itemscroller.mixin.IMixinScreenHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
@@ -1424,18 +1420,6 @@ public class InventoryUtils
         }
 
         return clearedAll;
-    }
-
-    public static void clearCraftingGridCursorStack(HandledScreen<? extends ScreenHandler> gui, MinecraftClient mc)
-    {
-        ItemStack stack = gui.getScreenHandler().getCursorStack();
-        PlayerEntity player = mc.player;
-
-        if (stack.isEmpty() == false && player != null)
-        {
-            ((IMixinScreenHandler) gui).itemscroller_offerOrDropStack(player, stack);
-            gui.getScreenHandler().setCursorStack(ItemStack.EMPTY);
-        }
     }
 
     private static boolean tryMoveItemsToCraftingGridSlots(RecipePattern recipe,

@@ -152,7 +152,6 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             {
                 recipes.storeCraftingRecipeToCurrentSelection(slot, gui, true, true, mc);
                 InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
-                InventoryUtils.clearCraftingGridCursorStack(gui, mc);
                 return true;
             }
         }

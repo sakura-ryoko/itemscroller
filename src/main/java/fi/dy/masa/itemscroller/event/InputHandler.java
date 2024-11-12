@@ -202,7 +202,6 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                         {
                             recipes.storeCraftingRecipeToCurrentSelection(slot, gui, true, false, mc);
                             InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
-                            InventoryUtils.clearCraftingGridCursorStack(gui, mc);
                             cancel = true;
                         }
                     }

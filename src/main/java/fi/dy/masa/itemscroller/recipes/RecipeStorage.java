@@ -150,11 +150,15 @@ public class RecipeStorage
 
         for (RecipePattern recipe : this.recipes)
         {
-            if (recipe.matchClientRecipeBookEntry(entry, mc))
+            if (!recipe.isEmpty())
             {
-                recipe.storeNetworkRecipeId(entry.id(), true);
-                recipe.swapGhostNetworkRecipeId();
-                recipe.storeRecipeDisplayEntry(entry);
+                if (recipe.matchClientRecipeBookEntry(entry, mc))
+                {
+                    ItemScroller.printDebug("onAddToRecipeBook(): Positive Match for result stack: [{}] networkId [{}]", recipe.getResult().toString(), entry.id().index());
+                    recipe.storeNetworkRecipeId(entry.id());
+                    recipe.storeRecipeCategory(entry.category());
+                    recipe.storeRecipeDisplayEntry(entry);
+                }
             }
         }
     }
@@ -184,13 +188,13 @@ public class RecipeStorage
             {
                 this.recipes[index].readFromNBT(tag, registryManager);
 
+                if (tag.contains("RecipeCategory", Constants.NBT.TAG_STRING))
+                {
+                    this.recipes[index].storeRecipeCategory(RecipeUtils.getRecipeCategoryFromId(tag.getString("RecipeCategory")));
+                }
                 if (tag.contains("LastNetworkId"))
                 {
-                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId")), false);
-                }
-                if (tag.contains("GhostNetworkId"))
-                {
-                    this.recipes[index].storeGhostNetworkRecipeId(new NetworkRecipeId(tag.getInt("GhostNetworkId")));
+                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId")));
                 }
             }
         }
@@ -211,14 +215,20 @@ public class RecipeStorage
                 NbtCompound tag = entry.writeToNBT(registryManager);
                 tag.putByte("RecipeIndex", (byte) i);
 
+                if (entry.getRecipeCategory() != null)
+                {
+                    String id = RecipeUtils.getRecipeCategoryId(entry.getRecipeCategory());
+
+                    if (!id.isEmpty())
+                    {
+                        tag.putString("RecipeCategory", id);
+                    }
+                }
                 if (entry.getNetworkRecipeId() != null)
                 {
                     tag.putInt("LastNetworkId", entry.getNetworkRecipeId().index());
                 }
-                if (entry.getGhostNetworkRecipeId() != null)
-                {
-                    tag.putInt("GhostNetworkId", entry.getGhostNetworkRecipeId().index());
-                }
+
                 tagRecipes.add(tag);
             }
         }
