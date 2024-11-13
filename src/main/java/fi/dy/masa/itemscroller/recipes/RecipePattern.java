@@ -44,6 +44,7 @@ public class RecipePattern
     private NetworkRecipeId networkRecipeId;
     private RecipeDisplayEntry displayEntry;
     private RecipeBookCategory category;
+    private long recipeSaveTime;
 
     public RecipePattern()
     {
@@ -66,6 +67,7 @@ public class RecipePattern
         this.networkRecipeId = null;
         this.displayEntry = null;
         this.category = null;
+        this.recipeSaveTime = -1;
     }
 
     public void ensureRecipeSizeAndClearRecipe(int size)
@@ -190,7 +192,6 @@ public class RecipePattern
         ClientRecipeBook recipeBook = mc.player.getRecipeBook();
         ContextParameterMap ctx = SlotDisplayContexts.createParameters(mc.world);
         Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
-        //List<ItemStack> recipeStacks = Arrays.stream(this.getRecipeItems()).toList();
 
         if (recipeMap.size() < 1)
         {
@@ -210,7 +211,6 @@ public class RecipePattern
 
                 List<ItemStack> stacks = entry.getStacks(ctx);
 
-                //if (RecipeUtils.compareRecipeStacks(recipeStacks, stacks))
                 if (ItemStack.areItemsEqual(this.getResult(), stacks.getFirst()))
                 {
                     pair = Pair.of(id, entry);
@@ -272,12 +272,23 @@ public class RecipePattern
                         Slot slotTmp = gui.getScreenHandler().getSlot(s);
                         this.recipe[i] = slotTmp.hasStack() ? slotTmp.getStack().copy() : InventoryUtils.EMPTY_STACK;
                     }
+                    this.recipeSaveTime = System.currentTimeMillis();
+                }
+                // Stop the mod from overwriting the correctly saved recipe with a button or nugget from the Grid clear
+                else if ((System.currentTimeMillis() - this.recipeSaveTime) < 4000L)
+                {
+                    //System.out.printf("storeCraftingRecipe() SKIPPING InputHandler input result [%s] versus [%s]\n", this.result.toString(), slot.getStack().toString());
+                    this.recipeSaveTime = System.currentTimeMillis();
+                    gui.getScreenHandler().setCursorStack(ItemStack.EMPTY);
+                    InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
+                    return;
                 }
 
                 //System.out.printf("storeCraftingRecipe() old result [%s] new [%s]\n", this.result.toString(), slot.getStack().toString());
                 this.result = slot.getStack().copy();
                 this.lookupVanillaRecipe(mc.world);
                 this.storeSelectedRecipeIdFromGui(gui);
+                InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
             }
             else if (clearIfEmpty)
             {
@@ -391,6 +402,7 @@ public class RecipePattern
         this.networkRecipeId = other.networkRecipeId;
         this.displayEntry = other.displayEntry;
         this.category = other.category;
+        this.recipeSaveTime = System.currentTimeMillis();
     }
 
     public void readFromNBT(@Nonnull NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)

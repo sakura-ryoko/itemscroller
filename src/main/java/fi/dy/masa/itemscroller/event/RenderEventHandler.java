@@ -238,8 +238,10 @@ public class RenderEventHandler
         {
             for (int col = 0; col < recipeDimensions; col++, i++)
             {
-                int xOff = col * 17;
-                int yOff = row * 17;
+                //int xOff = col * 17;
+                //int yOff = row * 17;
+                int xOff = col > 0 ? col * 17 : 0;
+                int yOff = row > 0 ? row * 17 : 0;
 
                 this.renderStackAt(items[i], x + xOff, y + yOff, false, drawContext);
             }

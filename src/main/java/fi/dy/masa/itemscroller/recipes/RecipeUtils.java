@@ -45,61 +45,50 @@ public class RecipeUtils
             //System.out.print("compare() --> EMPTY!!!\n");
             return false;
         }
-        /*
-        if (left.size() != right.size())
-        {
-            //System.out.printf("compare() --> size left [%d] != right [%d]\n", left.size(), right.size());
-            return false;
-        }
-         */
 
         //System.out.printf("compare() --> size left [%d], right [%d]\n", left.size(), right.size());
         //dumpStacks(left, "LF");
         //dumpIngs(right, "RT");
 
-        for (int i = 0; i < left.size(); i++)
+        int lPos = 0;
+
+        for (int i = 0; i < right.size(); i++)
         {
-            ItemStack l = left.get(i);
-
-            if (i >= right.size())
-            {
-                if (count > i)
-                {
-                    //System.out.print(" count not valid (ran out of right entries!)\n");
-                    return false;
-                }
-                else if (l.isEmpty() && i <= count)
-                {
-                    //System.out.print(" PASS (end of right side)\n");
-                    return true;
-                }
-
-                //System.out.print(" not valid (ran out of right entries!)\n");
-                return false;
-            }
+            ItemStack lStack = left.get(lPos);
             Ingredient ri = right.get(i);
-            RegistryEntry<Item> r = ri.getMatchingItems().getFirst();
 
-            //System.out.printf("compare() [%d] left [%s] / right [%s]\n", i, l.toString(), r.getIdAsString());
-
-            if (!ri.test(l))
+            while (lStack.isEmpty())
             {
-                //System.out.print(" not valid (Test test)\n");
-                return false;
-            }
-            else if (!ItemStack.areItemsEqual(l, new ItemStack(r)))
-            {
-                //System.out.print(" not valid (Stack test)\n");
-                return false;
+                lPos++;
+                lStack = left.get(lPos);
+                //System.out.printf("compare() [%d] left [%s] (Advance Left), right [%d]\n", lPos, lStack.toString(), i);
             }
 
-            /*
-            else if (l.getCount() != r.getCount())
+            List<RegistryEntry<Item>> rItems = ri.getMatchingItems();
+            boolean match = false;
+
+            for (RegistryEntry<Item> rItem : rItems)
             {
-                //System.out.print(" count not equal\n");
+                //System.out.printf("compare() [%d] left [%s] / [%d] right [%s]\n", lPos, lStack, i, rItem.getIdAsString());
+
+                if (ri.test(lStack))
+                {
+                    //System.out.print(" not valid (Test test)");
+                    match = true;
+                }
+                else if (ItemStack.areItemsEqual(lStack, new ItemStack(rItem)))
+                {
+                    //System.out.print(" not valid (Stack test)");
+                    match = true;
+                }
+            }
+            if (!match)
+            {
+                //System.out.print(" FAIL\n");
                 return false;
             }
-             */
+
+            lPos++;
         }
 
         //System.out.print(" PASS\n");
@@ -126,9 +115,19 @@ public class RecipeUtils
         //System.out.printf("DUMP [%s] -->\n", side);
         for (Ingredient ing : ings)
         {
-            //System.out.printf("%s[%d] // [%s]\n", side, i, ing.getMatchingItems().getFirst().getIdAsString());
+            List<RegistryEntry<Item>> items = ing.getMatchingItems();
+
+            //System.out.printf("%s[%d] //", side, i);
+
+            for (RegistryEntry<Item> item : items)
+            {
+                //System.out.printf(" [%s]", item.getIdAsString());
+            }
+
+            //System.out.print("// []\n");
             i++;
         }
+
         //System.out.printf("DUMP END [%s]\n", side);
     }
 }

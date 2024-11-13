@@ -20,6 +20,7 @@ public class Hotkeys
     public static final ConfigHotkey CRAFT_EVERYTHING           = new ConfigHotkey("craftEverything",       "LEFT_CONTROL,C", GUI_NO_ORDER).apply(HOTKEYS_KEY);
     public static final ConfigHotkey DROP_ALL_MATCHING          = new ConfigHotkey("dropAllMatching",       "LEFT_CONTROL,LEFT_SHIFT,Q", GUI_NO_ORDER).apply(HOTKEYS_KEY);
     public static final ConfigHotkey MASS_CRAFT                 = new ConfigHotkey("massCraft",             "LEFT_CONTROL,LEFT_ALT,C", GUI_NO_ORDER).apply(HOTKEYS_KEY);
+    public static final ConfigHotkey MASS_CRAFT_TOGGLE          = new ConfigHotkey("massCraftToggle",       "").apply(HOTKEYS_KEY);
     public static final ConfigHotkey MOVE_CRAFT_RESULTS         = new ConfigHotkey("moveCraftResults",      "LEFT_CONTROL,M", GUI_NO_ORDER).apply(HOTKEYS_KEY);
     public static final ConfigHotkey RECIPE_VIEW                = new ConfigHotkey("recipeView",            "A", GUI_RELAXED).apply(HOTKEYS_KEY);
     public static final ConfigHotkey SLOT_DEBUG                 = new ConfigHotkey("slotDebug",             "LEFT_CONTROL,LEFT_ALT,LEFT_SHIFT,I", GUI_NO_ORDER).apply(HOTKEYS_KEY);
@@ -62,6 +63,7 @@ public class Hotkeys
             CRAFT_EVERYTHING,
             DROP_ALL_MATCHING,
             MASS_CRAFT,
+            MASS_CRAFT_TOGGLE,
             MOVE_CRAFT_RESULTS,
             RECIPE_VIEW,
             SLOT_DEBUG,

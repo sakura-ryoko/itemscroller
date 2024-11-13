@@ -9,6 +9,7 @@
     "itemscroller.config.generic.name.massCraftIterations": "massCraftIterations",
     "itemscroller.config.generic.name.massCraftSwapsOnly": "massCraftSwapsOnly",
     "itemscroller.config.generic.name.massCraftUseRecipeBook": "massCraftUseRecipeBook",
+    "itemscroller.config.generic.name.massCraftHold": "massCraftHold",
     "itemscroller.config.generic.name.packetRateLimit": "packetRateLimit",
     "itemscroller.config.generic.name.craftingRecipesSaveToFile": "craftingRecipesSaveToFile",
     "itemscroller.config.generic.name.craftingRecipesSaveFileIsGlobal": "craftingRecipesSaveFileIsGlobal",
@@ -40,6 +41,7 @@
     "itemscroller.config.generic.comment.massCraftIterations": "How many massCraft iterations/attempts to do per execution.\nWith unstackable items or a full inventory and \"small recipe\"\nthis will need to be larger, as a shift + click craft to the inventory\nmight only craft 1 or 2 items per operation.",
     "itemscroller.config.generic.comment.massCraftSwapsOnly": "Uses a newer method of filling the crafting grid,\nusing only swap slot packets.\n\nNote: Due to only using slot swap packets,\nno partial crafts are possible! And also no\nstack splitting will happen, at all.",
     "itemscroller.config.generic.comment.massCraftUseRecipeBook": "Uses the \"Recipe Book Protocol\" inspired by Andrew54757's \"Craft-Fix\" fork,\nbut re-implemented in a way that works for 1.21+.\n§6NOTE: This is NOT compatible with \"rateLimitClickPackets\" enabled.",
+    "itemscroller.config.generic.comment.massCraftHold": "Uses the \"Mass Craft Hold\" inspired by Andrew54757's \"Craft-Fix\" fork,\nbut re-implemented here.\n§6NOTE: This is NOT compatible with \"rateLimitClickPackets\" enabled.",
     "itemscroller.config.generic.comment.packetRateLimit": "The limit of sent emulated slot click packets per game tick,\nif 'rateLimitClickPackets' is enabled",
     "itemscroller.config.generic.comment.craftingRecipesSaveToFile": "If enabled, then the crafting features recipes are saved to a file\ninside minecraft/itemscroller/recipes_worldorservername.nbt.\nThis makes the recipes persistent across game restarts.",
     "itemscroller.config.generic.comment.craftingRecipesSaveFileIsGlobal": "If true, then the recipe file is global, instead\n of being saved per-world or server",
@@ -60,6 +62,8 @@
     "itemscroller.config.generic.comment.sortBottomPriorityInventory": "These items will have a priority to be sorted last.\nYou can put item IDs (eg. \"minecraft:diamond_sword\") or custom names (eg. \"Wither killer\").\nIf you put custom names, those will be preferred before the id.\nItems in the list will be sorted to the back according to the list.",
     "itemscroller.config.generic.comment.sortMethodDefault": "The default sorting method used to compare items.\n\n§6Category [ANY]§r = Sort by §a\"sortCategoryOrder\"§r first, and then followed by:\n§6Item Name§r - Sort by Items' Name\n§6Item Count§r - Sort by Item's Stack Size, then by RawID\n§6Item Rarity§r - Sort by Rarity, then by RawID\n§6Item RawID§r - Sort by RawID\n§d(RawID is the built-in Vanilla Item Index value)§r\n\n§cData Components are compared by Hash Code afterwards, and then\n§cby Item Stack Size after all other checks have passed.§r",
     "itemscroller.config.generic.comment.sortCategoryOrder": "The Category order to be used for sorting items.\nThe Vanilla Creative Menu Categories are used.",
+
+    "itemscroller.config.generic.prettyName.massCraftHold": "Mass Craft Hold",
 
     "itemscroller.config.toggles.name.enableCraftingFeatures": "enableCraftingFeatures",
     "itemscroller.config.toggles.name.enableDropkeyDropMatching": "enableDropkeyDropMatching",
@@ -91,6 +95,7 @@
     "itemscroller.config.hotkeys.name.craftEverything": "craftEverything",
     "itemscroller.config.hotkeys.name.dropAllMatching": "dropAllMatching",
     "itemscroller.config.hotkeys.name.massCraft": "massCraft",
+    "itemscroller.config.hotkeys.name.massCraftToggle": "massCraftToggle",
     "itemscroller.config.hotkeys.name.moveCraftResults": "moveCraftResults",
     "itemscroller.config.hotkeys.name.recipeView": "recipeView",
     "itemscroller.config.hotkeys.name.slotDebug": "slotDebug",
@@ -124,6 +129,7 @@
     "itemscroller.config.hotkeys.comment.craftEverything": "Craft everything possible once with the currently selected recipe",
     "itemscroller.config.hotkeys.comment.dropAllMatching": "Drop all stacks identical to the hovered stack",
     "itemscroller.config.hotkeys.comment.massCraft": "Mass craft and throw out the results with the\ncurrently selected recipe as long as this\nkeybind is held down",
+    "itemscroller.config.hotkeys.comment.massCraftToggle": "Uses the \"Mass Craft Toggle\" inspired by Andrew54757's \"Craft-Fix\" fork,\nbut re-implemented here.\n§6NOTE: This is NOT compatible with \"rateLimitClickPackets\" enabled.",
     "itemscroller.config.hotkeys.comment.moveCraftResults": "Move all of the currently selected recipe's\noutput items from the player inventory\nto the other inventory",
     "itemscroller.config.hotkeys.comment.recipeView": "Show the Item Scroller recipe GUI",
     "itemscroller.config.hotkeys.comment.slotDebug": "Print debug info for the hovered slot or GUI",
@@ -152,6 +158,8 @@
     "itemscroller.config.hotkeys.comment.modifierMoveStack": "Modifier key to move the entire stack to the other\ninventory when scrolling over it",
     "itemscroller.config.hotkeys.comment.modifierToggleVillagerGlobalFavorite": "Modifier key to hold while middle clicking a trade,\nto toggle the global favorite state for that trade.\nGlobal favorites are used for villagers that don't\nhave any \"local\"/villager-specific favorites set.",
     "itemscroller.config.hotkeys.comment.sortInventory": "Sort the inventory that the cursor is hovering over",
+
+    "itemscroller.config.generic.prettyName.massCraftToggle": "Mass Craft Toggle",
 
     "itemscroller.gui.button.config_gui.generic": "Generic",
     "itemscroller.gui.button.config_gui.hotkeys": "Hotkeys",
