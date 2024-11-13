@@ -12,6 +12,8 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
+import fi.dy.masa.itemscroller.mixin.IMixinIngredient;
+
 public class RecipeUtils
 {
     public static String getRecipeCategoryId(RecipeBookCategory category)
@@ -64,7 +66,8 @@ public class RecipeUtils
                 //System.out.printf("compare() [%d] left [%s] (Advance Left), right [%d]\n", lPos, lStack.toString(), i);
             }
 
-            List<RegistryEntry<Item>> rItems = ri.getMatchingItems();
+            List<RegistryEntry<Item>> rItems = ((IMixinIngredient) (Object) ri).itemscroller_getEntries().stream().toList();
+            //List<RegistryEntry<Item>> rItems = ri.getMatchingItems().toList();
             boolean match = false;
 
             for (RegistryEntry<Item> rItem : rItems)
@@ -115,7 +118,9 @@ public class RecipeUtils
         //System.out.printf("DUMP [%s] -->\n", side);
         for (Ingredient ing : ings)
         {
-            List<RegistryEntry<Item>> items = ing.getMatchingItems();
+            //List<RegistryEntry<Item>> items = ing.getMatchingItems().toList();
+            List<RegistryEntry<Item>> items = ((IMixinIngredient) (Object) ing).itemscroller_getEntries().stream().toList();
+
 
             //System.out.printf("%s[%d] //", side, i);
 
