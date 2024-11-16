@@ -49,7 +49,7 @@
     "itemscroller.config.generic.comment.reverseScrollDirectionStacks": "フルスタックモードの場合、スクロール方向を逆にします。",
     "itemscroller.config.generic.comment.useRecipeCaching": "クラフト\nレシピ出力アイテム取得コードで最後に使用したレシピをキャッシュできるようにします。これにより、大量のクラフトを行うときに CPU 使用量を大幅に削減できます\n。",
     "itemscroller.config.generic.comment.useSlotPositionAwareScrollDirection": "有効にすると、アイテムの移動方向は画面上のスロットの Y 位置に依存します。より複雑なインベントリでは不自然になる可能性があるため、注意して使用してください。",
-    "itemscroller.config.generic.comment.villagerTradeUseGlobalFavorites": "グローバル（アイテムタイプごと）の村人取引\nのお気に入りを使用するかどうか。",
+    "itemscroller.config.generic.comment.villagerTradeUseGlobalFavorites": "村人が\nを売買するかどうかは、グローバル(アイテム毎) かどうかです。",
     "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition": "GUIを再開したときに、\n貿易リスト内の最後のスクロール位置を記憶し復元します",
     "itemscroller.config.generic.comment.sortInventoryToggle": "クイック インベントリ ソート機能を有効にします。\nこれは、任意のアイテムの上にマウスを移動し、\n§a\"sortInventory\"§r キー バインドを押すことでアクティブになります。",
     "itemscroller.config.generic.comment.sortAssumeEmptyBoxStacks": "インベントリをソートするときに、空のシュルカー ボックスが\n積み重ねられると想定します。\nこれは、シュルカー ボックスを積み重ねられるようにする mod\nをインストールした場合に便利です。\nこれにより、インベントリが同期されるように追加のパケットが送信されます。\n",
