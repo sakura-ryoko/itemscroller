@@ -211,7 +211,7 @@ public class RecipePattern
 
                 List<ItemStack> stacks = entry.getStacks(ctx);
 
-                if (ItemStack.areItemsEqual(this.getResult(), stacks.getFirst()))
+                if (RecipeUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
                 {
                     pair = Pair.of(id, entry);
                     return pair;
@@ -238,7 +238,7 @@ public class RecipePattern
 
         //System.out.printf("matchClientRecipeBookEntry() --> [%s] vs [%s]\n", this.getResult().toString(), stacks.getFirst().toString());
 
-        if (ItemStack.areItemsEqual(this.getResult(), stacks.getFirst()))
+        if (RecipeUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
         {
             if (entry.craftingRequirements().isPresent())
             {
@@ -323,7 +323,7 @@ public class RecipePattern
                         RecipeDisplayEntry entry = recipeMap.get(id);
                         ItemStack result = entry.getStacks(SlotDisplayContexts.createParameters(mc.world)).getFirst();
 
-                        if (ItemStack.areItemsEqual(this.getResult(), result))
+                        if (RecipeUtils.areStacksEqual(this.getResult(), result))
                         {
                             if (entry.craftingRequirements().isPresent())
                             {

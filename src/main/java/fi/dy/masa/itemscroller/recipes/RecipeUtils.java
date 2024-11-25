@@ -79,7 +79,7 @@ public class RecipeUtils
                     //System.out.print(" not valid (Test test)");
                     match = true;
                 }
-                else if (ItemStack.areItemsEqual(lStack, new ItemStack(rItem)))
+                else if (areStacksEqual(lStack, new ItemStack(rItem)))
                 {
                     //System.out.print(" not valid (Stack test)");
                     match = true;
@@ -96,6 +96,11 @@ public class RecipeUtils
 
         //System.out.print(" PASS\n");
         return true;
+    }
+
+    public static boolean areStacksEqual(ItemStack left, ItemStack right)
+    {
+        return ItemStack.areItemsEqual(left, right) && left.getCount() == right.getCount();
     }
 
     private static void dumpStacks(List<ItemStack> stacks, String side)
