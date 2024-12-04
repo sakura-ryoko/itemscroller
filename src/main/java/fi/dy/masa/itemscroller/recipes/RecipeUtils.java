@@ -126,7 +126,6 @@ public class RecipeUtils
             //List<RegistryEntry<Item>> items = ing.getMatchingItems().toList();
             List<RegistryEntry<Item>> items = ((IMixinIngredient) (Object) ing).itemscroller_getEntries().stream().toList();
 
-
             //System.out.printf("%s[%d] //", side, i);
 
             for (RegistryEntry<Item> item : items)
