@@ -59,11 +59,19 @@ public class RecipeUtils
             ItemStack lStack = left.get(lPos);
             Ingredient ri = right.get(i);
 
-            while (lStack.isEmpty() && lPos < 9)
+            while (lStack.isEmpty())
             {
                 lPos++;
-                lStack = left.get(lPos);
-                //System.out.printf(" compare() [%d] left [%s] (Advance Left), right [%d]\n", lPos, lStack.toString(), i);
+                
+                if (lPos < 9)
+                {
+                    lStack = left.get(lPos);
+                    //System.out.printf(" compare() [%d] left [%s] (Advance Left), right [%d]\n", lPos, lStack.toString(), i);
+                }
+                else
+                {
+                    break;
+                }
             }
 
             List<RegistryEntry<Item>> rItems = ((IMixinIngredient) (Object) ri).itemscroller_getEntries().stream().toList();

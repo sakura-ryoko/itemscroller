@@ -230,7 +230,7 @@ public class RenderEventHandler
     private void renderRecipeItems(RecipePattern recipe, int recipeCountPerPage, HandledScreen<?> gui, DrawContext drawContext)
     {
         ItemStack[] items = recipe.getRecipeItems();
-        final int recipeDimensions = (int) Math.ceil(Math.sqrt(recipe.getRecipeLength()));
+        final int recipeDimensions = (int) Math.ceil(Math.sqrt(Math.min(recipe.getRecipeLength(), 9)));
         int x = -3 * 17 + 2;
         int y = 3 * this.entryHeight;
 
@@ -250,7 +250,7 @@ public class RenderEventHandler
 
     private ItemStack getHoveredRecipeIngredient(int mouseX, int mouseY, RecipePattern recipe, int recipeCountPerPage, HandledScreen<?> gui)
     {
-        final int recipeDimensions = (int) Math.ceil(Math.sqrt(recipe.getRecipeLength()));
+        final int recipeDimensions = (int) Math.ceil(Math.sqrt(Math.min(recipe.getRecipeLength(), 9)));
         int scaledStackDimensions = (int) (16 * this.scale);
         int scaledGridEntry = (int) (17 * this.scale);
         int x = this.recipeListX - (int) ((3 * 17 - 2) * this.scale);
