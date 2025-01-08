@@ -2,13 +2,10 @@ plugins {
 	id 'fabric-loom' version '1.9-SNAPSHOT'
 }
 
-//sourceCompatibility = JavaVersion.VERSION_21
-//targetCompatibility = JavaVersion.VERSION_21
-
 repositories {
-	maven { url 'https://masa.dy.fi/maven' }
-	maven {	url 'https://maven.terraformersmc.com/releases/' }
-	maven { url 'https://jitpack.io' }
+	maven { url = 'https://masa.dy.fi/maven' }
+	maven { url = 'https://maven.terraformersmc.com/releases/' }
+	maven { url = 'https://jitpack.io' }
 }
 
 loom {
