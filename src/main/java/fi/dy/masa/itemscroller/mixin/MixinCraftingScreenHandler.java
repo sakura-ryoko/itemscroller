@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 @Mixin(CraftingScreenHandler.class)
@@ -26,7 +27,8 @@ public abstract class MixinCraftingScreenHandler
     @Inject(method = "onContentChanged", at = @At("RETURN"))
     private void onSlotChangedCraftingGrid(net.minecraft.inventory.Inventory inventory, CallbackInfo ci)
     {
-        if (MinecraftClient.getInstance().isOnThread())
+        if (MinecraftClient.getInstance().isOnThread() &&
+            Configs.Generic.MOD_MAIN_TOGGLE.getBooleanValue())
         {
             InventoryUtils.onSlotChangedCraftingGrid(this.player,
                     ((IMixinAbstractCraftingScreenHandler) this).itemscroller_getCraftingInventory(),
@@ -38,7 +40,8 @@ public abstract class MixinCraftingScreenHandler
     private static void onUpdateResult(
             ScreenHandler handler, ServerWorld serverWorld, PlayerEntity player, RecipeInputInventory craftingInventory, CraftingResultInventory resultInventory, RecipeEntry<CraftingRecipe> recipe, CallbackInfo ci)
     {
-        if (MinecraftClient.getInstance().isOnThread())
+        if (MinecraftClient.getInstance().isOnThread() &&
+            Configs.Generic.MOD_MAIN_TOGGLE.getBooleanValue())
         {
             InventoryUtils.onSlotChangedCraftingGrid(player, craftingInventory, resultInventory);
         }
