@@ -87,6 +87,7 @@ public class InventoryUtils
     public static boolean bufferInvUpdates = false;
     public static List<Packet<ClientPlayPacketListener>> invUpdatesBuffer = new ArrayList<>();
     private static ItemGroup.DisplayContext displayContext;
+    public static boolean ignoreScrollingInsideOfBundles = false;
 
     /*
     private static Pair<Integer, Integer> lastSwapTry = Pair.of(-1, -1);
@@ -98,6 +99,11 @@ public class InventoryUtils
     public static void setInhibitCraftingOutputUpdate(boolean inhibitUpdate)
     {
         inhibitCraftResultUpdate = inhibitUpdate;
+    }
+
+    public static void setIgnoreScrollingInsideOfBundles(boolean toggle)
+    {
+        ignoreScrollingInsideOfBundles = toggle;
     }
 
     public static void onSlotChangedCraftingGrid(PlayerEntity player,
@@ -255,7 +261,7 @@ public class InventoryUtils
         Slot slot = AccessorUtils.getSlotUnderMouse(gui);
 
         // We require an empty cursor
-        if (slot == null || isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
+        if (slot == null || isStackEmpty(gui.getScreenHandler().getCursorStack()) == false || ignoreScrollingInsideOfBundles)
         {
             return false;
         }

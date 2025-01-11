@@ -171,7 +171,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                         recipes.scrollSelection(dWheel < 0);
                         cancel = true;
                     }
-                    else
+                    else if (!InventoryUtils.ignoreScrollingInsideOfBundles)
                     {
                         cancel = InventoryUtils.tryMoveItems(gui, recipes, dWheel > 0);
                     }
