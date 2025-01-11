@@ -7,7 +7,6 @@
     "IMixinAbstractCraftingScreenHandler",
     "IMixinClientRecipeBook",
     "IMixinCraftingResultSlot",
-    "IMixinIngredient",
     "IMixinMerchantScreen",
     "IMixinRecipeBookScreen",
     "IMixinRecipeBookWidget",
