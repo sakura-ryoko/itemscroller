@@ -2,13 +2,10 @@ plugins {
 	id 'fabric-loom' version '1.9-SNAPSHOT'
 }
 
-//sourceCompatibility = JavaVersion.VERSION_21
-//targetCompatibility = JavaVersion.VERSION_21
-
 repositories {
-	maven { url 'https://masa.dy.fi/maven' }
-	maven {	url 'https://maven.terraformersmc.com/releases/' }
-	maven { url 'https://jitpack.io' }
+	maven { url = 'https://masa.dy.fi/maven' }
+	maven {	url = 'https://maven.terraformersmc.com/releases/' }
+	maven { url = 'https://jitpack.io' }
 }
 
 loom {
@@ -30,12 +27,14 @@ dependencies {
 	modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
-group = project.group + "." + project.mod_id
-base.archivesName = project.mod_file_name + '-' + project.minecraft_version_out
-version = project.mod_version
+base {
+	group = project.group + "." + project.mod_id
+	archivesName = project.mod_file_name + '-' + project.minecraft_version_out
+	version = project.mod_version
 
-if (version.endsWith('-dev')) {
-	version += "." + new Date().format('yyyyMMdd.HHmmss')
+	if (version.endsWith('-dev')) {
+		version += "." + new Date().format('yyyyMMdd.HHmmss')
+	}
 }
 
 processResources {
