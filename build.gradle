@@ -4,6 +4,7 @@ plugins {
 
 repositories {
 	maven { url = 'https://masa.dy.fi/maven' }
+	maven { url = 'https://maven.fallenbreath.me/releases' }
 	maven { url = 'https://maven.terraformersmc.com/releases/' }
 	maven { url = 'https://jitpack.io' }
 }
@@ -25,6 +26,7 @@ dependencies {
 	//modCompile "net.fabricmc.fabric-api:fabric-api:" + project.fabric_version
 
 	modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
+	modRuntimeOnly 'me.fallenbreath:mixin-auditor:0.1.0'
 }
 
 base {
@@ -34,6 +36,19 @@ base {
 
 	if (version.endsWith('-dev')) {
 		version += "." + new Date().format('yyyyMMdd.HHmmss')
+	}
+}
+
+loom {
+	def commonVmArgs = ['-Dmixin.debug.export=true', '-Dmixin.debug.countInjections=true']
+	// [FEATURE] MIXIN_AUDITOR
+	runs {
+		def auditVmArgs = [*commonVmArgs, '-DmixinAuditor.audit=true']
+		clientMixinAudit {
+			client()
+			vmArgs auditVmArgs
+			ideConfigGenerated false
+		}
 	}
 }
 
