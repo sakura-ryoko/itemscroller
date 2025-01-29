@@ -3078,21 +3078,21 @@ public class InventoryUtils
         // Sort at the top: Prefer name priority if it exists
         if (nameTopPriority != -1)
         {
-            return topSortingPriorityList.size() - nameTopPriority;
+            return -topSortingPriorityList.size() + nameTopPriority - 2;
         }
         if (idTopPriority != -1)
         {
-            return topSortingPriorityList.size() - idTopPriority;
+            return -topSortingPriorityList.size() + idTopPriority - 2;
         }
 
         // Sort at the bottom: Prefer name priority if it exists
         if (nameBottomPriority != -1)
         {
-            return -bottomSortingPriorityList.size() - nameBottomPriority - 2;
+            return bottomSortingPriorityList.size() + nameBottomPriority;
         }
         if (idBottomPriority != -1)
         {
-            return -bottomSortingPriorityList.size() - idBottomPriority - 2;
+            return bottomSortingPriorityList.size() + idBottomPriority;
         }
 
         // Default: no specific priority found
