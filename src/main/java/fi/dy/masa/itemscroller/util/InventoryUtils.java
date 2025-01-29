@@ -2917,6 +2917,16 @@ public class InventoryUtils
             return Boolean.compare(stack1IsBundle, stack2IsBundle);
         }
 
+        // order items according to user-defined top/bottom priority
+        // a priority of -1 means that no priority was specified
+        int priority1 = getCustomPriority(stack1);
+        int priority2 = getCustomPriority(stack2);
+
+        if (priority1 != -1 || priority2 != -1)
+        {
+            return Integer.compare(priority1, priority2);
+        }
+
         // empty slots last
         boolean stack1IsEmpty = stack1.isEmpty();
         boolean stack2IsEmpty = stack2.isEmpty();
@@ -2930,23 +2940,6 @@ public class InventoryUtils
         {
             // both stacks are empty
             return 0;
-        }
-
-        // order items according to user-defined top/bottom priority
-        // a priority of -1 means that no priority was specified
-        int priority1 = getCustomPriority(stack1);
-        int priority2 = getCustomPriority(stack2);
-        boolean stack1HasUnspecifiedPriority = priority1 == -1;
-        boolean stack2HasUnspecifiedPriority = priority2 == -1;
-
-        if (stack1HasUnspecifiedPriority != stack2HasUnspecifiedPriority)
-        {
-            return Boolean.compare(stack1HasUnspecifiedPriority, stack2HasUnspecifiedPriority);
-        }
-
-        if (priority1 != -1)
-        {
-            return Integer.compare(priority1, priority2);
         }
 
         // sort by shulker box contents
