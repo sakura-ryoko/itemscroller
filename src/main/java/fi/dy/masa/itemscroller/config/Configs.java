@@ -195,9 +195,7 @@ public class Configs implements IConfigHandler
             writeStrings(root, GUI_BLACKLIST, "guiBlacklist");
             writeStrings(root, SLOT_BLACKLIST, "slotBlacklist");
 
-            Path config = dir.resolve(CONFIG_FILE_NAME);
-
-            JsonUtils.writeJsonToFileAsPath(root, config);
+            JsonUtils.writeJsonToFileAsPath(root, dir.resolve(CONFIG_FILE_NAME));
         }
         else
         {
