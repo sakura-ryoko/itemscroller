@@ -1,6 +1,7 @@
 package fi.dy.masa.itemscroller.config;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import com.google.common.collect.ImmutableList;
@@ -17,6 +18,7 @@ import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.JsonUtils;
+import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
@@ -139,11 +141,11 @@ public class Configs implements IConfigHandler
 
     public static void loadFromFile()
     {
-        File configFile = new File(FileUtils.getConfigDirectory(), CONFIG_FILE_NAME);
+        Path configFile = FileUtils.getConfigDirectoryAsPath().resolve(CONFIG_FILE_NAME);
 
-        if (configFile.exists() && configFile.isFile() && configFile.canRead())
+        if (Files.exists(configFile) && Files.isReadable(configFile))
         {
-            JsonElement element = JsonUtils.parseJsonFile(configFile);
+            JsonElement element = JsonUtils.parseJsonFileAsPath(configFile);
 
             if (element != null && element.isJsonObject())
             {
@@ -155,7 +157,13 @@ public class Configs implements IConfigHandler
 
                 getStrings(root, GUI_BLACKLIST, "guiBlacklist");
                 getStrings(root, SLOT_BLACKLIST, "slotBlacklist");
+
+                //ItemScroller.debugLog("loadFromFile(): Successfully loaded config file '{}'.", configFile.toAbsolutePath());
             }
+        }
+        else
+        {
+            ItemScroller.LOGGER.error("loadFromFile(): Failed to load config file '{}'.", configFile.toAbsolutePath());
         }
 
         CraftingHandler.clearDefinitions();
@@ -168,9 +176,15 @@ public class Configs implements IConfigHandler
 
     public static void saveToFile()
     {
-        File dir = FileUtils.getConfigDirectory();
+        Path dir = FileUtils.getConfigDirectoryAsPath();
 
-        if ((dir.exists() && dir.isDirectory()) || dir.mkdirs())
+        if (!Files.exists(dir))
+        {
+            FileUtils.createDirectoriesIfMissing(dir);
+            //ItemScroller.debugLog("saveToFile(): Creating directory '{}'.", dir.toAbsolutePath());
+        }
+
+        if (Files.isDirectory(dir))
         {
             JsonObject root = new JsonObject();
 
@@ -181,7 +195,13 @@ public class Configs implements IConfigHandler
             writeStrings(root, GUI_BLACKLIST, "guiBlacklist");
             writeStrings(root, SLOT_BLACKLIST, "slotBlacklist");
 
-            JsonUtils.writeJsonToFile(root, new File(dir, CONFIG_FILE_NAME));
+            Path config = dir.resolve(CONFIG_FILE_NAME);
+
+            JsonUtils.writeJsonToFileAsPath(root, config);
+        }
+        else
+        {
+            ItemScroller.LOGGER.error("saveToFile(): Config Folder '{}' does not exist!", dir.toAbsolutePath());
         }
     }
 

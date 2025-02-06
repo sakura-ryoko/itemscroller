@@ -168,7 +168,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             }
             else
             {
-                ItemScroller.logger.info("GUI class: {}", gui.getClass().getName());
+                ItemScroller.LOGGER.info("GUI class: {}", gui.getClass().getName());
             }
 
             return true;
