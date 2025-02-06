@@ -2057,11 +2057,11 @@ public class InventoryUtils
 
     public static int getPlayerInventoryIndexWithItem(ItemStack stackReference, PlayerInventory inv)
     {
-        final int size = inv.main.size();
+        final int size = inv.getMainStacks().size();
 
         for (int index = 0; index < size; ++index)
         {
-            ItemStack stack = inv.main.get(index);
+            ItemStack stack = inv.getMainStacks().get(index);
 
             if (areStacksEqual(stack, stackReference))
             {
