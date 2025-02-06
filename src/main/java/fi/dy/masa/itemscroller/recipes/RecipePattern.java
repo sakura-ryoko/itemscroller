@@ -329,19 +329,19 @@ public class RecipePattern
                             {
                                 if (RecipeUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), this.countRecipeItems()))
                                 {
-                                    ItemScroller.printDebug("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+                                    ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
                                     this.storeNetworkRecipeId(id);
                                     this.storeRecipeCategory(entry.category());
                                     this.storeRecipeDisplayEntry(entry);
                                 }
                                 else
                                 {
-                                    ItemScroller.logger.warn("storeSelectedRecipeIdFromGui(): failed to match Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+                                    ItemScroller.LOGGER.warn("storeSelectedRecipeIdFromGui(): failed to match Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
                                 }
                             }
                             else
                             {
-                                ItemScroller.printDebug("storeSelectedRecipeIdFromGui(): No craftingRequirements present, Saving Blindly for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+                                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): No craftingRequirements present, Saving Blindly for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
                                 this.storeNetworkRecipeId(id);
                                 this.storeRecipeCategory(entry.category());
                                 this.storeRecipeDisplayEntry(entry);
@@ -354,7 +354,7 @@ public class RecipePattern
 
                             if (pair != null)
                             {
-                                ItemScroller.printDebug("storeSelectedRecipeIdFromGui(): matching pair for result stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
+                                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): matching pair for result stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
                                 this.storeNetworkRecipeId(pair.getLeft());
                                 this.storeRecipeCategory(pair.getRight().category());
                                 this.storeRecipeDisplayEntry(pair.getRight());
@@ -367,14 +367,14 @@ public class RecipePattern
 
                                 if (pair != null)
                                 {
-                                    ItemScroller.printDebug("storeSelectedRecipeIdFromGui(): RE-matching pair results stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
+                                    ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): RE-matching pair results stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
                                     this.storeNetworkRecipeId(pair.getLeft());
                                     this.storeRecipeCategory(pair.getRight().category());
                                     this.storeRecipeDisplayEntry(pair.getRight());
                                 }
                                 else
                                 {
-                                    ItemScroller.logger.error("storeSelectedRecipeIdFromGui(): Final Exception matching results stack [{}] versus [{}] --> Clearing Recipe", this.getResult().toString(), result.toString());
+                                    ItemScroller.LOGGER.error("storeSelectedRecipeIdFromGui(): Final Exception matching results stack [{}] versus [{}] --> Clearing Recipe", this.getResult().toString(), result.toString());
                                     this.clearRecipe();
                                 }
                             }

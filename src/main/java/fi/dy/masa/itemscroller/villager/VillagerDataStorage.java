@@ -1,31 +1,25 @@
 package fi.dy.masa.itemscroller.villager;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import javax.annotation.Nonnull;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.screen.MerchantScreenHandler;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
 
+import fi.dy.masa.malilib.util.FileUtils;
+import fi.dy.masa.malilib.util.StringUtils;
+import fi.dy.masa.malilib.util.nbt.NbtUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.util.Constants;
-import fi.dy.masa.malilib.util.FileUtils;
-import fi.dy.masa.malilib.util.StringUtils;
 
 public class VillagerDataStorage
 {
@@ -164,8 +158,9 @@ public class VillagerDataStorage
         }
     }
 
-    private NbtCompound writeToNBT(@Nonnull NbtCompound nbt)
+    private NbtCompound writeToNBT()
     {
+        NbtCompound nbt = new NbtCompound();
         NbtList favoriteListData = new NbtList();
         NbtList globalFavoriteData = new NbtList();
 
@@ -199,9 +194,9 @@ public class VillagerDataStorage
         return "villager_data.nbt";
     }
 
-    private File getSaveDir()
+    private Path getSaveDirPath()
     {
-        return new File(FileUtils.getMinecraftDirectory(), Reference.MOD_ID);
+        return FileUtils.getMinecraftDirectoryAsPath().resolve(Reference.MOD_ID);
     }
 
     public void readFromDisk()
@@ -211,26 +206,36 @@ public class VillagerDataStorage
 
         try
         {
-            File saveDir = this.getSaveDir();
-            File file = new File(saveDir, this.getFileName());
+            Path saveDir = this.getSaveDirPath();
 
-            if (file.exists())
+            if (Files.isDirectory(saveDir))
             {
-                if (file.isFile() && file.canRead())
+                Path file = saveDir.resolve(this.getFileName());
+
+                if (Files.exists(file))
                 {
-                    FileInputStream is = new FileInputStream(file);
-                    this.readFromNBT(NbtIo.readCompressed(is, NbtSizeTracker.ofUnlimitedBytes()));
-                    is.close();
+                    NbtCompound nbtIn = NbtUtils.readNbtFromFileAsPath(file, NbtSizeTracker.ofUnlimitedBytes());
+
+                    if (nbtIn != null && !nbtIn.isEmpty())
+                    {
+                        this.readFromNBT(nbtIn);
+                        //ItemScroller.debugLog("readFromDisk(): Successfully loaded villager's from file '{}'", file.toAbsolutePath());
+                    }
+                    else
+                    {
+                        ItemScroller.LOGGER.warn("readFromDisk(): Error reading villager data from file '{}'", file.toAbsolutePath());
+                    }
                 }
-                else
-                {
-                    ItemScroller.logger.warn("VillagerDataStorage#readFromDisk(): Error reading villager data from file '{}'", file.getPath());
-                }
+                // File does not exist
+            }
+            else
+            {
+                ItemScroller.LOGGER.warn("readFromDisk(): Error reading villager data from dir '{}'", saveDir.toAbsolutePath());
             }
         }
         catch (Exception e)
         {
-            ItemScroller.logger.warn("Failed to read villager data from file", e);
+            ItemScroller.LOGGER.warn("Failed to read villager data from file", e);
         }
     }
 
@@ -240,38 +245,35 @@ public class VillagerDataStorage
         {
             try
             {
-                File saveDir = this.getSaveDir();
+                Path saveDir = this.getSaveDirPath();
 
-                if (saveDir.exists() == false && saveDir.mkdirs() == false)
+                if (!Files.exists(saveDir))
                 {
-                    ItemScroller.logger.warn("Failed to create the data storage directory '{}'", saveDir.getPath());
-                    return;
+                    FileUtils.createDirectoriesIfMissing(saveDir);
+                    //ItemScroller.debugLog("writeToDisk(): Creating directory '{}'.", saveDir.toAbsolutePath());
                 }
 
-                File fileTmp  = new File(saveDir, this.getFileName() + ".tmp");
-                File fileReal = new File(saveDir, this.getFileName());
-                FileOutputStream os = new FileOutputStream(fileTmp);
-                NbtIo.writeCompressed(this.writeToNBT(new NbtCompound()), os);
-                os.close();
-
-                if (fileReal.exists())
+                if (Files.isDirectory(saveDir))
                 {
-                    if (fileReal.delete() == false)
+                    Path fileTmp = saveDir.resolve(this.getFileName() + ".tmp");
+                    Path fileReal = saveDir.resolve(this.getFileName());
+
+                    NbtUtils.writeCompressed(this.writeToNBT(), fileTmp);
+
+                    if (Files.exists(fileReal))
                     {
-                        ItemScroller.logger.warn("VillagerDataStorage#writeToDisk(): failed to delete file {} ", fileReal.getName());
+                        Files.delete(fileReal);
                     }
-                }
 
-                if (fileTmp.renameTo(fileReal) == false)
-                {
-                    ItemScroller.logger.warn("VillagerDataStorage#writeToDisk(): failed to delete file {} ", fileTmp.getName());
-                }
-                this.dirty = false;
+                    Files.move(fileTmp, fileReal);
 
+                    //ItemScroller.debugLog("writeToDisk(): Successfully saved recipes file '{}'", fileReal.toAbsolutePath());
+                    this.dirty = false;
+                }
             }
             catch (Exception e)
             {
-                ItemScroller.logger.warn("Failed to write villager data to file!", e);
+                ItemScroller.LOGGER.warn("Failed to write villager data to file!", e);
             }
         }
     }
