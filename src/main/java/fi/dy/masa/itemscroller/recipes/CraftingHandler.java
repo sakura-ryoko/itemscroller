@@ -37,8 +37,8 @@ public class CraftingHandler
         }
         catch (Exception e)
         {
-            ItemScroller.logger.warn("addCraftingGridDefinition(): Failed to find classes for grid definition: gui: '{}', slot: '{}', outputSlot: {}",
-                    guiClassName, slotClassName, outputSlot);
+            ItemScroller.LOGGER.warn("addCraftingGridDefinition(): Failed to find classes for grid definition: gui: '{}', slot: '{}', outputSlot: {}",
+                                     guiClassName, slotClassName, outputSlot);
         }
 
         return false;
