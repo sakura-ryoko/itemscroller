@@ -242,7 +242,7 @@ public class RecipePattern
         {
             if (entry.craftingRequirements().isPresent())
             {
-                return RecipeUtils.compareStacksAndIngredients(recipeStacks, entry.craftingRequirements().get(), this.countRecipeItems());
+                return RecipeUtils.compareStacksAndIngredients(recipeStacks, entry.craftingRequirements().get(), this.countRecipeItems(), RecipeUtils.Type.fromRecipeDisplay(entry.display()));
             }
 
             return true;
@@ -327,7 +327,7 @@ public class RecipePattern
                         {
                             if (entry.craftingRequirements().isPresent())
                             {
-                                if (RecipeUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), this.countRecipeItems()))
+                                if (RecipeUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), this.countRecipeItems(), RecipeUtils.Type.fromRecipeDisplay(entry.display())))
                                 {
                                     ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
                                     this.storeNetworkRecipeId(id);
