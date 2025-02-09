@@ -3102,7 +3102,7 @@ public class InventoryUtils
         return false;
     }
 
-    private static boolean isShulkerBox(ItemStack stack)
+    public static boolean isShulkerBox(ItemStack stack)
     {
         return stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof ShulkerBoxBlock;
     }
