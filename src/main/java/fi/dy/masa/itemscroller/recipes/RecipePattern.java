@@ -425,11 +425,11 @@ public class RecipePattern
 
                 if (slot >= 0 && slot < this.recipe.length)
                 {
-                    this.recipe[slot] = ItemStack.fromNbtOrEmpty(registryManager, tag);
+                    this.recipe[slot] = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, tag);
                 }
             }
 
-            this.result = ItemStack.fromNbtOrEmpty(registryManager, nbt.getCompound("Result"));
+            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, nbt.getCompound("Result"));
         }
     }
 
