@@ -157,6 +157,7 @@ public class RecipeStorage
                     recipe.storeNetworkRecipeId(entry.id());
                     recipe.storeRecipeCategory(entry.category());
                     recipe.storeRecipeDisplayEntry(entry);
+                    break;
                 }
             }
         }
