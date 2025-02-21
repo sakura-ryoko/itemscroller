@@ -229,10 +229,13 @@ public class RecipePattern
             return false;
         }
 
+        // Mojang breaks their own player recipe book.  Verifying the Category here can cause problems.
+        /*
         if (this.getRecipeCategory() != null && !entry.category().equals(this.getRecipeCategory()))
         {
             return false;
         }
+         */
         List<ItemStack> recipeStacks = Arrays.stream(this.getRecipeItems()).toList();
         List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
 
