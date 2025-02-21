@@ -21,8 +21,6 @@ import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.util.Constants;
-import fi.dy.masa.malilib.util.FileUtils;
-import fi.dy.masa.malilib.util.StringUtils;
 
 public class RecipeStorage
 {
@@ -159,6 +157,7 @@ public class RecipeStorage
                     recipe.storeNetworkRecipeId(entry.id());
                     recipe.storeRecipeCategory(entry.category());
                     recipe.storeRecipeDisplayEntry(entry);
+                    break;
                 }
             }
         }

@@ -48,8 +48,8 @@ public class RecipeUtils
         }
 
         //System.out.printf("compareStacksAndIngredients() Type: [%s], count [%s] --> START\n", type.toString(), count);
-        dumpStacks(left, "LF");
-        dumpIngs(right, "RT");
+        //dumpStacks(left, "LF");
+        //dumpIngs(right, "RT");
 
         if (type == Type.SHAPELESS)
         {
@@ -166,36 +166,36 @@ public class RecipeUtils
     {
         int i = 0;
 
-        System.out.printf("DUMP [%s] -->\n", side);
+        //System.out.printf("DUMP [%s] -->\n", side);
         for (ItemStack stack : stacks)
         {
-            System.out.printf(" %s[%d] // [%s]\n", side, i, stack.toString());
+            //System.out.printf(" %s[%d] // [%s]\n", side, i, stack.toString());
             i++;
         }
-        System.out.printf("DUMP END [%s]\n", side);
+        //System.out.printf("DUMP END [%s]\n", side);
     }
 
     private static void dumpIngs(List<Ingredient> ings, String side)
     {
         int i = 0;
 
-        System.out.printf("DUMP [%s] -->\n", side);
+        //System.out.printf("DUMP [%s] -->\n", side);
         for (Ingredient ing : ings)
         {
             List<RegistryEntry<Item>> items = ing.getMatchingItems();
 
-            System.out.printf(" %s[%d] //", side, i);
+            //System.out.printf(" %s[%d] //", side, i);
 
             for (RegistryEntry<Item> item : items)
             {
-                System.out.printf(" [%s]", item.getIdAsString());
+                //System.out.printf(" [%s]", item.getIdAsString());
             }
 
-            System.out.print("// []\n");
+            //System.out.print("// []\n");
             i++;
         }
 
-        System.out.printf("DUMP END [%s]\n", side);
+        //System.out.printf("DUMP END [%s]\n", side);
     }
 
     public enum Type
