@@ -50,8 +50,8 @@ public class RecipeUtils
         }
 
         //System.out.printf("compareStacksAndIngredients() Type: [%s], count [%s] --> START\n", type.toString(), count);
-        dumpStacks(left, "LF");
-        dumpIngs(right, "RT");
+        //dumpStacks(left, "LF");
+        //dumpIngs(right, "RT");
 
         if (type == Type.SHAPELESS)
         {
