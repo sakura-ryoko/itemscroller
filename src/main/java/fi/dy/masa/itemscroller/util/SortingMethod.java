@@ -2,6 +2,8 @@ package fi.dy.masa.itemscroller.util;
 
 import com.google.common.collect.ImmutableList;
 
+import com.mojang.serialization.Codec;
+
 import fi.dy.masa.malilib.config.IConfigOptionListEntry;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.itemscroller.Reference;
@@ -26,6 +28,12 @@ public enum SortingMethod implements IConfigOptionListEntry
     {
         this.configString = configString;
         this.translationKey = Reference.MOD_ID+".gui.label.sorting_method."+translationKey;
+    }
+
+    @Override
+    public Codec<SortingMethod> codec()
+    {
+        return null;
     }
 
     @Override
