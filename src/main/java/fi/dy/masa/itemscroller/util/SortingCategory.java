@@ -11,6 +11,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.StringIdentifiable;
 
 import fi.dy.masa.malilib.config.IConfigLockedListEntry;
 import fi.dy.masa.malilib.config.IConfigLockedListType;
@@ -21,6 +22,7 @@ public class SortingCategory implements IConfigLockedListType
 {
     public static final SortingCategory INSTANCE = new SortingCategory();
     public ImmutableList<Entry> VALUES = ImmutableList.copyOf(Entry.values());
+    //public static final Codec<SortingCategory> CODEC = Entry.CODEC.listOf().xmap(getDefault);
 
     @Nullable
     public ItemGroup.DisplayContext buildDisplayContext(MinecraftClient mc)
@@ -118,7 +120,7 @@ public class SortingCategory implements IConfigLockedListType
         return Entry.fromString(string);
     }
 
-    public enum Entry implements IConfigLockedListEntry
+    public enum Entry implements IConfigLockedListEntry, StringIdentifiable
     {
         BUILDING_BLOCKS     ("building_blocks",     "building_blocks"),
         COLORED_BLOCKS      ("colored_blocks",      "colored_blocks"),
@@ -133,6 +135,9 @@ public class SortingCategory implements IConfigLockedListType
         OPERATOR            ("op_blocks",           "op_blocks"),
         OTHER               ("other",               "other");
 
+        public static final StringIdentifiable.EnumCodec<Entry> CODEC = StringIdentifiable.createCodec(Entry::values);
+        public static final ImmutableList<Entry> VALUES = ImmutableList.copyOf(values());
+
         private final String configKey;
         private final String translationKey;
 
@@ -145,7 +150,13 @@ public class SortingCategory implements IConfigLockedListType
         @Override
         public Codec<Entry> codec()
         {
-            return null;
+            return CODEC;
+        }
+
+        @Override
+        public String asString()
+        {
+            return this.configKey;
         }
 
         @Override
