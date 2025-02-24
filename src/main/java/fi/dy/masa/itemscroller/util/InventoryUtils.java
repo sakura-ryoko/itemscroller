@@ -792,6 +792,16 @@ public class InventoryUtils
         if (GuiUtils.getCurrentScreen() instanceof MerchantScreen merchantGui)
         {
             MerchantScreenHandler handler = merchantGui.getScreenHandler();
+
+            try
+            {
+                if (handler.getRecipes().isEmpty()) return;
+            }
+            catch (Exception ignored)
+            {
+                return;
+            }
+
             Slot slot = handler.getSlot(2);
             ItemStack sellItem = handler.getRecipes().get(visibleIndex).getSellItem().copy();
 
