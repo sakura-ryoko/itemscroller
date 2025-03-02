@@ -96,9 +96,8 @@ public abstract class MixinGuiMerchant extends GuiContainer implements IGuiMerch
     {
         if (Configs.Toggles.VILLAGER_TRADE_LIST.getBooleanValue() && this.widgetTradeList != null)
         {
-            WidgetTradeList widget = this.widgetTradeList;
             ScreenContext ctx = new ScreenContext(mouseX, mouseY, -1, true);
-            widget.render(ctx);
+            this.widgetTradeList.render(ctx);
         }
     }
 }
