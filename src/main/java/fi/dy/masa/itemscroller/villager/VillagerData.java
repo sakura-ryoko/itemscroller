@@ -1,12 +1,12 @@
 package fi.dy.masa.itemscroller.villager;
 
-import java.util.UUID;
 import javax.annotation.Nullable;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import java.util.UUID;
+
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
-import fi.dy.masa.itemscroller.util.Constants;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 public class VillagerData
 {
@@ -74,18 +74,18 @@ public class VillagerData
     @Nullable
     public static VillagerData fromNBT(NbtCompound tag)
     {
-        if (tag.contains("UUIDM", Constants.NBT.TAG_LONG) && tag.contains("UUIDL", Constants.NBT.TAG_LONG))
+        if (tag.contains("UUIDM") && tag.contains("UUIDL"))
         {
-            VillagerData data = new VillagerData(new UUID(tag.getLong("UUIDM"), tag.getLong("UUIDL")));
-            NbtList tagList = tag.getList("Favorites", Constants.NBT.TAG_INT);
+            VillagerData data = new VillagerData(new UUID(tag.getLong("UUIDM", 0L), tag.getLong("UUIDL", 0L)));
+            NbtList tagList = tag.getOrCreateList("Favorites");
             final int count = tagList.size();
 
             data.favorites.clear();
-            data.tradeListPosition = tag.getInt("ListPosition");
+            data.tradeListPosition = tag.getInt("ListPosition", -1);
 
             for (int i = 0; i < count; ++i)
             {
-                data.favorites.add(tagList.getInt(i));
+                data.favorites.add(tagList.getInt(i, -1));
             }
 
             return data;

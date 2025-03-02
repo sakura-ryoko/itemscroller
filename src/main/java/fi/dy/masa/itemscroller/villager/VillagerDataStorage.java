@@ -1,10 +1,10 @@
 package fi.dy.masa.itemscroller.villager;
 
+import javax.annotation.Nullable;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import javax.annotation.Nullable;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -19,7 +19,6 @@ import fi.dy.masa.malilib.util.nbt.NbtUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.util.Constants;
 
 public class VillagerDataStorage
 {
@@ -124,17 +123,17 @@ public class VillagerDataStorage
 
     private void readFromNBT(NbtCompound nbt)
     {
-        if (nbt == null || nbt.contains("VillagerData", Constants.NBT.TAG_LIST) == false)
+        if (nbt == null || nbt.contains("VillagerData") == false)
         {
             return;
         }
 
-        NbtList tagList = nbt.getList("VillagerData", Constants.NBT.TAG_COMPOUND);
+        NbtList tagList = nbt.getOrCreateList("VillagerData");
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getCompound(i);
+            NbtCompound tag = tagList.getOrCreateCompound(i);
             VillagerData data = VillagerData.fromNBT(tag);
 
             if (data != null)
@@ -143,12 +142,12 @@ public class VillagerDataStorage
             }
         }
 
-        tagList = nbt.getList("GlobalFavorites", Constants.NBT.TAG_COMPOUND);
+        tagList = nbt.getOrCreateList("GlobalFavorites");
         count = tagList.size();
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getCompound(i);
+            NbtCompound tag = tagList.getOrCreateCompound(i);
             TradeType type = TradeType.fromTag(tag);
 
             if (type != null)

@@ -51,9 +51,9 @@ public class TradeType
     @Nullable
     public static TradeType fromTag(NbtCompound tag)
     {
-        Item buy1 = getItemForName(tag.getString("Buy1"));
-        Item buy2 = getItemForName(tag.getString("Buy2"));
-        Item sell = getItemForName(tag.getString("Sell"));
+        Item buy1 = getItemForName(tag.getString("Buy1", ""));
+        Item buy2 = getItemForName(tag.getString("Buy2", ""));
+        Item sell = getItemForName(tag.getString("Sell", ""));
 
         if (buy1 != Items.AIR || buy2 != Items.AIR || sell != Items.AIR)
         {
