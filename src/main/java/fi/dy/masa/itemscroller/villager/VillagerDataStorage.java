@@ -128,7 +128,7 @@ public class VillagerDataStorage
             return;
         }
 
-        NbtList tagList = nbt.getOrCreateList("VillagerData");
+        NbtList tagList = nbt.getListOrEmpty("VillagerData");
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)
@@ -142,7 +142,7 @@ public class VillagerDataStorage
             }
         }
 
-        tagList = nbt.getOrCreateList("GlobalFavorites");
+        tagList = nbt.getListOrEmpty("GlobalFavorites");
         count = tagList.size();
 
         for (int i = 0; i < count; i++)

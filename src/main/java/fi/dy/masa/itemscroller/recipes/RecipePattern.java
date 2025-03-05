@@ -411,7 +411,7 @@ public class RecipePattern
     {
         if (nbt.contains("Result") && nbt.contains("Ingredients"))
         {
-            NbtList tagIngredients = nbt.getOrCreateList("Ingredients");
+            NbtList tagIngredients = nbt.getListOrEmpty("Ingredients");
             int count = tagIngredients.size();
             int length = nbt.getInt("Length" , -1);
 
@@ -431,7 +431,7 @@ public class RecipePattern
                 }
             }
 
-            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, nbt.getOrCreateCompound("Result"));
+            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, nbt.getCompoundOrEmpty("Result"));
         }
     }
 

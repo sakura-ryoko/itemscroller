@@ -174,7 +174,7 @@ public class RecipeStorage
             this.recipes[i].clearRecipe();
         }
 
-        NbtList tagList = nbt.getOrCreateList("Recipes");
+        NbtList tagList = nbt.getListOrEmpty("Recipes");
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)

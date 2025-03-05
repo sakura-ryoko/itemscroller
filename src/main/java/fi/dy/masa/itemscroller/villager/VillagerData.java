@@ -77,7 +77,7 @@ public class VillagerData
         if (tag.contains("UUIDM") && tag.contains("UUIDL"))
         {
             VillagerData data = new VillagerData(new UUID(tag.getLong("UUIDM", 0L), tag.getLong("UUIDL", 0L)));
-            NbtList tagList = tag.getOrCreateList("Favorites");
+            NbtList tagList = tag.getListOrEmpty("Favorites");
             final int count = tagList.size();
 
             data.favorites.clear();
