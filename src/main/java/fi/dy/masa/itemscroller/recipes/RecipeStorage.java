@@ -179,7 +179,7 @@ public class RecipeStorage
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getOrCreateCompound(i);
+            NbtCompound tag = tagList.getCompoundOrEmpty(i);
 
             int index = tag.getByte("RecipeIndex", (byte) -1);
 

@@ -422,7 +422,7 @@ public class RecipePattern
 
             for (int i = 0; i < count; i++)
             {
-                NbtCompound tag = tagIngredients.getOrCreateCompound(i);
+                NbtCompound tag = tagIngredients.getCompoundOrEmpty(i);
                 int slot = tag.getInt("Slot", -1);
 
                 if (slot >= 0 && slot < this.recipe.length)

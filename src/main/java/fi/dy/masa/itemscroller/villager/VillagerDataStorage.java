@@ -133,7 +133,7 @@ public class VillagerDataStorage
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getOrCreateCompound(i);
+            NbtCompound tag = tagList.getCompoundOrEmpty(i);
             VillagerData data = VillagerData.fromNBT(tag);
 
             if (data != null)
@@ -147,7 +147,7 @@ public class VillagerDataStorage
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getOrCreateCompound(i);
+            NbtCompound tag = tagList.getCompoundOrEmpty(i);
             TradeType type = TradeType.fromTag(tag);
 
             if (type != null)
