@@ -13,7 +13,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
-import fi.dy.masa.itemscroller.mixin.IMixinIngredient;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinIngredient;
 
 public class RecipeUtils
 {

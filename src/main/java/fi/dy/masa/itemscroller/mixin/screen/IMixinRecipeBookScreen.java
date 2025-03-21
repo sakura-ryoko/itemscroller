@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.screen;
 
 import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;

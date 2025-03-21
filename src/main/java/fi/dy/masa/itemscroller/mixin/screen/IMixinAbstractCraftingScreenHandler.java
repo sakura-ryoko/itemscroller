@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.screen;
 
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.RecipeInputInventory;

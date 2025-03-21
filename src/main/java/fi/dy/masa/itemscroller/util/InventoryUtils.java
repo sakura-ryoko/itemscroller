@@ -56,7 +56,7 @@ import fi.dy.masa.malilib.util.game.wrap.GameWrap;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
-import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinCraftingResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;

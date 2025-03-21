@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.item;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;

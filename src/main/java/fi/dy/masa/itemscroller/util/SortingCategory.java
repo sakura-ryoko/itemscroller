@@ -5,7 +5,6 @@ import java.util.Iterator;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
-import com.mojang.serialization.Codec;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -98,12 +97,6 @@ public class SortingCategory implements IConfigLockedListType
     }
 
     @Override
-    public Codec<SortingCategory> codec()
-    {
-        return null;
-    }
-
-    @Override
     public ImmutableList<IConfigLockedListEntry> getDefaultEntries()
     {
         ImmutableList.Builder<IConfigLockedListEntry> list = ImmutableList.builder();
@@ -145,12 +138,6 @@ public class SortingCategory implements IConfigLockedListType
         {
             this.configKey = configKey;
             this.translationKey = Reference.MOD_ID+".gui.label.sorting_category."+translationKey;
-        }
-
-        @Override
-        public Codec<Entry> codec()
-        {
-            return CODEC;
         }
 
         @Override

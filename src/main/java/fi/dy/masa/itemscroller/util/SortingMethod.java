@@ -2,7 +2,6 @@ package fi.dy.masa.itemscroller.util;
 
 import com.google.common.collect.ImmutableList;
 
-import com.mojang.serialization.Codec;
 import net.minecraft.util.StringIdentifiable;
 
 import fi.dy.masa.malilib.config.IConfigOptionListEntry;
@@ -30,12 +29,6 @@ public enum SortingMethod implements IConfigOptionListEntry, StringIdentifiable
     {
         this.configString = configString;
         this.translationKey = Reference.MOD_ID+".gui.label.sorting_method."+translationKey;
-    }
-
-    @Override
-    public Codec<SortingMethod> codec()
-    {
-        return CODEC;
     }
 
     @Override
