@@ -5,9 +5,9 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import fi.dy.masa.itemscroller.mixin.IMixinMerchantScreen;
-import fi.dy.masa.itemscroller.mixin.IMixinScreenWithHandler;
-import fi.dy.masa.itemscroller.mixin.IMixinSlot;
+import fi.dy.masa.itemscroller.mixin.screen.IMixinMerchantScreen;
+import fi.dy.masa.itemscroller.mixin.screen.IMixinScreenWithHandler;
+import fi.dy.masa.itemscroller.mixin.item.IMixinSlot;
 
 public class AccessorUtils
 {

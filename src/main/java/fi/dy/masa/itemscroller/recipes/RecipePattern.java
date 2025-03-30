@@ -1,12 +1,12 @@
 package fi.dy.masa.itemscroller.recipes;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -29,11 +29,10 @@ import net.minecraft.util.context.ContextParameterMap;
 import net.minecraft.world.World;
 
 import fi.dy.masa.itemscroller.ItemScroller;
-import fi.dy.masa.itemscroller.mixin.IMixinClientRecipeBook;
-import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookScreen;
-import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookWidget;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinClientRecipeBook;
+import fi.dy.masa.itemscroller.mixin.screen.IMixinRecipeBookScreen;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinRecipeBookWidget;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
-import fi.dy.masa.itemscroller.util.Constants;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 public class RecipePattern
@@ -410,11 +409,11 @@ public class RecipePattern
 
     public void readFromNBT(@Nonnull NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
     {
-        if (nbt.contains("Result", Constants.NBT.TAG_COMPOUND) && nbt.contains("Ingredients", Constants.NBT.TAG_LIST))
+        if (nbt.contains("Result") && nbt.contains("Ingredients"))
         {
-            NbtList tagIngredients = nbt.getList("Ingredients", Constants.NBT.TAG_COMPOUND);
+            NbtList tagIngredients = nbt.getListOrEmpty("Ingredients");
             int count = tagIngredients.size();
-            int length = nbt.getInt("Length");
+            int length = nbt.getInt("Length" , -1);
 
             if (length > 0)
             {
@@ -423,16 +422,16 @@ public class RecipePattern
 
             for (int i = 0; i < count; i++)
             {
-                NbtCompound tag = tagIngredients.getCompound(i);
-                int slot = tag.getInt("Slot");
+                NbtCompound tag = tagIngredients.getCompoundOrEmpty(i);
+                int slot = tag.getInt("Slot", -1);
 
                 if (slot >= 0 && slot < this.recipe.length)
                 {
-                    this.recipe[slot] = ItemStack.fromNbtOrEmpty(registryManager, tag);
+                    this.recipe[slot] = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, tag);
                 }
             }
 
-            this.result = ItemStack.fromNbtOrEmpty(registryManager, nbt.getCompound("Result"));
+            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, nbt.getCompoundOrEmpty("Result"));
         }
     }
 

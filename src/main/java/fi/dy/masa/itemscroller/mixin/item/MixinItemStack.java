@@ -1,7 +1,5 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.item;
 
-import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.util.InventoryUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,14 +8,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.util.InventoryUtils;
+
 @Mixin(ItemStack.class)
-public class MixinItemStack
+public abstract class MixinItemStack
 {
     @Inject(method = "capCount", at = @At("HEAD"), cancellable = true)
     private void dontCap(int maxCount, CallbackInfo ci)
     {
         // Client-side fx for empty shulker box stacking
         if (MinecraftClient.getInstance().isOnThread() &&
+            Configs.Generic.MOD_MAIN_TOGGLE.getBooleanValue() &&
             Configs.Generic.SORT_INVENTORY_TOGGLE.getBooleanValue() &&
             Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue())
         {
@@ -28,8 +30,11 @@ public class MixinItemStack
     @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
     private void getMaxCount(CallbackInfoReturnable<Integer> cir)
     {
+        //System.out.printf("getMaxCount(): this item [%s] // Default Component [%d]\n", this.toString(), this.getComponents().getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1));
+
         // Client-side fx for empty shulker box stacking
         if (MinecraftClient.getInstance().isOnThread() &&
+            Configs.Generic.MOD_MAIN_TOGGLE.getBooleanValue() &&
             Configs.Generic.SORT_INVENTORY_TOGGLE.getBooleanValue() &&
             Configs.Generic.SORT_ASSUME_EMPTY_BOX_STACKS.getBooleanValue() &&
             InventoryUtils.assumeEmptyShulkerStacking)

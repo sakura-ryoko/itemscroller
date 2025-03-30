@@ -22,7 +22,7 @@ import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.GuiConfigs;
-import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinCraftingResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
@@ -153,7 +153,6 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         {
             if (InputUtils.isRecipeViewOpen() && InventoryUtils.isCraftingSlot(gui, slot))
             {
-                //System.out.print("onKeyActionImpl()\n");
                 recipes.storeCraftingRecipeToCurrentSelection(slot, gui, true, true, mc);
                 return true;
             }
@@ -190,9 +189,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
     @Override
     public void onClientTick(MinecraftClient mc)
     {
-        if (InventoryUtils.dontUpdateRecipeBook > 0) {
+        if (InventoryUtils.dontUpdateRecipeBook > 0)
+        {
             --InventoryUtils.dontUpdateRecipeBook;
         }
+
         if (this.functionalityEnabled() == false || mc.player == null)
         {
             return;

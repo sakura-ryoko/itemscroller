@@ -1,13 +1,6 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.screen;
 
 import javax.annotation.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -16,18 +9,20 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.MerchantScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.village.TradeOffer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.ItemScrollerIcons;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
-import fi.dy.masa.itemscroller.villager.FavoriteData;
-import fi.dy.masa.itemscroller.villager.IMerchantScreenHandler;
-import fi.dy.masa.itemscroller.villager.VillagerData;
-import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
-import fi.dy.masa.itemscroller.villager.VillagerUtils;
-import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
-import fi.dy.masa.malilib.render.RenderUtils;
+import fi.dy.masa.itemscroller.villager.*;
 
 @Mixin(MerchantScreen.class)
 public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHandler>
@@ -172,7 +167,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
 
                 for (int i = 0; i < (numFavorites - this.indexStartOffset); ++i)
                 {
-                    RenderUtils.bindTexture(icon.getTexture());
+                    //RenderUtils.bindTexture(icon.getTexture());
                     icon.renderAt(x, y, z, false, false, context);
                     y += 20;
                 }

@@ -20,7 +20,6 @@ import fi.dy.masa.malilib.util.nbt.NbtUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.util.Constants;
 
 public class RecipeStorage
 {
@@ -165,7 +164,7 @@ public class RecipeStorage
 
     private void readFromNBT(NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
     {
-        if (nbt == null || nbt.contains("Recipes", Constants.NBT.TAG_LIST) == false)
+        if (nbt == null || nbt.contains("Recipes") == false)
         {
             return;
         }
@@ -175,31 +174,31 @@ public class RecipeStorage
             this.recipes[i].clearRecipe();
         }
 
-        NbtList tagList = nbt.getList("Recipes", Constants.NBT.TAG_COMPOUND);
+        NbtList tagList = nbt.getListOrEmpty("Recipes");
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getCompound(i);
+            NbtCompound tag = tagList.getCompoundOrEmpty(i);
 
-            int index = tag.getByte("RecipeIndex");
+            int index = tag.getByte("RecipeIndex", (byte) -1);
 
             if (index >= 0 && index < this.recipes.length)
             {
                 this.recipes[index].readFromNBT(tag, registryManager);
 
-                if (tag.contains("RecipeCategory", Constants.NBT.TAG_STRING))
+                if (tag.contains("RecipeCategory"))
                 {
-                    this.recipes[index].storeRecipeCategory(RecipeUtils.getRecipeCategoryFromId(tag.getString("RecipeCategory")));
+                    this.recipes[index].storeRecipeCategory(RecipeUtils.getRecipeCategoryFromId(tag.getString("RecipeCategory", "")));
                 }
                 if (tag.contains("LastNetworkId"))
                 {
-                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId")));
+                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId", -1)));
                 }
             }
         }
 
-        this.changeSelectedRecipe(nbt.getByte("Selected"));
+        this.changeSelectedRecipe(nbt.getByte("Selected", (byte) -1));
     }
 
     private NbtCompound writeToNBT(@Nonnull DynamicRegistryManager registry)

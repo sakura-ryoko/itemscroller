@@ -2,11 +2,13 @@ package fi.dy.masa.itemscroller.util;
 
 import com.google.common.collect.ImmutableList;
 
+import net.minecraft.util.StringIdentifiable;
+
 import fi.dy.masa.malilib.config.IConfigOptionListEntry;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.itemscroller.Reference;
 
-public enum SortingMethod implements IConfigOptionListEntry
+public enum SortingMethod implements IConfigOptionListEntry, StringIdentifiable
 {
     CATEGORY_NAME       ("category_name",   "category_name"),
     CATEGORY_COUNT      ("category_count",  "category_count"),
@@ -17,6 +19,7 @@ public enum SortingMethod implements IConfigOptionListEntry
     ITEM_RARITY         ("item_rarity",     "item_rarity"),
     ITEM_RAWID          ("item_rawid",      "item_rawid");
 
+    public static final StringIdentifiable.EnumCodec<SortingMethod> CODEC = StringIdentifiable.createCodec(SortingMethod::values);
     public static final ImmutableList<SortingMethod> VALUES = ImmutableList.copyOf(values());
 
     private final String configString;
@@ -26,6 +29,12 @@ public enum SortingMethod implements IConfigOptionListEntry
     {
         this.configString = configString;
         this.translationKey = Reference.MOD_ID+".gui.label.sorting_method."+translationKey;
+    }
+
+    @Override
+    public String asString()
+    {
+        return this.configString;
     }
 
     @Override

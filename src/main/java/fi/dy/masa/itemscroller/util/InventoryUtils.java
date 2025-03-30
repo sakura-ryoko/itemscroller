@@ -56,7 +56,7 @@ import fi.dy.masa.malilib.util.game.wrap.GameWrap;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
-import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinCraftingResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
@@ -2066,11 +2066,11 @@ public class InventoryUtils
 
     public static int getPlayerInventoryIndexWithItem(ItemStack stackReference, PlayerInventory inv)
     {
-        final int size = inv.main.size();
+        final int size = inv.getMainStacks().size();
 
         for (int index = 0; index < size; ++index)
         {
-            ItemStack stack = inv.main.get(index);
+            ItemStack stack = inv.getMainStacks().get(index);
 
             if (areStacksEqual(stack, stackReference))
             {

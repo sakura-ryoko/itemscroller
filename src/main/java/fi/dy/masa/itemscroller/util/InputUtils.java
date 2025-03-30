@@ -2,18 +2,21 @@ package fi.dy.masa.itemscroller.util;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import fi.dy.masa.itemscroller.config.Hotkeys;
-import fi.dy.masa.itemscroller.event.KeybindCallbacks;
-import fi.dy.masa.itemscroller.recipes.CraftingHandler;
+
 import fi.dy.masa.malilib.hotkeys.IKeybind;
 import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.util.GuiUtils;
+import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.config.Hotkeys;
+import fi.dy.masa.itemscroller.event.KeybindCallbacks;
+import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 
 public class InputUtils
 {
     public static boolean isRecipeViewOpen()
     {
         return GuiUtils.getCurrentScreen() != null &&
+               Configs.Generic.MOD_MAIN_TOGGLE.getBooleanValue() &&
                Hotkeys.RECIPE_VIEW.getKeybind().isKeybindHeld() &&
                KeybindCallbacks.getInstance().functionalityEnabled() &&
                CraftingHandler.isCraftingGui(GuiUtils.getCurrentScreen());
