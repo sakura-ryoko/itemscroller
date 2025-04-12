@@ -139,7 +139,7 @@ public class InventoryUtils
                                                 boolean setEmptyStack)
     {
         MinecraftClient mc = MinecraftClient.getInstance();
-        ServerWorld serverWorld = mc.getServer() != null ? mc.getServer().getWorld(mc.world.getRegistryKey()) : null;
+        ServerWorld serverWorld = mc.getServer() != null && mc.getServer().getGameInstance() != null ? mc.getServer().getGameInstance().getWorld(mc.world.getRegistryKey()) : null;
         World world = player.getEntityWorld();
 
         if ((world instanceof ClientWorld) && player instanceof ClientPlayerEntity)

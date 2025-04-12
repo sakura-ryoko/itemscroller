@@ -101,7 +101,7 @@ public class RecipePattern
             return null;
         }
 
-        ServerWorld serverWorld = mc.getServer() != null ? mc.getServer().getWorld(mc.world.getRegistryKey()) : null;
+        ServerWorld serverWorld = mc.getServer() != null && mc.getServer().getGameInstance() != null ? mc.getServer().getGameInstance().getWorld(mc.world.getRegistryKey()) : null;
 
         if (mc.isIntegratedServerRunning() && serverWorld != null)
         {
