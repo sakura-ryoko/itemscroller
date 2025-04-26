@@ -29,9 +29,9 @@ import net.minecraft.util.context.ContextParameterMap;
 import net.minecraft.world.World;
 
 import fi.dy.masa.itemscroller.ItemScroller;
-import fi.dy.masa.itemscroller.mixin.IMixinClientRecipeBook;
-import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookScreen;
-import fi.dy.masa.itemscroller.mixin.IMixinRecipeBookWidget;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinClientRecipeBook;
+import fi.dy.masa.itemscroller.mixin.screen.IMixinRecipeBookScreen;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinRecipeBookWidget;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.util.Constants;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
