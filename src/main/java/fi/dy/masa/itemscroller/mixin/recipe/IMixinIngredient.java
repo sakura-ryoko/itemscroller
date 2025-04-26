@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.recipe;
 
 import net.minecraft.item.Item;
 import net.minecraft.recipe.Ingredient;

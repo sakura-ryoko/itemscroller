@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.item;
 
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
