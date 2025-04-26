@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.screen;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

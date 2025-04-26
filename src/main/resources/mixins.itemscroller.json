@@ -4,20 +4,19 @@
 	"compatibilityLevel": "JAVA_21",
 	"minVersion": "0.8",
 	"mixins": [
-		"IMixinCraftingResultSlot",
-		"IMixinMerchantScreen",
-		"IMixinScreenWithHandler",
-		"IMixinSlot",
-		"MixinAbstractInventoryScreen",
 		"MixinClientPlayerInteractionManager",
 		"MixinClientPlayNetworkHandler",
-		"MixinCraftingScreenHandler",
-		"MixinItemStack",
-		"MixinMerchantScreen",
-		"MixinMerchantScreenHandler",
-		"MixinRecipeBookWidget",
-		"MixinScreen",
-		"debug.MixinServerPlayNetworkHandler"
+		"item.IMixinSlot",
+		"item.MixinItemStack",
+		"recipe.IMixinCraftingResultSlot",
+		"recipe.MixinRecipeBookWidget",
+		"screen.IMixinMerchantScreen",
+		"screen.IMixinScreenWithHandler",
+		"screen.MixinAbstractInventoryScreen",
+		"screen.MixinCraftingScreenHandler",
+		"screen.MixinMerchantScreen",
+		"screen.MixinMerchantScreenHandler",
+		"screen.MixinScreen"
 	],
 	"injectors": {
 		"defaultRequire": 1

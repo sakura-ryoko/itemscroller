@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.screen;
 
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Final;
@@ -12,11 +12,12 @@ import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.world.World;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
-@Mixin(net.minecraft.screen.CraftingScreenHandler.class)
+@Mixin(CraftingScreenHandler.class)
 public abstract class MixinCraftingScreenHandler
 {
     @Shadow @Final private RecipeInputInventory input;

@@ -1,8 +1,9 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.screen;
 
 import javax.annotation.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,10 +32,10 @@ import fi.dy.masa.malilib.render.RenderUtils;
 @Mixin(MerchantScreen.class)
 public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHandler>
 {
-    @Nullable private FavoriteData favoriteData;
+    @Unique @Nullable private FavoriteData favoriteData;
     @Shadow private int selectedIndex;
     @Shadow int indexStartOffset;
-    private int indexStartOffsetLast = -1;
+    @Unique private int indexStartOffsetLast = -1;
 
     @Shadow protected abstract boolean canScroll(int listSize);
 

@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.recipe;
 
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookGhostSlots;

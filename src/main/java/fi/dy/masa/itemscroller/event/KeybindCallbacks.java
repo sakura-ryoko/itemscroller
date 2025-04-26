@@ -1,6 +1,6 @@
 package fi.dy.masa.itemscroller.event;
 
-import fi.dy.masa.itemscroller.mixin.IMixinCraftingResultSlot;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinCraftingResultSlot;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -307,9 +307,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         try
                         {
                             Thread.sleep(0);
-                        } catch (InterruptedException e)
-                        {
                         }
+                        catch (InterruptedException ignored) { }
                         InventoryUtils.setCraftingGridContentsUsingSwaps(gui, mc.player.getInventory(), recipe, outputSlot);
                         //System.out.println("After:");
                         //debugPrintInv(inv);
