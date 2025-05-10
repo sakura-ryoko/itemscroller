@@ -210,6 +210,13 @@ public class RecipePattern
 
                 List<ItemStack> stacks = entry.getStacks(ctx);
 
+                if (stacks.isEmpty())
+                {
+                    // And why would that be? *cries without essential data*
+                    ItemScroller.LOGGER.warn("matchClientRecipeBook(): Failed receiving crafting stacks for NetworkRecipeId: [{}] -- is it even a valid recipe?", id.index());
+                    continue;
+                }
+
                 if (RecipeUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
                 {
                     pair = Pair.of(id, entry);
@@ -239,6 +246,13 @@ public class RecipePattern
         List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
 
         //System.out.printf("matchClientRecipeBookEntry() --> [%s] vs [%s]\n", this.getResult().toString(), stacks.getFirst().toString());
+
+        if (stacks.isEmpty())
+        {
+            // And why would that be? *cries without essential data*
+            ItemScroller.LOGGER.warn("matchClientRecipeBookEntry(): Failed receiving crafting stacks for NetworkRecipeId: [{}] -- is it even a valid recipe?", entry.id().index());
+            return false;
+        }
 
         if (RecipeUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
         {
@@ -323,7 +337,16 @@ public class RecipePattern
                     if (recipeMap.containsKey(id))
                     {
                         RecipeDisplayEntry entry = recipeMap.get(id);
-                        ItemStack result = entry.getStacks(SlotDisplayContexts.createParameters(mc.world)).getFirst();
+                        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
+
+                        if (stacks.isEmpty())
+                        {
+                            // And why would that be? *cries without essential data*
+                            ItemScroller.LOGGER.error("storeSelectedRecipeIdFromGui(): Failed reading crafting stacks for NetworkRecipeId: [{}] -- is it even a valid recipe?", entry.id().index());
+                            return;
+                        }
+
+                        ItemStack result = stacks.getFirst();
 
                         if (RecipeUtils.areStacksEqual(this.getResult(), result))
                         {

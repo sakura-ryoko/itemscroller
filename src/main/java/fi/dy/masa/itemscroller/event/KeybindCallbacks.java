@@ -355,6 +355,6 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
     public void onPacket(ScreenHandlerSlotUpdateS2CPacket packet)
     {
-        var mc = MinecraftClient.getInstance();
+//        var mc = MinecraftClient.getInstance();
     }
 }
