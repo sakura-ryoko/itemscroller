@@ -168,7 +168,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
                 for (int i = 0; i < (numFavorites - this.indexStartOffset); ++i)
                 {
                     //RenderUtils.bindTexture(icon.getTexture());
-                    icon.renderAt(x, y, z, false, false, context);
+                    icon.renderAt(context, x, y, z, false, false);
                     y += 20;
                 }
             }

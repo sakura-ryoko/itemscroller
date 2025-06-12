@@ -16,6 +16,7 @@ import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.RecipeBookCategory;
 import net.minecraft.recipe.display.SlotDisplayContexts;
@@ -465,7 +466,8 @@ public class RecipePattern
 
         if (this.isValid())
         {
-            NbtCompound tag = (NbtCompound) this.result.toNbt(registryManager);
+//            NbtCompound tag = (NbtCompound) this.result.toNbt(registryManager);
+            NbtCompound tag = (NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.result).getPartialOrThrow();
 
             nbt.putInt("Length", this.recipe.length);
             nbt.put("Result", tag);
@@ -476,9 +478,8 @@ public class RecipePattern
             {
                 if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
                 {
-                    tag = new NbtCompound();
-                    tag.copyFrom((NbtCompound) this.recipe[i].toNbt(registryManager));
-
+//                    tag.copyFrom((NbtCompound) this.recipe[i].toNbt(registryManager));
+                    tag = (NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.recipe[i]).getPartialOrThrow();
                     tag.putInt("Slot", i);
                     tagIngredients.add(tag);
                 }

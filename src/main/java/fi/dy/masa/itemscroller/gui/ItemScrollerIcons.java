@@ -63,7 +63,7 @@ public enum ItemScrollerIcons implements IGuiIcon
     }
 
     @Override
-    public void renderAt(int x, int y, float zLevel, boolean enabled, boolean selected, DrawContext drawContext)
+    public void renderAt(DrawContext drawContext, int x, int y, float zLevel, boolean enabled, boolean selected)
     {
         int u = this.u;
         int v = this.v;
@@ -80,7 +80,7 @@ public enum ItemScrollerIcons implements IGuiIcon
             v += this.hoverOffV;
         }
 
-        RenderUtils.drawTexturedRect(this.getTexture(), x, y, u, v, this.w, this.h, zLevel, drawContext);
+        RenderUtils.drawTexturedRect(drawContext, this.getTexture(), x, y, u, v, this.w, this.h, zLevel);
     }
 
     @Override
