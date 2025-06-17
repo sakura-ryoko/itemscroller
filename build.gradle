@@ -9,10 +9,6 @@ repositories {
 	maven { url = 'https://jitpack.io' }
 }
 
-loom {
-	accessWidenerPath = file("src/main/resources/itemscroller.accesswidener")
-}
-
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.mappings_version}:v2"
@@ -26,7 +22,7 @@ dependencies {
 	//modCompile "net.fabricmc.fabric-api:fabric-api:" + project.fabric_version
 
 	modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
-	modRuntimeOnly 'me.fallenbreath:mixin-auditor:0.1.0'
+//	modRuntimeOnly 'me.fallenbreath:mixin-auditor:0.1.0'
 }
 
 base {
@@ -40,16 +36,18 @@ base {
 }
 
 loom {
-	def commonVmArgs = ['-Dmixin.debug.export=true', '-Dmixin.debug.countInjections=true']
-	// [FEATURE] MIXIN_AUDITOR
-	runs {
-		def auditVmArgs = [*commonVmArgs, '-DmixinAuditor.audit=true']
-		clientMixinAudit {
-			client()
-			vmArgs auditVmArgs
-			ideConfigGenerated false
-		}
-	}
+	accessWidenerPath = file("src/main/resources/itemscroller.accesswidener")
+
+//	def commonVmArgs = ['-Dmixin.debug.export=true', '-Dmixin.debug.countInjections=true']
+//	// [FEATURE] MIXIN_AUDITOR
+//	runs {
+//		def auditVmArgs = [*commonVmArgs, '-DmixinAuditor.audit=true']
+//		clientMixinAudit {
+//			client()
+//			vmArgs auditVmArgs
+//			ideConfigGenerated false
+//		}
+//	}
 }
 
 processResources {
