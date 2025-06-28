@@ -174,6 +174,8 @@ public class Configs implements IConfigHandler
         CraftingHandler.addCraftingGridDefinition(CraftingScreen.class.getName(), CraftingResultSlot.class.getName(), 0, new SlotRange(1, 9));
         //"net.minecraft.client.gui.inventory.PlayerInventoryScreen,net.minecraft.inventory.SlotCrafting,0,1-4", // vanilla player inventory crafting grid
         CraftingHandler.addCraftingGridDefinition(InventoryScreen.class.getName(), CraftingResultSlot.class.getName(), 0, new SlotRange(1, 4));
+//        CraftingHandler.addCraftingGridDefinition(StonecutterScreen.class.getName(), Slot.class.getName(), 0, new SlotRange(1, 1));
+        // TODO FIXME -- Stonecutter Screen (Slot numbering, etc) --> Doesn't work the same as the crafting grid
     }
 
     public static void saveToFile()

@@ -15,6 +15,10 @@ import net.minecraft.util.Identifier;
 
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinIngredient;
 
+/**
+ * Moved to {@link fi.dy.masa.malilib.util.game.RecipeBookUtils}
+ */
+@Deprecated(forRemoval = true)
 public class RecipeUtils
 {
     public static String getRecipeCategoryId(RecipeBookCategory category)

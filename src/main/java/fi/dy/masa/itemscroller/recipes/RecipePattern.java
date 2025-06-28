@@ -11,6 +11,7 @@ import java.util.Optional;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
+import net.minecraft.client.gui.screen.ingame.StonecutterScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.item.ItemStack;
@@ -29,6 +30,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.context.ContextParameterMap;
 import net.minecraft.world.World;
 
+import fi.dy.masa.malilib.util.game.RecipeBookUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinClientRecipeBook;
 import fi.dy.masa.itemscroller.mixin.screen.IMixinRecipeBookScreen;
@@ -44,6 +46,7 @@ public class RecipePattern
     private NetworkRecipeId networkRecipeId;
     private RecipeDisplayEntry displayEntry;
     private RecipeBookCategory category;
+    private RecipeBookUtils.Type recipeType;
     private long recipeSaveTime;
 
     public RecipePattern()
@@ -67,6 +70,7 @@ public class RecipePattern
         this.networkRecipeId = null;
         this.displayEntry = null;
         this.category = null;
+        this.recipeType = null;
         this.recipeSaveTime = -1;
     }
 
@@ -143,6 +147,7 @@ public class RecipePattern
         this.storeNetworkRecipeId(pair.getLeft());
         this.storeRecipeCategory(pair.getRight().category());
         this.storeRecipeDisplayEntry(pair.getRight());
+        this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(pair.getRight().display()));
     }
 
     public void storeNetworkRecipeId(NetworkRecipeId id)
@@ -160,6 +165,11 @@ public class RecipePattern
         this.category = category;
     }
 
+    public void storeRecipeType(RecipeBookUtils.Type type)
+    {
+        this.recipeType = type;
+    }
+
     public @Nullable NetworkRecipeId getNetworkRecipeId()
     {
         return this.networkRecipeId;
@@ -175,9 +185,19 @@ public class RecipePattern
         return this.category;
     }
 
+    public @Nullable RecipeBookUtils.Type getRecipeType()
+    {
+        return this.recipeType;
+    }
+
     public boolean matchRecipeCategory(RecipeBookCategory category)
     {
         return this.getRecipeCategory() != null && this.getRecipeCategory().equals(category);
+    }
+
+    public boolean matchRecipeType(RecipeDisplayEntry entry)
+    {
+        return RecipeBookUtils.Type.fromRecipeDisplay(entry.display()) == this.recipeType;
     }
 
     public @Nullable Pair<NetworkRecipeId, RecipeDisplayEntry> matchClientRecipeBook(MinecraftClient mc)
@@ -209,6 +229,12 @@ public class RecipePattern
                     continue;
                 }
 
+                if (this.getRecipeType() != null && !this.matchRecipeType(entry))
+                {
+                    ItemScroller.LOGGER.warn("matchClientRecipeBook(): Type mismatch: [{} != {}]", this.getRecipeType().name(), RecipeBookUtils.Type.fromRecipeDisplay(entry.display()).name());
+                    continue;
+                }
+
                 List<ItemStack> stacks = entry.getStacks(ctx);
 
                 if (stacks.isEmpty())
@@ -218,7 +244,7 @@ public class RecipePattern
                     continue;
                 }
 
-                if (RecipeUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
+                if (RecipeBookUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
                 {
                     pair = Pair.of(id, entry);
                     return pair;
@@ -229,44 +255,45 @@ public class RecipePattern
         return null;
     }
 
-    public boolean matchClientRecipeBookEntry(RecipeDisplayEntry entry, MinecraftClient mc)
-    {
-        if (mc.world == null || this.isEmpty())
-        {
-            return false;
-        }
-
-        // Mojang breaks their own player recipe book.  Verifying the Category here can cause problems.
-        /*
-        if (this.getRecipeCategory() != null && !entry.category().equals(this.getRecipeCategory()))
-        {
-            return false;
-        }
-         */
-        List<ItemStack> recipeStacks = Arrays.stream(this.getRecipeItems()).toList();
-        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
-
-        //System.out.printf("matchClientRecipeBookEntry() --> [%s] vs [%s]\n", this.getResult().toString(), stacks.getFirst().toString());
-
-        if (stacks.isEmpty())
-        {
-            // And why would that be? *cries without essential data*
-            ItemScroller.LOGGER.warn("matchClientRecipeBookEntry(): Failed receiving crafting stacks for NetworkRecipeId: [{}] -- is it even a valid recipe?", entry.id().index());
-            return false;
-        }
-
-        if (RecipeUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
-        {
-            if (entry.craftingRequirements().isPresent())
-            {
-                return RecipeUtils.compareStacksAndIngredients(recipeStacks, entry.craftingRequirements().get(), this.countRecipeItems(), RecipeUtils.Type.fromRecipeDisplay(entry.display()));
-            }
-
-            return true;
-        }
-
-        return false;
-    }
+//    @Deprecated(forRemoval = true)
+//    public boolean matchClientRecipeBookEntry(RecipeDisplayEntry entry, MinecraftClient mc)
+//    {
+//        if (mc.world == null || this.isEmpty())
+//        {
+//            return false;
+//        }
+//
+//        // Mojang breaks their own player recipe book.  Verifying the Category here can cause problems.
+//        /*
+//        if (this.getRecipeCategory() != null && !entry.category().equals(this.getRecipeCategory()))
+//        {
+//            return false;
+//        }
+//         */
+//        List<ItemStack> recipeStacks = Arrays.stream(this.getRecipeItems()).toList();
+//        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
+//
+//        //System.out.printf("matchClientRecipeBookEntry() --> [%s] vs [%s]\n", this.getResult().toString(), stacks.getFirst().toString());
+//
+//        if (stacks.isEmpty())
+//        {
+//            // And why would that be? *cries without essential data*
+//            ItemScroller.LOGGER.warn("matchClientRecipeBookEntry(): Failed receiving crafting stacks for NetworkRecipeId: [{}] -- is it even a valid recipe?", entry.id().index());
+//            return false;
+//        }
+//
+//        if (RecipeBookUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
+//        {
+//            if (entry.craftingRequirements().isPresent())
+//            {
+//                return RecipeUtils.compareStacksAndIngredients(recipeStacks, entry.craftingRequirements().get(), this.countRecipeItems(), RecipeUtils.Type.fromRecipeDisplay(entry.display()));
+//            }
+//
+//            return true;
+//        }
+//
+//        return false;
+//    }
 
     public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
     {
@@ -322,6 +349,22 @@ public class RecipePattern
         {
             return;
         }
+
+        List<RecipeBookUtils.Type> types;
+
+        if (gui instanceof StonecutterScreen)
+        {
+            types = List.of(RecipeBookUtils.Type.STONECUTTER);
+        }
+        else
+        {
+            types = List.of(RecipeBookUtils.Type.SHAPED, RecipeBookUtils.Type.SHAPELESS);
+        }
+
+        // DEBUG
+//        RecipeBookUtils.toggleDebugLog(true);
+//        RecipeBookUtils.toggleAnsiColorLog(true);
+
         if (gui instanceof RecipeBookScreen<?> rbs)
         {
             RecipeBookWidget<?> widget = ((IMixinRecipeBookScreen) rbs).itemscroller_getRecipeBookWidget();
@@ -349,16 +392,17 @@ public class RecipePattern
 
                         ItemStack result = stacks.getFirst();
 
-                        if (RecipeUtils.areStacksEqual(this.getResult(), result))
+                        if (RecipeBookUtils.areStacksEqual(this.getResult(), result))
                         {
                             if (entry.craftingRequirements().isPresent())
                             {
-                                if (RecipeUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), this.countRecipeItems(), RecipeUtils.Type.fromRecipeDisplay(entry.display())))
+                                if (RecipeBookUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), RecipeBookUtils.Type.fromRecipeDisplay(entry.display()), types))
                                 {
                                     ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
                                     this.storeNetworkRecipeId(id);
                                     this.storeRecipeCategory(entry.category());
                                     this.storeRecipeDisplayEntry(entry);
+                                    this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
                                 }
                                 else
                                 {
@@ -371,6 +415,7 @@ public class RecipePattern
                                 this.storeNetworkRecipeId(id);
                                 this.storeRecipeCategory(entry.category());
                                 this.storeRecipeDisplayEntry(entry);
+                                this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
                             }
                         }
                         else
@@ -384,6 +429,7 @@ public class RecipePattern
                                 this.storeNetworkRecipeId(pair.getLeft());
                                 this.storeRecipeCategory(pair.getRight().category());
                                 this.storeRecipeDisplayEntry(pair.getRight());
+                                this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
                             }
                             else
                             {
@@ -397,6 +443,7 @@ public class RecipePattern
                                     this.storeNetworkRecipeId(pair.getLeft());
                                     this.storeRecipeCategory(pair.getRight().category());
                                     this.storeRecipeDisplayEntry(pair.getRight());
+                                    this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
                                 }
                                 else
                                 {
@@ -428,6 +475,7 @@ public class RecipePattern
         this.networkRecipeId = other.networkRecipeId;
         this.displayEntry = other.displayEntry;
         this.category = other.category;
+        this.recipeType = other.recipeType;
         this.recipeSaveTime = System.currentTimeMillis();
     }
 
