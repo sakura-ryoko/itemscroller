@@ -210,7 +210,7 @@ public class RecipePattern
         }
 
         ClientRecipeBook recipeBook = mc.player.getRecipeBook();
-        ContextParameterMap ctx = SlotDisplayContexts.createParameters(mc.world);
+        ContextParameterMap map = RecipeBookUtils.getMap(mc);
         Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
 
         if (recipeMap.size() < 1)
@@ -235,7 +235,7 @@ public class RecipePattern
                     continue;
                 }
 
-                List<ItemStack> stacks = entry.getStacks(ctx);
+                List<ItemStack> stacks = entry.getStacks(map);
 
                 if (stacks.isEmpty())
                 {
@@ -377,11 +377,12 @@ public class RecipePattern
                 {
                     ClientRecipeBook recipeBook = mc.player.getRecipeBook();
                     Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
+                    ContextParameterMap map = RecipeBookUtils.getMap(mc);
 
                     if (recipeMap.containsKey(id))
                     {
                         RecipeDisplayEntry entry = recipeMap.get(id);
-                        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
+                        List<ItemStack> stacks = entry.getStacks(map);
 
                         if (stacks.isEmpty())
                         {
