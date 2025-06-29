@@ -15,7 +15,7 @@ import fi.dy.masa.itemscroller.ItemScroller;
 
 public class CraftingHandler
 {
-    private static final Map<CraftingOutputSlot, SlotRange> CRAFTING_GRID_SLOTS = new HashMap<CraftingOutputSlot, SlotRange>();
+    private static final Map<CraftingOutputSlot, SlotRange> CRAFTING_GRID_SLOTS = new HashMap<>();
     private static final Set<Class<? extends HandledScreen<?>>> CRAFTING_GUIS = new HashSet<>();
 
     public static void clearDefinitions()
