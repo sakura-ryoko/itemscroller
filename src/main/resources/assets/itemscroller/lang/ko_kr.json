@@ -180,6 +180,7 @@
     "itemscroller.gui.label.trade_uses": "거래 사용: %d / %d",
     "itemscroller.gui.label.trades": "거래",
     "itemscroller.gui.title.configs": "아이템 스크롤러 설정 - %s",
+    "itemscroller.hotkeys.category.hotkeys": "단축키",
     "itemscroller.message.toggled_mod_off": "모든 아이템 스크롤러 기능 토글 §cOFF",
     "itemscroller.message.toggled_mod_on": "모든 아이템 스크롤러 기능 토글 §cON",
     "modmenu.descriptionTranslation.itemscroller": "마우스 휠을 스크롤 하거나 슬롯 위로 드래그하여 보관함 GUI에서 아이템을 이동합니다."
