@@ -9,7 +9,7 @@
     "itemscroller.config.generic.comment.massCraftInhibitMidUpdates": "在将物品移动到合成网格的过程中，阻止合成输出槽更新。\n这应该可以减少 CPU 占用，因为无需在每次网格切换后不断查询配方。",
     "itemscroller.config.generic.comment.massCraftInterval": "喷射合成的重复执行间隔（单位：游戏刻）",
     "itemscroller.config.generic.comment.massCraftIterations": "每次执行喷射合成的尝试次数\n使用不可堆叠物品或背包满载时需调大此值\n因为每次Shift+点击可能仅合成1~2个物品",
-    "itemscroller.config.generic.comment.massCraftSwapsOnly": "使用一种较新的填充合成槽位的方法，仅使用交换槽数据包。\n注意：\n\t由于仅使用交换槽数据包，因此无法进行部分合成！\n\t不过完全不会发生一组物品分裂成多份物品的情况。",
+    "itemscroller.config.generic.comment.massCraftSwapsOnly": "使用一种较新的填充合成槽位的方法，仅使用交换槽数据包。\n注意：由于仅使用交换槽数据包，因此无法进行部分合成！\n不过完全不会发生一组物品分裂成多份物品的情况。",
     "itemscroller.config.generic.comment.massCraftUseRecipeBook": "使用受 Andrew54757 的“Craft-Fix”分支启发的“喷射合成 - 使用配方书协议（Recipe Book Protocol）”，\n同时重新实现了适用于 1.21+ 版本的方式。\n§6注意：此功能与启用“点击数据包速率限制（rateLimitClickPackets）”功能不兼容。",
     "itemscroller.config.generic.comment.modMainToggle": "可以禁用整个Mod的所有功能",
     "itemscroller.config.generic.comment.packetRateLimit": "当开启“点击数据包速率限制（rateLimitClickPackets）”时，\n每tick发送的模拟点击数据包会受此限制",
