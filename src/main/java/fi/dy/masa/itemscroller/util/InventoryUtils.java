@@ -2647,7 +2647,7 @@ public class InventoryUtils
         MinecraftClient mc = GameWrap.getClient();
         boolean shulkerBoxFix;
 
-        if (focusedSlot == null || focusedSlot.hasStack() == false)
+        if (focusedSlot == null)
         {
             return;
         }
