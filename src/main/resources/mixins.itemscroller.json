@@ -4,8 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "mixins": [
-    "MixinClientPlayerInteractionManager",
-    "MixinClientPlayNetworkHandler",
+      "network.MixinClientPlayerInteractionManager",
+      "network.MixinClientPlayNetworkHandler",
     "MixinStatusEffectsDisplay",
     "item.IMixinSlot",
     "item.MixinItemStack",

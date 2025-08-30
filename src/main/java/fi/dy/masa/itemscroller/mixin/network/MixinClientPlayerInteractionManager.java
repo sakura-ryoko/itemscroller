@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin;
+package fi.dy.masa.itemscroller.mixin.network;
 
 import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 import net.minecraft.client.network.ClientPlayNetworkHandler;

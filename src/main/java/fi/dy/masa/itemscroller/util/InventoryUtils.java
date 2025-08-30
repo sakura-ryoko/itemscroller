@@ -140,7 +140,7 @@ public class InventoryUtils
     {
         MinecraftClient mc = MinecraftClient.getInstance();
         ServerWorld serverWorld = mc.getServer() != null ? mc.getServer().getWorld(mc.world.getRegistryKey()) : null;
-        World world = player.getWorld();
+        World world = player.getEntityWorld();
 
         if ((world instanceof ClientWorld) && player instanceof ClientPlayerEntity)
         {

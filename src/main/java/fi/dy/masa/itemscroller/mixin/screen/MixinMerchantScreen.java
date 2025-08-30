@@ -40,7 +40,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     }
 
     @Inject(
-            method = "render",
+            method = "renderMain",
             at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;renderScrollbar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/village/TradeOfferList;)V")
     )
@@ -86,7 +86,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     }
 
     @Inject(method = "mouseClicked", at = @At("RETURN"), cancellable = true)
-    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseClicked(double mouseX, double mouseY, int button, boolean doubleClick, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
@@ -138,7 +138,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
         }
     }
 
-    @Inject(method = "render", at = @At(value = "FIELD",
+    @Inject(method = "renderMain", at = @At(value = "FIELD",
             target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;offers:[Lnet/minecraft/client/gui/screen/ingame/MerchantScreen$WidgetButtonPage;"))
     private void renderFavoriteMarker(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
