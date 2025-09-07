@@ -2,6 +2,7 @@ package fi.dy.masa.itemscroller.mixin.screen;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.MerchantScreen;
@@ -31,7 +32,6 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     @Shadow private int selectedIndex;
     @Shadow int indexStartOffset;
     @Unique private int indexStartOffsetLast = -1;
-
     @Shadow protected abstract boolean canScroll(int listSize);
 
     private MixinMerchantScreen(MerchantScreenHandler handler, PlayerInventory inventory, Text title)
@@ -73,7 +73,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     }
 
     @Inject(method = "mouseDragged", at = @At("RETURN"))
-    private void onMouseDragPost(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseDragPost(Click click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
@@ -86,23 +86,23 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     }
 
     @Inject(method = "mouseClicked", at = @At("RETURN"), cancellable = true)
-    private void onMouseClicked(double mouseX, double mouseY, int button, boolean doubleClick, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseClicked(Click click, boolean doubled, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
-            int visibleIndex = this.getHoveredTradeButtonIndex(mouseX, mouseY);
+            int visibleIndex = this.getHoveredTradeButtonIndex(click.x(), click.y());
             int realIndex = VillagerUtils.getRealTradeIndexFor(visibleIndex, this.handler);
 
             if (realIndex >= 0)
             {
                 // right click, trade everything with this trade
-                if (button == 1)
+                if (click.keycode() == 1)
                 {
                     InventoryUtils.villagerTradeEverythingPossibleWithTrade(visibleIndex);
                     cir.setReturnValue(true);
                 }
                 // Middle click, toggle trade favorite
-                else if (button == 2)
+                else if (click.keycode() == 2)
                 {
                     if (Hotkeys.MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE.getKeybind().isKeybindHeld())
                     {

@@ -1,9 +1,6 @@
 package fi.dy.masa.itemscroller.mixin.network;
 
-import fi.dy.masa.itemscroller.event.KeybindCallbacks;
-import fi.dy.masa.itemscroller.util.InventoryUtils;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.s2c.play.CraftFailedResponseS2CPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.StatisticsS2CPacket;
@@ -11,6 +8,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import fi.dy.masa.itemscroller.event.KeybindCallbacks;
+import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler
@@ -30,24 +30,24 @@ public class MixinClientPlayNetworkHandler
         KeybindCallbacks.getInstance().onPacket(packet);
     }
 
-    @Inject(
-            method = "onCraftFailedResponse",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
-                    shift = At.Shift.AFTER
-            )
-    )
-    private void onCraftFailedResponse(CraftFailedResponseS2CPacket packet, CallbackInfo ci)
-    {
-        // todo
-    }
+//    @Inject(
+//            method = "onCraftFailedResponse",
+//            at = @At(
+//                    value = "INVOKE",
+//                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V",
+//                    shift = At.Shift.AFTER
+//            )
+//    )
+//    private void onCraftFailedResponse(CraftFailedResponseS2CPacket packet, CallbackInfo ci)
+//    {
+//        // todo
+//    }
 
     @Inject(
             method = "onInventory",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
+                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true)
@@ -64,7 +64,7 @@ public class MixinClientPlayNetworkHandler
             method = "onScreenHandlerSlotUpdate",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
+                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true

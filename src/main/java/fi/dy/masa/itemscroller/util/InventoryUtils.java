@@ -348,13 +348,13 @@ public class InventoryUtils
 
     public static boolean dragMoveItems(HandledScreen<? extends ScreenHandler> gui,
                                         MoveAction action,
-                                        int mouseX, int mouseY, boolean isClick)
+                                        double mouseX, double mouseY, boolean isClick)
     {
         if (isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
         {
             // Updating these here is part of the fix to preventing a drag after shift + place
-            lastPosX = mouseX;
-            lastPosY = mouseY;
+            lastPosX = (int) mouseX;
+            lastPosY = (int) mouseY;
             stopDragging();
 
             return false;
@@ -366,10 +366,10 @@ public class InventoryUtils
         {
             // Reset this or the method call won't do anything...
             slotNumberLast = -1;
-            lastPosX = mouseX;
-            lastPosY = mouseY;
+            lastPosX = (int) mouseX;
+            lastPosY = (int) mouseY;
             activeMoveAction = action;
-            cancel = dragMoveFromSlotAtPosition(gui, mouseX, mouseY, action);
+            cancel = dragMoveFromSlotAtPosition(gui, (int) mouseX, (int) mouseY, action);
         }
         else
         {
@@ -378,8 +378,8 @@ public class InventoryUtils
 
         if (activeMoveAction != MoveAction.NONE && cancel == false)
         {
-            int distX = mouseX - lastPosX;
-            int distY = mouseY - lastPosY;
+            int distX = (int) (mouseX - lastPosX);
+            int distY = (int) (mouseY - lastPosY);
             int absX = Math.abs(distX);
             int absY = Math.abs(distY);
 
@@ -389,7 +389,7 @@ public class InventoryUtils
 
                 for (int x = lastPosX; ; x += inc)
                 {
-                    int y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : mouseY;
+                    int y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : (int) mouseY;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
                     if (x == mouseX)
@@ -404,7 +404,7 @@ public class InventoryUtils
 
                 for (int y = lastPosY; ; y += inc)
                 {
-                    int x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : mouseX;
+                    int x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : (int) mouseX;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
                     if (y == mouseY)
@@ -415,14 +415,14 @@ public class InventoryUtils
             }
         }
 
-        lastPosX = mouseX;
-        lastPosY = mouseY;
+        lastPosX = (int) mouseX;
+        lastPosY = (int) mouseY;
 
         // Always update the slot under the mouse.
         // This should prevent a "double click/move" when shift + left clicking on slots that have more
         // than one stack of items. (the regular slotClick() + a "drag move" from the slot that is under the mouse
         // when the left mouse button is pressed down and this code runs).
-        Slot slot = AccessorUtils.getSlotAtPosition(gui, mouseX, mouseY);
+        Slot slot = AccessorUtils.getSlotAtPosition(gui, (int) mouseX, (int) mouseY);
 
         if (slot != null)
         {

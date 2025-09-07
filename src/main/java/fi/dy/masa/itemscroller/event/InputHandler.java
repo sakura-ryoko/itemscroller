@@ -3,9 +3,11 @@ package fi.dy.masa.itemscroller.event;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.entity.passive.MerchantEntity;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.hit.EntityHitResult;
@@ -48,7 +50,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
     }
 
     @Override
-    public boolean onKeyInput(int keyCode, int scanCode, int modifiers, boolean eventKeyState)
+    public boolean onKeyInput(KeyInput input, boolean eventKeyState)
     {
         if (InputUtils.isRecipeViewOpen() && eventKeyState)
         {
@@ -58,23 +60,23 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             int recipesPerPage = recipes.getRecipeCountPerPage();
             int recipeIndexChange = GuiBase.isShiftDown() ? recipesPerPage : recipesPerPage / 2;
 
-            if (keyCode >= KeyCodes.KEY_1 && keyCode <= KeyCodes.KEY_9)
+            if (input.key() >= KeyCodes.KEY_1 && input.key() <= KeyCodes.KEY_9)
             {
-                index = MathHelper.clamp(keyCode - GLFW.GLFW_KEY_1, 0, 8);
+                index = MathHelper.clamp(input.key() - GLFW.GLFW_KEY_1, 0, 8);
             }
-            else if (keyCode == KeyCodes.KEY_UP && oldIndex > 0)
+            else if (input.key() == KeyCodes.KEY_UP && oldIndex > 0)
             {
                 index = oldIndex - 1;
             }
-            else if (keyCode == KeyCodes.KEY_DOWN && oldIndex < (recipes.getTotalRecipeCount() - 1))
+            else if (input.key() == KeyCodes.KEY_DOWN && oldIndex < (recipes.getTotalRecipeCount() - 1))
             {
                 index = oldIndex + 1;
             }
-            else if (keyCode == KeyCodes.KEY_LEFT && oldIndex >= recipeIndexChange)
+            else if (input.key() == KeyCodes.KEY_LEFT && oldIndex >= recipeIndexChange)
             {
                 index = oldIndex - recipeIndexChange;
             }
-            else if (keyCode == KeyCodes.KEY_RIGHT && oldIndex < (recipes.getTotalRecipeCount() - recipeIndexChange))
+            else if (input.key() == KeyCodes.KEY_RIGHT && oldIndex < (recipes.getTotalRecipeCount() - recipeIndexChange))
             {
                 index = oldIndex + recipeIndexChange;
             }
@@ -86,19 +88,19 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             }
         }
 
-        return this.handleInput(keyCode, eventKeyState, 0);
+        return this.handleInput(input.key(), eventKeyState, 0);
     }
 
     @Override
-    public boolean onMouseScroll(int mouseX, int mouseY, double amount)
+    public boolean onMouseScroll(double mouseX, double mouseY, double amount)
     {
         return this.handleInput(KeyCodes.KEY_NONE, false, amount);
     }
 
     @Override
-    public boolean onMouseClick(int mouseX, int mouseY, int eventButton, boolean eventButtonState)
+    public boolean onMouseClick(Click click, boolean eventButtonState)
     {
-        return this.handleInput(eventButton - 100, eventButtonState, 0);
+        return this.handleInput(click.keycode() - 100, eventButtonState, 0);
     }
 
     private boolean handleInput(int keyCode, boolean keyState, double dWheel)
@@ -233,7 +235,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
     }
 
     @Override
-    public void onMouseMove(int mouseX, int mouseY)
+    public void onMouseMove(double mouseX, double mouseY)
     {
         MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -246,7 +248,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
         }
     }
 
-    private boolean handleDragging(HandledScreen<?> gui, MinecraftClient mc, int mouseX, int mouseY, boolean isClick)
+    private boolean handleDragging(HandledScreen<?> gui, MinecraftClient mc, double mouseX, double mouseY, boolean isClick)
     {
         MoveAction action = InventoryUtils.getActiveMoveAction();
         boolean cancel = false;
