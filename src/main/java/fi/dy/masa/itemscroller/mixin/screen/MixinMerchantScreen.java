@@ -96,13 +96,13 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
             if (realIndex >= 0)
             {
                 // right click, trade everything with this trade
-                if (click.keycode() == 1)
+                if (click.getKeycode() == 1)
                 {
                     InventoryUtils.villagerTradeEverythingPossibleWithTrade(visibleIndex);
                     cir.setReturnValue(true);
                 }
                 // Middle click, toggle trade favorite
-                else if (click.keycode() == 2)
+                else if (click.getKeycode() == 2)
                 {
                     if (Hotkeys.MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE.getKeybind().isKeybindHeld())
                     {

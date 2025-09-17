@@ -100,7 +100,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
     @Override
     public boolean onMouseClick(Click click, boolean eventButtonState)
     {
-        return this.handleInput(click.keycode() - 100, eventButtonState, 0);
+        return this.handleInput(click.getKeycode() - 100, eventButtonState, 0);
     }
 
     private boolean handleInput(int keyCode, boolean keyState, double dWheel)
