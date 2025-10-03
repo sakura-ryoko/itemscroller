@@ -180,6 +180,7 @@
     "itemscroller.gui.label.trade_uses": "交易使用: %d / %",
     "itemscroller.gui.label.trades": "交易",
     "itemscroller.gui.title.configs": "Item Scroller 配置 - %s",
+    "itemscroller.hotkeys.category.hotkeys": "Hotkeys",
     "itemscroller.message.toggled_mod_off": "Item Scroller 功能調整為：§c關閉",
     "itemscroller.message.toggled_mod_on": "Item Scroller 功能調整為：§a開啟",
     "modmenu.descriptionTranslation.itemscroller": "透過滾動滑鼠滾輪或在欄位上拖按滑鼠來移動庫存 GUI 中的物品"
