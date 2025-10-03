@@ -1,12 +1,14 @@
 package fi.dy.masa.itemscroller.util;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.KeyInput;
 
 import fi.dy.masa.malilib.hotkeys.IKeybind;
-import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.util.GuiUtils;
-import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.event.KeybindCallbacks;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
@@ -16,13 +18,12 @@ public class InputUtils
     public static boolean isRecipeViewOpen()
     {
         return GuiUtils.getCurrentScreen() != null &&
-               Configs.Generic.MOD_MAIN_TOGGLE.getBooleanValue() &&
-               Hotkeys.RECIPE_VIEW.getKeybind().isKeybindHeld() &&
                KeybindCallbacks.getInstance().functionalityEnabled() &&
+	           Hotkeys.RECIPE_VIEW.getKeybind().isKeybindHeld() &&
                CraftingHandler.isCraftingGui(GuiUtils.getCurrentScreen());
     }
 
-    public static boolean canShiftDropItems(HandledScreen<?> gui, MinecraftClient mc, int mouseX, int mouseY)
+    public static boolean canShiftDropItems(HandledScreen<?> gui, MinecraftClient mc, double mouseX, double mouseY)
     {
         if (InventoryUtils.isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
         {
@@ -40,8 +41,9 @@ public class InputUtils
 
     public static MoveAction getDragMoveAction(IKeybind key)
     {
-             if (key == Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind())      { return MoveAction.MOVE_TO_OTHER_STACKS;       }
-        else if (key == Hotkeys.KEY_DRAG_LEAVE_ONE.getKeybind())        { return MoveAction.MOVE_TO_OTHER_LEAVE_ONE;    }
+//             if (key == Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind())      { return MoveAction.MOVE_TO_OTHER_STACKS;       }
+//		else
+			 if (key == Hotkeys.KEY_DRAG_LEAVE_ONE.getKeybind())        { return MoveAction.MOVE_TO_OTHER_LEAVE_ONE;    }
         else if (key == Hotkeys.KEY_DRAG_MOVE_ONE.getKeybind())         { return MoveAction.MOVE_TO_OTHER_MOVE_ONE;     }
         else if (key == Hotkeys.KEY_DRAG_MATCHING.getKeybind())         { return MoveAction.MOVE_TO_OTHER_MATCHING;     }
 
@@ -65,7 +67,7 @@ public class InputUtils
     {
         switch (action)
         {
-            case MOVE_TO_OTHER_STACKS:          return Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind().isKeybindHeld();
+//            case MOVE_TO_OTHER_STACKS:          return Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind().isKeybindHeld();
             case MOVE_TO_OTHER_LEAVE_ONE:       return Hotkeys.KEY_DRAG_LEAVE_ONE.getKeybind().isKeybindHeld();
             case MOVE_TO_OTHER_MOVE_ONE:        return Hotkeys.KEY_DRAG_MOVE_ONE.getKeybind().isKeybindHeld();
             case MOVE_TO_OTHER_MATCHING:        return Hotkeys.KEY_DRAG_MATCHING.getKeybind().isKeybindHeld();
@@ -105,7 +107,7 @@ public class InputUtils
                 return MoveAmount.LEAVE_ONE;
 
             case SCROLL_TO_OTHER_STACKS:
-            case MOVE_TO_OTHER_STACKS:
+//            case MOVE_TO_OTHER_STACKS:
             case DROP_STACKS:
             case MOVE_DOWN_STACKS:
             case MOVE_UP_STACKS:
@@ -128,18 +130,33 @@ public class InputUtils
         return MoveAmount.NONE;
     }
 
-    public static boolean isAttack(int keyCode)
+    public static boolean isAttack(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
     {
-        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.attackKey);
+//        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.attackKey);
+	    if (click != null && mc.options.attackKey.matchesMouse(click))
+	    {
+			return true;
+	    }
+		else return input != null && mc.options.attackKey.matchesKey(input);
     }
 
-    public static boolean isUse(int keyCode)
+    public static boolean isUse(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
     {
-        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.useKey);
+//        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.useKey);
+	    if (click != null && mc.options.useKey.matchesMouse(click))
+	    {
+		    return true;
+	    }
+	    else return input != null && mc.options.useKey.matchesKey(input);
     }
 
-    public static boolean isPickBlock(int keyCode)
+    public static boolean isPickBlock(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
     {
-        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.pickItemKey);
+//        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.pickItemKey);
+	    if (click != null && mc.options.pickItemKey.matchesMouse(click))
+	    {
+		    return true;
+	    }
+	    else return input != null && mc.options.pickItemKey.matchesKey(input);
     }
 }

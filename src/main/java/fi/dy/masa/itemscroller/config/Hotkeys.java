@@ -36,7 +36,8 @@ public class Hotkeys
     public static final ConfigHotkey KEY_DRAG_LEAVE_ONE         = new ConfigHotkey("keyDragMoveLeaveOne",   "LEFT_SHIFT,BUTTON_2", GUI_NO_ORDER).apply(HOTKEYS_KEY);
     public static final ConfigHotkey KEY_DRAG_MATCHING          = new ConfigHotkey("keyDragMoveMatching",   "LEFT_ALT,BUTTON_1", GUI_NO_ORDER).apply(HOTKEYS_KEY);
     public static final ConfigHotkey KEY_DRAG_MOVE_ONE          = new ConfigHotkey("keyDragMoveOne",        "LEFT_CONTROL,BUTTON_1", GUI_NO_ORDER).apply(HOTKEYS_KEY);
-    public static final ConfigHotkey KEY_DRAG_FULL_STACKS       = new ConfigHotkey("keyDragMoveStacks",     "LEFT_SHIFT,BUTTON_1", GUI_NO_ORDER).apply(HOTKEYS_KEY);
+	// FIXME --> Causes JVM Freeze / Crash (WHY?)
+//    public static final ConfigHotkey KEY_DRAG_FULL_STACKS       = new ConfigHotkey("keyDragMoveStacks",     "LEFT_SHIFT,BUTTON_1", GUI_NO_ORDER).apply(HOTKEYS_KEY);
 
     public static final ConfigHotkey KEY_MOVE_EVERYTHING        = new ConfigHotkey("keyMoveEverything",     "LEFT_ALT,LEFT_SHIFT,BUTTON_1", GUI_NO_ORDER).apply(HOTKEYS_KEY);
 
@@ -76,7 +77,8 @@ public class Hotkeys
             MODIFIER_MOVE_STACK,
             MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE,
 
-            KEY_DRAG_FULL_STACKS,
+// FIXME --> Causes JVM Freeze / Crash (WHY?)
+//            KEY_DRAG_FULL_STACKS,
             KEY_DRAG_LEAVE_ONE,
             KEY_DRAG_MATCHING,
             KEY_DRAG_MOVE_ONE,

@@ -75,8 +75,8 @@ public class InventoryUtils
     private static ItemStack stackInCursorLast = ItemStack.EMPTY;
     @Nullable protected static CraftingRecipe lastRecipe;
     private static MoveAction activeMoveAction = MoveAction.NONE;
-    private static int lastPosX;
-    private static int lastPosY;
+    private static double lastPosX;
+    private static double lastPosY;
     private static int slotNumberLast;
     private static boolean inhibitCraftResultUpdate;
     private static Runnable selectedSlotUpdateTask;
@@ -353,8 +353,8 @@ public class InventoryUtils
         if (isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
         {
             // Updating these here is part of the fix to preventing a drag after shift + place
-            lastPosX = (int) mouseX;
-            lastPosY = (int) mouseY;
+            lastPosX = mouseX;
+            lastPosY = mouseY;
             stopDragging();
 
             return false;
@@ -366,10 +366,10 @@ public class InventoryUtils
         {
             // Reset this or the method call won't do anything...
             slotNumberLast = -1;
-            lastPosX = (int) mouseX;
-            lastPosY = (int) mouseY;
+            lastPosX = mouseX;
+            lastPosY = mouseY;
             activeMoveAction = action;
-            cancel = dragMoveFromSlotAtPosition(gui, (int) mouseX, (int) mouseY, action);
+            cancel = dragMoveFromSlotAtPosition(gui, mouseX, mouseY, action);
         }
         else
         {
@@ -378,18 +378,18 @@ public class InventoryUtils
 
         if (activeMoveAction != MoveAction.NONE && cancel == false)
         {
-            int distX = (int) (mouseX - lastPosX);
-            int distY = (int) (mouseY - lastPosY);
-            int absX = Math.abs(distX);
-            int absY = Math.abs(distY);
+	        double distX = (mouseX - lastPosX);
+	        double distY = (mouseY - lastPosY);
+	        double absX = Math.abs(distX);
+	        double absY = Math.abs(distY);
 
             if (absX > absY)
             {
                 int inc = distX > 0 ? 1 : -1;
 
-                for (int x = lastPosX; ; x += inc)
+                for (double x = lastPosX; ; x += inc)
                 {
-                    int y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : (int) mouseY;
+	                double y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : mouseY;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
                     if (x == mouseX)
@@ -402,9 +402,9 @@ public class InventoryUtils
             {
                 int inc = distY > 0 ? 1 : -1;
 
-                for (int y = lastPosY; ; y += inc)
+                for (double y = lastPosY; ; y += inc)
                 {
-                    int x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : (int) mouseX;
+                    double x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : mouseX;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
                     if (y == mouseY)
@@ -415,14 +415,14 @@ public class InventoryUtils
             }
         }
 
-        lastPosX = (int) mouseX;
-        lastPosY = (int) mouseY;
+        lastPosX = mouseX;
+        lastPosY = mouseY;
 
         // Always update the slot under the mouse.
         // This should prevent a "double click/move" when shift + left clicking on slots that have more
         // than one stack of items. (the regular slotClick() + a "drag move" from the slot that is under the mouse
         // when the left mouse button is pressed down and this code runs).
-        Slot slot = AccessorUtils.getSlotAtPosition(gui, (int) mouseX, (int) mouseY);
+        Slot slot = AccessorUtils.getSlotAtPosition(gui, mouseX, mouseY);
 
         if (slot != null)
         {
@@ -452,7 +452,7 @@ public class InventoryUtils
     }
 
     private static boolean dragMoveFromSlotAtPosition(HandledScreen<? extends ScreenHandler> gui,
-                                                      int x, int y, MoveAction action)
+                                                      double x, double y, MoveAction action)
     {
         if (gui instanceof CreativeInventoryScreen)
         {
@@ -478,9 +478,10 @@ public class InventoryUtils
                     tryMoveAllButOneItemToOtherInventory(slot, gui);
                     break;
 
-                case MOVE_TO_OTHER_STACKS:
-                    shiftClickSlot(gui, slot.id);
-                    break;
+                // FIXME
+//                case MOVE_TO_OTHER_STACKS:
+//                    shiftClickSlot(gui, slot.id);
+//                    break;
 
                 case MOVE_TO_OTHER_MATCHING:
                     tryMoveStacks(slot, gui, true, true, false);
@@ -524,7 +525,7 @@ public class InventoryUtils
     }
 
     private static boolean dragMoveFromSlotAtPositionCreative(HandledScreen<? extends ScreenHandler> gui,
-                                                              int x, int y, MoveAction action)
+                                                              double x, double y, MoveAction action)
     {
         CreativeInventoryScreen guiCreative = (CreativeInventoryScreen) gui;
         Slot slot = AccessorUtils.getSlotAtPosition(gui, x, y);
@@ -575,10 +576,11 @@ public class InventoryUtils
                     break;
 
                 case SCROLL_TO_OTHER_STACKS:
-                case MOVE_TO_OTHER_STACKS:
-                    shiftClickSlot(gui, slot, slotNumber);
-                    cancel = true;
-                    break;
+					// FIXME
+//                case MOVE_TO_OTHER_STACKS:
+//                    shiftClickSlot(gui, slot, slotNumber);
+//                    cancel = true;
+//                    break;
 
                 case DROP_ONE:
                     clickSlot(gui, slot.id, 0, SlotActionType.THROW);
@@ -3292,7 +3294,7 @@ public class InventoryUtils
                                  int mouseButton,
                                  SlotActionType type)
     {
-        if (slotNum >= 0 && slotNum < gui.getScreenHandler().slots.size())
+        if (slotNum > 0 && slotNum < gui.getScreenHandler().slots.size())
         {
             Slot slot = gui.getScreenHandler().getSlot(slotNum);
             clickSlot(gui, slot, slotNum, mouseButton, type);

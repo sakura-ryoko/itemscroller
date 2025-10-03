@@ -1,10 +1,10 @@
 package fi.dy.masa.itemscroller.event;
 
+import javax.annotation.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.input.KeyInput;
@@ -58,7 +58,8 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             RecipeStorage recipes = RecipeStorage.getInstance();
             int oldIndex = recipes.getSelection();
             int recipesPerPage = recipes.getRecipeCountPerPage();
-            int recipeIndexChange = GuiBase.isShiftDown() ? recipesPerPage : recipesPerPage / 2;
+//            int recipeIndexChange = GuiBase.isShiftDown() ? recipesPerPage : recipesPerPage / 2;
+	        int recipeIndexChange = input.hasShift() ? recipesPerPage : recipesPerPage / 2;
 
             if (input.key() >= KeyCodes.KEY_1 && input.key() <= KeyCodes.KEY_9)
             {
@@ -88,22 +89,25 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             }
         }
 
-        return this.handleInput(input.key(), eventKeyState, 0);
+        return this.handleInput(null, input, eventKeyState, 0);
     }
 
     @Override
     public boolean onMouseScroll(double mouseX, double mouseY, double amount)
     {
-        return this.handleInput(KeyCodes.KEY_NONE, false, amount);
+//        return this.handleInput(null, null, KeyCodes.KEY_NONE, false, amount);
+	    return this.handleInput(null, null, false, amount);
     }
 
     @Override
     public boolean onMouseClick(Click click, boolean eventButtonState)
     {
-        return this.handleInput(click.getKeycode() - 100, eventButtonState, 0);
+//        return this.handleInput(click,null, click.getKeycode() - 100, eventButtonState, 0);
+	    return this.handleInput(click,null, eventButtonState, 0);
     }
 
-    private boolean handleInput(int keyCode, boolean keyState, double dWheel)
+    private boolean handleInput(@Nullable Click click, @Nullable KeyInput input,
+                                boolean keyState, double dWheel)
     {
         MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -118,14 +122,15 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             ClickPacketBuffer.setShouldBufferClickPackets(true);
         }
 
-        boolean cancel = this.handleInputImpl(keyCode, keyState, dWheel, mc);
+        boolean cancel = this.handleInputImpl(click, input, keyState, dWheel, mc);
 
         ClickPacketBuffer.setShouldBufferClickPackets(false);
 
         return cancel;
     }
 
-    private boolean handleInputImpl(int keyCode, boolean keyState, double dWheel, MinecraftClient mc)
+    private boolean handleInputImpl(@Nullable Click click, @Nullable KeyInput input,
+                                    boolean keyState, double dWheel, MinecraftClient mc)
     {
         MoveAction action = InventoryUtils.getActiveMoveAction();
 
@@ -138,19 +143,18 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
 
         if (this.callbacks.functionalityEnabled() && mc.player != null)
         {
-            final boolean isAttack = InputUtils.isAttack(keyCode);
-            final boolean isUse = InputUtils.isUse(keyCode);
-            final boolean isPickBlock = InputUtils.isPickBlock(keyCode);
+            final boolean isAttack = InputUtils.isAttack(click, input, mc);
+            final boolean isUse = InputUtils.isUse(click, input, mc);
+            final boolean isPickBlock = InputUtils.isPickBlock(click, input, mc);
             final boolean isAttackUseOrPick = isAttack || isUse || isPickBlock;
-            final int mouseX = fi.dy.masa.malilib.util.InputUtils.getMouseX();
-            final int mouseY = fi.dy.masa.malilib.util.InputUtils.getMouseY();
-            Screen screen = GuiUtils.getCurrentScreen();
+            final double mouseX = click != null ? click.x() : mc.mouse.getX();
+            final double mouseY = click != null ? click.y() : mc.mouse.getY();
 
             if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
             {
                 VillagerDataStorage storage = VillagerDataStorage.getInstance();
 
-                if (screen == null && mc.crosshairTarget != null &&
+                if (mc.currentScreen == null && mc.crosshairTarget != null &&
                     mc.crosshairTarget.getType() == HitResult.Type.ENTITY &&
                     ((EntityHitResult) mc.crosshairTarget).getEntity() instanceof MerchantEntity)
                 {
@@ -158,12 +162,11 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                 }
             }
 
-            if (screen instanceof HandledScreen &&
-                (screen instanceof CreativeInventoryScreen) == false &&
-                Configs.GUI_BLACKLIST.contains(screen.getClass().getName()) == false)
+            if (mc.currentScreen instanceof HandledScreen<?> gui &&
+                (mc.currentScreen instanceof CreativeInventoryScreen) == false &&
+                Configs.GUI_BLACKLIST.contains(mc.currentScreen.getClass().getName()) == false)
             {
-                HandledScreen<?> gui = (HandledScreen<?>) screen;
-                RecipeStorage recipes = RecipeStorage.getInstance();
+	            RecipeStorage recipes = RecipeStorage.getInstance();
 
                 if (dWheel != 0)
                 {
@@ -181,7 +184,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                 else
                 {
                     Slot slot = AccessorUtils.getSlotUnderMouse(gui);
-                    final boolean isShiftDown = GuiBase.isShiftDown();
+                    final boolean isShiftDown = input != null ? input.hasShift() : GuiBase.isShiftDown();
 
                     if (keyState && isAttackUseOrPick)
                     {
@@ -238,6 +241,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
     public void onMouseMove(double mouseX, double mouseY)
     {
         MinecraftClient mc = MinecraftClient.getInstance();
+		if (mc.player == null) return;
 
         if (this.callbacks.functionalityEnabled() &&
             mc.player != null &&

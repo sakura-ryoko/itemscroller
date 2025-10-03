@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import fi.dy.masa.itemscroller.event.KeybindCallbacks;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 @Mixin(ClientPlayNetworkHandler.class)
@@ -24,23 +23,10 @@ public class MixinClientPlayNetworkHandler
         }
     }
 
-    @Inject(method = "onScreenHandlerSlotUpdate", at = @At("RETURN"))
-    private void onScreenHandlerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci)
-    {
-        KeybindCallbacks.getInstance().onPacket(packet);
-    }
-
-//    @Inject(
-//            method = "onCraftFailedResponse",
-//            at = @At(
-//                    value = "INVOKE",
-//                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V",
-//                    shift = At.Shift.AFTER
-//            )
-//    )
-//    private void onCraftFailedResponse(CraftFailedResponseS2CPacket packet, CallbackInfo ci)
+//    @Inject(method = "onScreenHandlerSlotUpdate", at = @At("RETURN"))
+//    private void onScreenHandlerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci)
 //    {
-//        // todo
+//        KeybindCallbacks.getInstance().onPacket(packet);
 //    }
 
     @Inject(

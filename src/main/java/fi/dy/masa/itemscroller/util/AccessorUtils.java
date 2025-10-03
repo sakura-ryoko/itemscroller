@@ -18,7 +18,7 @@ public class AccessorUtils
     }
 
     @Nullable
-    public static Slot getSlotAtPosition(HandledScreen<?> gui, int x, int y)
+    public static Slot getSlotAtPosition(HandledScreen<?> gui, double x, double y)
     {
         return ((IMixinScreenWithHandler) gui).itemscroller_getSlotAtPositionInvoker(x, y);
     }
