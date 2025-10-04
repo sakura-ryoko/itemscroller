@@ -31,9 +31,11 @@ public class InputUtils
             int top = AccessorUtils.getGuiTop(gui);
             int xSize = AccessorUtils.getGuiXSize(gui);
             int ySize = AccessorUtils.getGuiYSize(gui);
-            boolean isOutsideGui = mouseX < left || mouseY < top || mouseX >= left + xSize || mouseY >= top + ySize;
+			int posX = (int) mouseX;
+	        int posY = (int) mouseY;
+            boolean isOutsideGui = posX < left || posY < top || posX >= left + xSize || posY >= top + ySize;
 
-            return isOutsideGui && AccessorUtils.getSlotAtPosition(gui, mouseX - left, mouseY - top) == null;
+            return isOutsideGui && AccessorUtils.getSlotAtPosition(gui, posX - left, posY - top) == null;
         }
 
         return false;
@@ -41,9 +43,8 @@ public class InputUtils
 
     public static MoveAction getDragMoveAction(IKeybind key)
     {
-//             if (key == Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind())      { return MoveAction.MOVE_TO_OTHER_STACKS;       }
-//		else
-			 if (key == Hotkeys.KEY_DRAG_LEAVE_ONE.getKeybind())        { return MoveAction.MOVE_TO_OTHER_LEAVE_ONE;    }
+             if (key == Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind())      { return MoveAction.MOVE_TO_OTHER_STACKS;       }
+		else if (key == Hotkeys.KEY_DRAG_LEAVE_ONE.getKeybind())        { return MoveAction.MOVE_TO_OTHER_LEAVE_ONE;    }
         else if (key == Hotkeys.KEY_DRAG_MOVE_ONE.getKeybind())         { return MoveAction.MOVE_TO_OTHER_MOVE_ONE;     }
         else if (key == Hotkeys.KEY_DRAG_MATCHING.getKeybind())         { return MoveAction.MOVE_TO_OTHER_MATCHING;     }
 
@@ -67,7 +68,7 @@ public class InputUtils
     {
         switch (action)
         {
-//            case MOVE_TO_OTHER_STACKS:          return Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind().isKeybindHeld();
+            case MOVE_TO_OTHER_STACKS:          return Hotkeys.KEY_DRAG_FULL_STACKS.getKeybind().isKeybindHeld();
             case MOVE_TO_OTHER_LEAVE_ONE:       return Hotkeys.KEY_DRAG_LEAVE_ONE.getKeybind().isKeybindHeld();
             case MOVE_TO_OTHER_MOVE_ONE:        return Hotkeys.KEY_DRAG_MOVE_ONE.getKeybind().isKeybindHeld();
             case MOVE_TO_OTHER_MATCHING:        return Hotkeys.KEY_DRAG_MATCHING.getKeybind().isKeybindHeld();
@@ -107,7 +108,7 @@ public class InputUtils
                 return MoveAmount.LEAVE_ONE;
 
             case SCROLL_TO_OTHER_STACKS:
-//            case MOVE_TO_OTHER_STACKS:
+            case MOVE_TO_OTHER_STACKS:
             case DROP_STACKS:
             case MOVE_DOWN_STACKS:
             case MOVE_UP_STACKS:

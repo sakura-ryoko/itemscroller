@@ -75,8 +75,8 @@ public class InventoryUtils
     private static ItemStack stackInCursorLast = ItemStack.EMPTY;
     @Nullable protected static CraftingRecipe lastRecipe;
     private static MoveAction activeMoveAction = MoveAction.NONE;
-    private static double lastPosX;
-    private static double lastPosY;
+    private static int lastPosX;
+    private static int lastPosY;
     private static int slotNumberLast;
     private static boolean inhibitCraftResultUpdate;
     private static Runnable selectedSlotUpdateTask;
@@ -350,11 +350,14 @@ public class InventoryUtils
                                         MoveAction action,
                                         double mouseX, double mouseY, boolean isClick)
     {
+		final int posX = (int) mouseX;
+		final int posY = (int) mouseY;
+
         if (isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
         {
             // Updating these here is part of the fix to preventing a drag after shift + place
-            lastPosX = mouseX;
-            lastPosY = mouseY;
+            lastPosX = posX;
+            lastPosY = posY;
             stopDragging();
 
             return false;
@@ -366,8 +369,8 @@ public class InventoryUtils
         {
             // Reset this or the method call won't do anything...
             slotNumberLast = -1;
-            lastPosX = mouseX;
-            lastPosY = mouseY;
+            lastPosX = posX;
+            lastPosY = posY;
             activeMoveAction = action;
             cancel = dragMoveFromSlotAtPosition(gui, mouseX, mouseY, action);
         }
@@ -378,21 +381,21 @@ public class InventoryUtils
 
         if (activeMoveAction != MoveAction.NONE && cancel == false)
         {
-	        double distX = (mouseX - lastPosX);
-	        double distY = (mouseY - lastPosY);
-	        double absX = Math.abs(distX);
-	        double absY = Math.abs(distY);
+	        int distX = (int) (posX - lastPosX);
+	        int distY = (int) (posY - lastPosY);
+	        int absX = Math.abs(distX);
+	        int absY = Math.abs(distY);
 
             if (absX > absY)
             {
                 int inc = distX > 0 ? 1 : -1;
 
-                for (double x = lastPosX; ; x += inc)
+                for (int x = lastPosX; ; x += inc)
                 {
-	                double y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : mouseY;
+	                int y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : posY;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
-                    if (x == mouseX)
+                    if (x == posX)
                     {
                         break;
                     }
@@ -402,12 +405,12 @@ public class InventoryUtils
             {
                 int inc = distY > 0 ? 1 : -1;
 
-                for (double y = lastPosY; ; y += inc)
+                for (int y = lastPosY; ; y += inc)
                 {
-                    double x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : mouseX;
+	                int x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : posX;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
-                    if (y == mouseY)
+                    if (y == posY)
                     {
                         break;
                     }
@@ -415,8 +418,8 @@ public class InventoryUtils
             }
         }
 
-        lastPosX = mouseX;
-        lastPosY = mouseY;
+        lastPosX = posX;
+        lastPosY = posY;
 
         // Always update the slot under the mouse.
         // This should prevent a "double click/move" when shift + left clicking on slots that have more
@@ -478,10 +481,9 @@ public class InventoryUtils
                     tryMoveAllButOneItemToOtherInventory(slot, gui);
                     break;
 
-                // FIXME
-//                case MOVE_TO_OTHER_STACKS:
-//                    shiftClickSlot(gui, slot.id);
-//                    break;
+                case MOVE_TO_OTHER_STACKS:
+                    shiftClickSlot(gui, slot.id);
+                    break;
 
                 case MOVE_TO_OTHER_MATCHING:
                     tryMoveStacks(slot, gui, true, true, false);
@@ -576,11 +578,10 @@ public class InventoryUtils
                     break;
 
                 case SCROLL_TO_OTHER_STACKS:
-					// FIXME
-//                case MOVE_TO_OTHER_STACKS:
-//                    shiftClickSlot(gui, slot, slotNumber);
-//                    cancel = true;
-//                    break;
+                case MOVE_TO_OTHER_STACKS:
+                    shiftClickSlot(gui, slot, slotNumber);
+                    cancel = true;
+                    break;
 
                 case DROP_ONE:
                     clickSlot(gui, slot.id, 0, SlotActionType.THROW);
@@ -3294,7 +3295,7 @@ public class InventoryUtils
                                  int mouseButton,
                                  SlotActionType type)
     {
-        if (slotNum > 0 && slotNum < gui.getScreenHandler().slots.size())
+        if (slotNum >= 0 && slotNum < gui.getScreenHandler().slots.size())
         {
             Slot slot = gui.getScreenHandler().getSlot(slotNum);
             clickSlot(gui, slot, slotNum, mouseButton, type);
