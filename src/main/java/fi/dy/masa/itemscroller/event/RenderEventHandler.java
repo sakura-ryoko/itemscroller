@@ -38,7 +38,7 @@ public class RenderEventHandler
         return INSTANCE;
     }
 
-    public void renderRecipeView(DrawContext drawContext, MinecraftClient mc, double mouseX, double mouseY)
+    public void renderRecipeView(DrawContext drawContext, MinecraftClient mc, int mouseX, int mouseY)
     {
         if (GuiUtils.getCurrentScreen() instanceof HandledScreen<?> gui &&
             InputUtils.isRecipeViewOpen())
@@ -80,7 +80,7 @@ public class RenderEventHandler
         }
     }
 
-    public void onDrawScreenPost(DrawContext drawContext, MinecraftClient mc, double mouseX, double mouseY)
+    public void onDrawScreenPost(DrawContext drawContext, MinecraftClient mc, int mouseX, int mouseY)
     {
         this.renderRecipeView(drawContext, mc, mouseX, mouseY);
 
@@ -113,7 +113,7 @@ public class RenderEventHandler
 
                     if (!InventoryUtils.isStackEmpty(stack))
                     {
-                        InventoryOverlay.renderStackToolTip(drawContext, (int) mouseX, (int) mouseY, stack, mc);
+                        InventoryOverlay.renderStackToolTip(drawContext, mouseX, mouseY, stack, mc);
                     }
                 }
 
@@ -152,18 +152,18 @@ public class RenderEventHandler
         this.columnWidth = stackBaseHeight + this.numberTextWidth + this.gapColumn;
     }
 
-    private void renderHoverTooltip(DrawContext drawContext, double mouseX, double mouseY, RecipePattern recipe,
+    private void renderHoverTooltip(DrawContext drawContext, int mouseX, int mouseY, RecipePattern recipe,
                                     HandledScreen<?> gui)
     {
         ItemStack stack = recipe.getResult();
 
         if (!InventoryUtils.isStackEmpty(stack))
         {
-            InventoryOverlay.renderStackToolTip(drawContext, (int) mouseX, (int) mouseY, stack, this.mc);
+            InventoryOverlay.renderStackToolTip(drawContext, mouseX, mouseY, stack, this.mc);
         }
     }
 
-    public int getHoveredRecipeId(double mouseX, double mouseY, RecipeStorage recipes, HandledScreen<?> gui)
+    public int getHoveredRecipeId(int mouseX, int mouseY, RecipeStorage recipes, HandledScreen<?> gui)
     {
         if (InputUtils.isRecipeViewOpen())
         {
@@ -215,8 +215,7 @@ public class RenderEventHandler
         drawContext.getMatrices().popMatrix();
     }
 
-    private void renderRecipeItems(DrawContext drawContext,
-                                   RecipePattern recipe, int recipeCountPerPage,
+    private void renderRecipeItems(DrawContext drawContext, RecipePattern recipe, int recipeCountPerPage,
                                    HandledScreen<?> gui)
     {
         ItemStack[] items = recipe.getRecipeItems();
@@ -238,8 +237,7 @@ public class RenderEventHandler
         }
     }
 
-    private ItemStack getHoveredRecipeIngredient(double mouseX, double mouseY,
-                                                 RecipePattern recipe, int recipeCountPerPage,
+    private ItemStack getHoveredRecipeIngredient(int mouseX, int mouseY, RecipePattern recipe, int recipeCountPerPage,
                                                  HandledScreen<?> gui)
     {
         final int recipeDimensions = (int) Math.ceil(Math.sqrt(Math.min(recipe.getRecipeLength(), 9)));
@@ -295,8 +293,59 @@ public class RenderEventHandler
 
             drawContext.getMatrices().pushMatrix();
             drawContext.getMatrices().translate(0, 0);      // z = 100.f
+
+//            DiffuseLighting.enableGuiDepthLighting();
             drawContext.drawItem(stack, x, y);
+
             drawContext.getMatrices().popMatrix();
         }
     }
+
+    /*
+    public static void enableGUIStandardItemLighting(float scale)
+    {
+        RenderSystem.pushMatrix();
+        RenderSystem.rotatef(-30.0F, 0.0F, 1.0F, 0.0F);
+        RenderSystem.rotatef(165.0F, 1.0F, 0.0F, 0.0F);
+
+        enableStandardItemLighting(scale);
+
+        RenderSystem.popMatrix();
+    }
+
+    public static void enableStandardItemLighting(float scale)
+    {
+        RenderSystem.enableLighting();
+        GlStateManager.enableLight(0);
+        GlStateManager.enableLight(1);
+        RenderSystem.enableColorMaterial();
+        RenderSystem.colorMaterial(1032, 5634);
+
+        float lightStrength = 0.3F * scale;
+        float ambientLightStrength = 0.4F;
+
+        GlStateManager.light(16384, 4611, singletonBuffer((float) LIGHT0_POS.x, (float) LIGHT0_POS.y, (float) LIGHT0_POS.z, 0.0f));
+        GlStateManager.light(16384, 4609, singletonBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
+        GlStateManager.light(16384, 4608, singletonBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager.light(16384, 4610, singletonBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+
+        GlStateManager.light(16385, 4611, singletonBuffer((float) LIGHT1_POS.x, (float) LIGHT1_POS.y, (float) LIGHT1_POS.z, 0.0f));
+        GlStateManager.light(16385, 4609, singletonBuffer(lightStrength, lightStrength, lightStrength, 1.0F));
+        GlStateManager.light(16385, 4608, singletonBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+        GlStateManager.light(16385, 4610, singletonBuffer(0.0F, 0.0F, 0.0F, 1.0F));
+
+        RenderSystem.shadeModel(GL11.GL_FLAT);
+
+        GlStateManager.lightModel(2899, singletonBuffer(ambientLightStrength, ambientLightStrength, ambientLightStrength, 1.0F));
+    }
+
+    private static FloatBuffer singletonBuffer(float val1, float val2, float val3, float val4)
+    {
+        FLOAT_BUFFER.clear();
+        FLOAT_BUFFER.put(val1).put(val2).put(val3).put(val4);
+        FLOAT_BUFFER.flip();
+
+        return FLOAT_BUFFER;
+    }
+    */
 }

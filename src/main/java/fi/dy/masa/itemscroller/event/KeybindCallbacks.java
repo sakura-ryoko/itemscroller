@@ -5,6 +5,7 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.slot.Slot;
 
 import fi.dy.masa.malilib.config.options.ConfigHotkey;
@@ -112,8 +113,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         {
             if (moveAction != MoveAction.NONE)
             {
-                final double mouseX = mc.mouse.getX();
-                final double mouseY = mc.mouse.getY();
+                final int mouseX = fi.dy.masa.malilib.util.InputUtils.getMouseX();
+                final int mouseY = fi.dy.masa.malilib.util.InputUtils.getMouseY();
                 return InventoryUtils.dragMoveItems(gui, moveAction, mouseX, mouseY, true);
             }
             else if (key == Hotkeys.KEY_MOVE_EVERYTHING.getKeybind())
@@ -352,8 +353,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         }
     }
 
-//    public void onPacket(ScreenHandlerSlotUpdateS2CPacket packet)
-//    {
-////        var mc = MinecraftClient.getInstance();
-//    }
+    public void onPacket(ScreenHandlerSlotUpdateS2CPacket packet)
+    {
+//        var mc = MinecraftClient.getInstance();
+    }
 }
