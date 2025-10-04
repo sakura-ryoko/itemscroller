@@ -244,11 +244,11 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             GuiUtils.getCurrentScreen() instanceof HandledScreen<?> screen &&
             Configs.GUI_BLACKLIST.contains(screen.getClass().getName()) == false)
         {
-            this.handleDragging(screen, mc, mouseX, mouseY, false);
+            this.handleDragging(screen, mc, (int) mouseX, (int) mouseY, false);
         }
     }
 
-    private boolean handleDragging(HandledScreen<?> gui, MinecraftClient mc, double mouseX, double mouseY, boolean isClick)
+    private boolean handleDragging(HandledScreen<?> gui, MinecraftClient mc, int mouseX, int mouseY, boolean isClick)
     {
         MoveAction action = InventoryUtils.getActiveMoveAction();
         boolean cancel = false;
