@@ -180,7 +180,7 @@
     "itemscroller.gui.label.trade_uses": "已交易：%d / %d",
     "itemscroller.gui.label.trades": "交易次数",
     "itemscroller.gui.title.configs": "物品滚轮(Item Scroller)配置界面 - %s §l汉化 §rby §6金合欢酱(acaciachan)§r",
-    "itemscroller.hotkeys.category.hotkeys": "Hotkeys",
+    "itemscroller.hotkeys.category.hotkeys": "快捷键",
     "itemscroller.message.toggled_mod_off": "已关闭物品滚轮mod所有功能 §cOFF",
     "itemscroller.message.toggled_mod_on": "已启用物品滚轮mod所有功能 §aON",
     "modmenu.descriptionTranslation.itemscroller": "通过滚动鼠标滚轮或在槽位上拖按鼠标来移动库存 GUI 中的物品"
