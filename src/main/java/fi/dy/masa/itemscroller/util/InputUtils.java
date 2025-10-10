@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.input.KeyInput;
 
 import fi.dy.masa.malilib.hotkeys.IKeybind;
+import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.event.KeybindCallbacks;
@@ -23,7 +24,7 @@ public class InputUtils
                CraftingHandler.isCraftingGui(GuiUtils.getCurrentScreen());
     }
 
-    public static boolean canShiftDropItems(HandledScreen<?> gui, MinecraftClient mc, double mouseX, double mouseY)
+    public static boolean canShiftDropItems(HandledScreen<?> gui, MinecraftClient mc, int mouseX, int mouseY)
     {
         if (InventoryUtils.isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
         {
@@ -31,11 +32,9 @@ public class InputUtils
             int top = AccessorUtils.getGuiTop(gui);
             int xSize = AccessorUtils.getGuiXSize(gui);
             int ySize = AccessorUtils.getGuiYSize(gui);
-			int posX = (int) mouseX;
-	        int posY = (int) mouseY;
-            boolean isOutsideGui = posX < left || posY < top || posX >= left + xSize || posY >= top + ySize;
+	        boolean isOutsideGui = mouseX < left || mouseY < top || mouseX >= left + xSize || mouseY >= top + ySize;
 
-            return isOutsideGui && AccessorUtils.getSlotAtPosition(gui, posX - left, posY - top) == null;
+            return isOutsideGui && AccessorUtils.getSlotAtPosition(gui, mouseX - left, mouseY - top) == null;
         }
 
         return false;
@@ -131,9 +130,23 @@ public class InputUtils
         return MoveAmount.NONE;
     }
 
-    public static boolean isAttack(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
+	public static boolean isAttack(int keyCode, MinecraftClient mc)
+	{
+		return keyCode == KeybindMulti.getKeyCode(mc.options.attackKey);
+	}
+
+	public static boolean isUse(int keyCode, MinecraftClient mc)
+	{
+		return keyCode == KeybindMulti.getKeyCode(mc.options.useKey);
+	}
+
+	public static boolean isPickBlock(int keyCode, MinecraftClient mc)
+	{
+		return keyCode == KeybindMulti.getKeyCode(mc.options.pickItemKey);
+	}
+
+	public static boolean isAttack(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
     {
-//        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.attackKey);
 	    if (click != null && mc.options.attackKey.matchesMouse(click))
 	    {
 			return true;
@@ -143,7 +156,6 @@ public class InputUtils
 
     public static boolean isUse(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
     {
-//        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.useKey);
 	    if (click != null && mc.options.useKey.matchesMouse(click))
 	    {
 		    return true;
@@ -153,7 +165,6 @@ public class InputUtils
 
     public static boolean isPickBlock(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
     {
-//        return keyCode == KeybindMulti.getKeyCode(MinecraftClient.getInstance().options.pickItemKey);
 	    if (click != null && mc.options.pickItemKey.matchesMouse(click))
 	    {
 		    return true;

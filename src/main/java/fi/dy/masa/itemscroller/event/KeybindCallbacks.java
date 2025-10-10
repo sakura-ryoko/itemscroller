@@ -30,11 +30,8 @@ import fi.dy.masa.itemscroller.util.*;
 public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 {
     private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
-
     protected int massCraftTicker;
-
     private boolean recipeBookClicks = false;
-
     public static KeybindCallbacks getInstance()
     {
         return INSTANCE;
@@ -112,8 +109,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         {
             if (moveAction != MoveAction.NONE)
             {
-                final double mouseX = mc.mouse.getX();
-                final double mouseY = mc.mouse.getY();
+                final int mouseX = fi.dy.masa.malilib.util.InputUtils.getMouseX();
+                final int mouseY = fi.dy.masa.malilib.util.InputUtils.getMouseY();
                 return InventoryUtils.dragMoveItems(gui, moveAction, mouseX, mouseY, true);
             }
             else if (key == Hotkeys.KEY_MOVE_EVERYTHING.getKeybind())

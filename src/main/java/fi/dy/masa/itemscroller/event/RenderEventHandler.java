@@ -38,7 +38,7 @@ public class RenderEventHandler
         return INSTANCE;
     }
 
-    public void renderRecipeView(DrawContext drawContext, MinecraftClient mc, double mouseX, double mouseY)
+    public void renderRecipeView(DrawContext drawContext, MinecraftClient mc, int mouseX, int mouseY)
     {
         if (GuiUtils.getCurrentScreen() instanceof HandledScreen<?> gui &&
             InputUtils.isRecipeViewOpen())
@@ -80,7 +80,7 @@ public class RenderEventHandler
         }
     }
 
-    public void onDrawScreenPost(DrawContext drawContext, MinecraftClient mc, double mouseX, double mouseY)
+    public void onDrawScreenPost(DrawContext drawContext, MinecraftClient mc, int mouseX, int mouseY)
     {
         this.renderRecipeView(drawContext, mc, mouseX, mouseY);
 
@@ -163,7 +163,7 @@ public class RenderEventHandler
         }
     }
 
-    public int getHoveredRecipeId(double mouseX, double mouseY, RecipeStorage recipes, HandledScreen<?> gui)
+    public int getHoveredRecipeId(int mouseX, int mouseY, RecipeStorage recipes, HandledScreen<?> gui)
     {
         if (InputUtils.isRecipeViewOpen())
         {
@@ -238,7 +238,7 @@ public class RenderEventHandler
         }
     }
 
-    private ItemStack getHoveredRecipeIngredient(double mouseX, double mouseY,
+    private ItemStack getHoveredRecipeIngredient(int mouseX, int mouseY,
                                                  RecipePattern recipe, int recipeCountPerPage,
                                                  HandledScreen<?> gui)
     {

@@ -348,16 +348,13 @@ public class InventoryUtils
 
     public static boolean dragMoveItems(HandledScreen<? extends ScreenHandler> gui,
                                         MoveAction action,
-                                        double mouseX, double mouseY, boolean isClick)
+                                        int mouseX, int mouseY, boolean isClick)
     {
-		final int posX = (int) mouseX;
-		final int posY = (int) mouseY;
-
         if (isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
         {
             // Updating these here is part of the fix to preventing a drag after shift + place
-            lastPosX = posX;
-            lastPosY = posY;
+            lastPosX = mouseX;
+            lastPosY = mouseY;
             stopDragging();
 
             return false;
@@ -369,8 +366,8 @@ public class InventoryUtils
         {
             // Reset this or the method call won't do anything...
             slotNumberLast = -1;
-            lastPosX = posX;
-            lastPosY = posY;
+            lastPosX = mouseX;
+            lastPosY = mouseY;
             activeMoveAction = action;
             cancel = dragMoveFromSlotAtPosition(gui, mouseX, mouseY, action);
         }
@@ -381,8 +378,8 @@ public class InventoryUtils
 
         if (activeMoveAction != MoveAction.NONE && cancel == false)
         {
-	        int distX = (int) (posX - lastPosX);
-	        int distY = (int) (posY - lastPosY);
+	        int distX = (int) (mouseX - lastPosX);
+	        int distY = (int) (mouseY - lastPosY);
 	        int absX = Math.abs(distX);
 	        int absY = Math.abs(distY);
 
@@ -392,10 +389,10 @@ public class InventoryUtils
 
                 for (int x = lastPosX; ; x += inc)
                 {
-	                int y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : posY;
+	                int y = absX != 0 ? lastPosY + ((x - lastPosX) * distY / absX) : mouseY;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
-                    if (x == posX)
+                    if (x == mouseX)
                     {
                         break;
                     }
@@ -407,10 +404,10 @@ public class InventoryUtils
 
                 for (int y = lastPosY; ; y += inc)
                 {
-	                int x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : posX;
+	                int x = absY != 0 ? lastPosX + ((y - lastPosY) * distX / absY) : mouseX;
                     dragMoveFromSlotAtPosition(gui, x, y, action);
 
-                    if (y == posY)
+                    if (y == mouseY)
                     {
                         break;
                     }
@@ -418,8 +415,8 @@ public class InventoryUtils
             }
         }
 
-        lastPosX = posX;
-        lastPosY = posY;
+        lastPosX = mouseX;
+        lastPosY = mouseY;
 
         // Always update the slot under the mouse.
         // This should prevent a "double click/move" when shift + left clicking on slots that have more
@@ -455,7 +452,7 @@ public class InventoryUtils
     }
 
     private static boolean dragMoveFromSlotAtPosition(HandledScreen<? extends ScreenHandler> gui,
-                                                      double x, double y, MoveAction action)
+                                                      int x, int y, MoveAction action)
     {
         if (gui instanceof CreativeInventoryScreen)
         {
@@ -527,10 +524,10 @@ public class InventoryUtils
     }
 
     private static boolean dragMoveFromSlotAtPositionCreative(HandledScreen<? extends ScreenHandler> gui,
-                                                              double x, double y, MoveAction action)
+                                                              int x, int y, MoveAction action)
     {
         CreativeInventoryScreen guiCreative = (CreativeInventoryScreen) gui;
-        Slot slot = AccessorUtils.getSlotAtPosition(gui, x, y);
+        Slot slot = AccessorUtils.getSlotAtPosition(gui, (double) x, (double) y);
         boolean isPlayerInv = guiCreative.isInventoryTabSelected(); // TODO 1.19.3+
 
         // Only allow dragging from the hotbar slots
@@ -2661,7 +2658,8 @@ public class InventoryUtils
         MinecraftClient mc = GameWrap.getClient();
         boolean shulkerBoxFix;
 
-        if (focusedSlot == null || focusedSlot.hasStack() == false)
+        if (focusedSlot == null)
+	        //|| focusedSlot.hasStack() == false)
         {
             return;
         }
