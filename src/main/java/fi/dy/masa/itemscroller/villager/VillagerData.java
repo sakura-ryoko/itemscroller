@@ -1,12 +1,11 @@
 package fi.dy.masa.itemscroller.villager;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.UUID;
-
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtList;
 
 public class VillagerData
 {
@@ -51,19 +50,19 @@ public class VillagerData
         return this.favorites;
     }
 
-    public NbtCompound toNBT()
+    public CompoundTag toNBT()
     {
-        NbtCompound tag = new NbtCompound();
+        CompoundTag tag = new CompoundTag();
 
         tag.putLong("UUIDM", this.uuid.getMostSignificantBits());
         tag.putLong("UUIDL", this.uuid.getLeastSignificantBits());
         tag.putInt("ListPosition", this.tradeListPosition);
 
-        NbtList tagList = new NbtList();
+        ListTag tagList = new ListTag();
 
         for (Integer val : this.favorites)
         {
-            tagList.add(NbtInt.of(val));
+            tagList.add(IntTag.valueOf(val));
         }
 
         tag.put("Favorites", tagList);
@@ -72,20 +71,20 @@ public class VillagerData
     }
 
     @Nullable
-    public static VillagerData fromNBT(NbtCompound tag)
+    public static VillagerData fromNBT(CompoundTag tag)
     {
         if (tag.contains("UUIDM") && tag.contains("UUIDL"))
         {
-            VillagerData data = new VillagerData(new UUID(tag.getLong("UUIDM", 0L), tag.getLong("UUIDL", 0L)));
-            NbtList tagList = tag.getListOrEmpty("Favorites");
+            VillagerData data = new VillagerData(new UUID(tag.getLongOr("UUIDM", 0L), tag.getLongOr("UUIDL", 0L)));
+            ListTag tagList = tag.getListOrEmpty("Favorites");
             final int count = tagList.size();
 
             data.favorites.clear();
-            data.tradeListPosition = tag.getInt("ListPosition", -1);
+            data.tradeListPosition = tag.getIntOr("ListPosition", -1);
 
             for (int i = 0; i < count; ++i)
             {
-                data.favorites.add(tagList.getInt(i, -1));
+                data.favorites.add(tagList.getIntOr(i, -1));
             }
 
             return data;

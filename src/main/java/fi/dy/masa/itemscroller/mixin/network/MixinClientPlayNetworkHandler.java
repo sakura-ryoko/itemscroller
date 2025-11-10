@@ -1,21 +1,21 @@
 package fi.dy.masa.itemscroller.mixin.network;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.StatisticsS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import fi.dy.masa.itemscroller.util.InventoryUtils;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 
-@Mixin(ClientPlayNetworkHandler.class)
+@Mixin(ClientPacketListener.class)
 public class MixinClientPlayNetworkHandler
 {
-    @Inject(method = "onStatistics", at = @At("RETURN"), cancellable = true)
-    private void onPong(StatisticsS2CPacket packet, CallbackInfo ci)
+    @Inject(method = "handleAwardStats", at = @At("RETURN"), cancellable = true)
+    private void onPong(ClientboundAwardStatsPacket packet, CallbackInfo ci)
     {
         if (InventoryUtils.onPong(packet))
         {
@@ -30,14 +30,14 @@ public class MixinClientPlayNetworkHandler
 //    }
 
     @Inject(
-            method = "onInventory",
+            method = "handleContainerContent",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V",
+                    target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true)
-    private void onInventory(InventoryS2CPacket packet, CallbackInfo ci)
+    private void onInventory(ClientboundContainerSetContentPacket packet, CallbackInfo ci)
     {
         if (InventoryUtils.bufferInvUpdates)
         {
@@ -47,15 +47,15 @@ public class MixinClientPlayNetworkHandler
     }
 
     @Inject(
-            method = "onScreenHandlerSlotUpdate",
+            method = "handleContainerSetSlot",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V",
+                    target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true
     )
-    private void onScreenHandlerSlotUpdateInvokeMainThread(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci)
+    private void onScreenHandlerSlotUpdateInvokeMainThread(ClientboundContainerSetSlotPacket packet, CallbackInfo ci)
     {
         if (InventoryUtils.bufferInvUpdates)
         {

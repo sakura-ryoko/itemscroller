@@ -1,40 +1,38 @@
 package fi.dy.masa.itemscroller.recipes;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
-import net.minecraft.client.gui.screen.ingame.StonecutterScreen;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
-import net.minecraft.client.recipebook.ClientRecipeBook;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.client.ClientRecipeBook;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
+import net.minecraft.client.gui.screens.inventory.StonecutterScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.recipe.*;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.SlotDisplayContexts;
-import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.recipe.input.RecipeInput;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.context.ContextParameterMap;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.context.ContextMap;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.world.level.Level;
 
 import fi.dy.masa.malilib.util.game.RecipeBookUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinClientRecipeBook;
-import fi.dy.masa.itemscroller.mixin.screen.IMixinRecipeBookScreen;
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinRecipeBookWidget;
+import fi.dy.masa.itemscroller.mixin.screen.IMixinRecipeBookScreen;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
@@ -42,8 +40,8 @@ public class RecipePattern
 {
     private ItemStack result = InventoryUtils.EMPTY_STACK;
     private ItemStack[] recipe = new ItemStack[9];
-    private RecipeEntry<?> vanillaRecipe;
-    private NetworkRecipeId networkRecipeId;
+    private RecipeHolder<?> vanillaRecipe;
+    private RecipeDisplayId networkRecipeId;
     private RecipeDisplayEntry displayEntry;
     private RecipeBookCategory category;
     private RecipeBookUtils.Type recipeType;
@@ -82,14 +80,14 @@ public class RecipePattern
 
     @SuppressWarnings("unchecked")
     @Nullable
-    public <T extends RecipeInput> Recipe<T> lookupVanillaRecipe(World world)
+    public <T extends RecipeInput> Recipe<T> lookupVanillaRecipe(Level world)
     {
         //Assume all recipes here are of type CraftingRecipe
         this.vanillaRecipe = null;
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
         int recipeSize;
 
-        if (mc.world == null)
+        if (mc.level == null)
         {
             return null;
         }
@@ -106,18 +104,18 @@ public class RecipePattern
             return null;
         }
 
-        ServerWorld serverWorld = mc.getServer() != null ? mc.getServer().getWorld(mc.world.getRegistryKey()) : null;
+        ServerLevel serverWorld = mc.getSingleplayerServer() != null ? mc.getSingleplayerServer().getLevel(mc.level.dimension()) : null;
 
-        if (mc.isIntegratedServerRunning() && serverWorld != null)
+        if (mc.hasSingleplayerServer() && serverWorld != null)
         {
-            CraftingRecipeInput input = CraftingRecipeInput.create(recipeSize, recipeSize, Arrays.asList(recipe));
-            Optional<RecipeEntry<CraftingRecipe>> opt = serverWorld.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, serverWorld);
+            CraftingInput input = CraftingInput.of(recipeSize, recipeSize, Arrays.asList(recipe));
+            Optional<RecipeHolder<CraftingRecipe>> opt = serverWorld.recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, serverWorld);
 
             if (opt.isPresent())
             {
-                RecipeEntry<CraftingRecipe> recipeEntry = opt.get();
-                Recipe<CraftingRecipeInput> match = opt.get().value();
-                ItemStack result = match.craft(input, serverWorld.getRegistryManager());
+                RecipeHolder<CraftingRecipe> recipeEntry = opt.get();
+                Recipe<CraftingInput> match = opt.get().value();
+                ItemStack result = match.assemble(input, serverWorld.registryAccess());
 
                 if (result != null && !result.isEmpty())
                 {
@@ -135,9 +133,9 @@ public class RecipePattern
         return null;
     }
 
-    public void storeIdFromClientRecipeBook(MinecraftClient mc)
+    public void storeIdFromClientRecipeBook(Minecraft mc)
     {
-        Pair<NetworkRecipeId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
+        Pair<RecipeDisplayId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
 
         if (pair == null || pair.getLeft() == null || pair.getRight() == null)
         {
@@ -150,7 +148,7 @@ public class RecipePattern
         this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(pair.getRight().display()));
     }
 
-    public void storeNetworkRecipeId(NetworkRecipeId id)
+    public void storeNetworkRecipeId(RecipeDisplayId id)
     {
         this.networkRecipeId = id;
     }
@@ -170,7 +168,7 @@ public class RecipePattern
         this.recipeType = type;
     }
 
-    public @Nullable NetworkRecipeId getNetworkRecipeId()
+    public @Nullable RecipeDisplayId getNetworkRecipeId()
     {
         return this.networkRecipeId;
     }
@@ -200,25 +198,25 @@ public class RecipePattern
         return RecipeBookUtils.Type.fromRecipeDisplay(entry.display()) == this.recipeType;
     }
 
-    public @Nullable Pair<NetworkRecipeId, RecipeDisplayEntry> matchClientRecipeBook(MinecraftClient mc)
+    public @Nullable Pair<RecipeDisplayId, RecipeDisplayEntry> matchClientRecipeBook(Minecraft mc)
     {
-        Pair<NetworkRecipeId, RecipeDisplayEntry> pair;
+        Pair<RecipeDisplayId, RecipeDisplayEntry> pair;
 
-        if (mc.player == null || mc.world == null || this.isEmpty())
+        if (mc.player == null || mc.level == null || this.isEmpty())
         {
             return null;
         }
 
         ClientRecipeBook recipeBook = mc.player.getRecipeBook();
-        ContextParameterMap map = RecipeBookUtils.getMap(mc);
-        Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
+        ContextMap map = RecipeBookUtils.getMap(mc);
+        Map<RecipeDisplayId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
 
-        if (recipeMap.size() < 1)
+        if (recipeMap.size() < 1 || map == null)
         {
             return null;
         }
 
-        for (NetworkRecipeId id : recipeMap.keySet())
+        for (RecipeDisplayId id : recipeMap.keySet())
         {
             RecipeDisplayEntry entry = recipeMap.get(id);
 
@@ -235,7 +233,7 @@ public class RecipePattern
                     continue;
                 }
 
-                List<ItemStack> stacks = entry.getStacks(map);
+                List<ItemStack> stacks = entry.resultItems(map);
 
                 if (stacks.isEmpty())
                 {
@@ -295,26 +293,26 @@ public class RecipePattern
 //        return false;
 //    }
 
-    public void storeCraftingRecipe(Slot slot, HandledScreen<? extends ScreenHandler> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
+    public void storeCraftingRecipe(Slot slot, AbstractContainerScreen<? extends AbstractContainerMenu> gui, boolean clearIfEmpty, boolean fromKeybind, Minecraft mc)
     {
         SlotRange range = CraftingHandler.getCraftingGridSlots(gui, slot);
 
         if (range != null)
         {
-            if (slot.hasStack())
+            if (slot.hasItem())
             {
                 int gridSize = range.getSlotCount();
 
                 if (fromKeybind)
                 {
                     // Slots are only populated from the Keybinds Callback
-                    int numSlots = gui.getScreenHandler().slots.size();
+                    int numSlots = gui.getMenu().slots.size();
                     this.ensureRecipeSizeAndClearRecipe(gridSize);
 
                     for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlots; i++, s++)
                     {
-                        Slot slotTmp = gui.getScreenHandler().getSlot(s);
-                        this.recipe[i] = slotTmp.hasStack() ? slotTmp.getStack().copy() : InventoryUtils.EMPTY_STACK;
+                        Slot slotTmp = gui.getMenu().getSlot(s);
+                        this.recipe[i] = slotTmp.hasItem() ? slotTmp.getItem().copy() : InventoryUtils.EMPTY_STACK;
                     }
                     this.recipeSaveTime = System.currentTimeMillis();
                 }
@@ -323,14 +321,14 @@ public class RecipePattern
                 {
                     //System.out.printf("storeCraftingRecipe() SKIPPING InputHandler input result [%s] versus [%s]\n", this.result.toString(), slot.getStack().toString());
                     this.recipeSaveTime = System.currentTimeMillis();
-                    gui.getScreenHandler().setCursorStack(ItemStack.EMPTY);
+                    gui.getMenu().setCarried(ItemStack.EMPTY);
                     InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
                     return;
                 }
 
                 //System.out.printf("storeCraftingRecipe() old result [%s] new [%s]\n", this.result.toString(), slot.getStack().toString());
-                this.result = slot.getStack().copy();
-                this.lookupVanillaRecipe(mc.world);
+                this.result = slot.getItem().copy();
+                this.lookupVanillaRecipe(mc.level);
                 this.storeSelectedRecipeIdFromGui(gui);
                 InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
             }
@@ -341,11 +339,11 @@ public class RecipePattern
         }
     }
 
-    public void storeSelectedRecipeIdFromGui(HandledScreen<? extends ScreenHandler> gui)
+    public void storeSelectedRecipeIdFromGui(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
     {
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
 
-        if (mc.world == null || mc.player == null)
+        if (mc.level == null || mc.player == null)
         {
             return;
         }
@@ -365,24 +363,25 @@ public class RecipePattern
 //        RecipeBookUtils.toggleDebugLog(true);
 //        RecipeBookUtils.toggleAnsiColorLog(true);
 
-        if (gui instanceof RecipeBookScreen<?> rbs)
+        if (gui instanceof AbstractRecipeBookScreen<?> rbs)
         {
-            RecipeBookWidget<?> widget = ((IMixinRecipeBookScreen) rbs).itemscroller_getRecipeBookWidget();
+            RecipeBookComponent<?> widget = ((IMixinRecipeBookScreen) rbs).itemscroller_getRecipeBookWidget();
 
             if (widget != null)
             {
-                NetworkRecipeId id = ((IMixinRecipeBookWidget) widget).itemscroller_getSelectedRecipe();
+                RecipeDisplayId id = ((IMixinRecipeBookWidget) widget).itemscroller_getSelectedRecipe();
 
                 if (id != null)
                 {
                     ClientRecipeBook recipeBook = mc.player.getRecipeBook();
-                    Map<NetworkRecipeId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
-                    ContextParameterMap map = RecipeBookUtils.getMap(mc);
+                    Map<RecipeDisplayId, RecipeDisplayEntry> recipeMap = ((IMixinClientRecipeBook) recipeBook).itemscroller_getRecipeMap();
+                    ContextMap map = RecipeBookUtils.getMap(mc);
 
+					if (map == null) return;
                     if (recipeMap.containsKey(id))
                     {
                         RecipeDisplayEntry entry = recipeMap.get(id);
-                        List<ItemStack> stacks = entry.getStacks(map);
+                        List<ItemStack> stacks = entry.resultItems(map);
 
                         if (stacks.isEmpty())
                         {
@@ -422,7 +421,7 @@ public class RecipePattern
                         else
                         {
                             // Go for broke, and iterate it.
-                            Pair<NetworkRecipeId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
+                            Pair<RecipeDisplayId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
 
                             if (pair != null)
                             {
@@ -480,13 +479,13 @@ public class RecipePattern
         this.recipeSaveTime = System.currentTimeMillis();
     }
 
-    public void readFromNBT(@Nonnull NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
+    public void readFromNBT(@Nonnull CompoundTag nbt, @Nonnull RegistryAccess registryManager)
     {
         if (nbt.contains("Result") && nbt.contains("Ingredients"))
         {
-            NbtList tagIngredients = nbt.getListOrEmpty("Ingredients");
+            ListTag tagIngredients = nbt.getListOrEmpty("Ingredients");
             int count = tagIngredients.size();
-            int length = nbt.getInt("Length" , -1);
+            int length = nbt.getIntOr("Length" , -1);
 
             if (length > 0)
             {
@@ -495,8 +494,8 @@ public class RecipePattern
 
             for (int i = 0; i < count; i++)
             {
-                NbtCompound tag = tagIngredients.getCompoundOrEmpty(i);
-                int slot = tag.getInt("Slot", -1);
+                CompoundTag tag = tagIngredients.getCompoundOrEmpty(i);
+                int slot = tag.getIntOr("Slot", -1);
 
                 if (slot >= 0 && slot < this.recipe.length)
                 {
@@ -509,26 +508,26 @@ public class RecipePattern
     }
 
     @Nonnull
-    public NbtCompound writeToNBT(@Nonnull DynamicRegistryManager registryManager)
+    public CompoundTag writeToNBT(@Nonnull RegistryAccess registryManager)
     {
-        NbtCompound nbt = new NbtCompound();
+        CompoundTag nbt = new CompoundTag();
 
         if (this.isValid())
         {
 //            NbtCompound tag = (NbtCompound) this.result.toNbt(registryManager);
-            NbtCompound tag = (NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.result).getPartialOrThrow();
+            CompoundTag tag = (CompoundTag) ItemStack.CODEC.encodeStart(registryManager.createSerializationContext(NbtOps.INSTANCE), this.result).getPartialOrThrow();
 
             nbt.putInt("Length", this.recipe.length);
             nbt.put("Result", tag);
 
-            NbtList tagIngredients = new NbtList();
+            ListTag tagIngredients = new ListTag();
 
             for (int i = 0; i < this.recipe.length; i++)
             {
                 if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
                 {
 //                    tag.copyFrom((NbtCompound) this.recipe[i].toNbt(registryManager));
-                    tag = (NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.recipe[i]).getPartialOrThrow();
+                    tag = (CompoundTag) ItemStack.CODEC.encodeStart(registryManager.createSerializationContext(NbtOps.INSTANCE), this.recipe[i]).getPartialOrThrow();
                     tag.putInt("Slot", i);
                     tagIngredients.add(tag);
                 }
@@ -598,7 +597,7 @@ public class RecipePattern
     }
 
     @Nullable
-    public RecipeEntry<?> getVanillaRecipeEntry()
+    public RecipeHolder<?> getVanillaRecipeEntry()
     {
         return this.vanillaRecipe;
     }

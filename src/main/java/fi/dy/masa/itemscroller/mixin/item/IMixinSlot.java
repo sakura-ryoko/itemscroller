@@ -1,12 +1,12 @@
 package fi.dy.masa.itemscroller.mixin.item;
 
+import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import net.minecraft.screen.slot.Slot;
 
 @Mixin(Slot.class)
 public interface IMixinSlot
 {
-    @Accessor("index")
+    @Accessor("slot")
     int itemscroller_getSlotIndex();
 }

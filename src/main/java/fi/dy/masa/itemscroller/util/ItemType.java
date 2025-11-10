@@ -1,11 +1,10 @@
 package fi.dy.masa.itemscroller.util;
 
 import javax.annotation.Nonnull;
+import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-
-import net.minecraft.item.ItemStack;
 
 /**
  * Wrapper class for ItemStack, which implements equals()
@@ -41,14 +40,14 @@ public record ItemType(ItemStack stack)
 
         ItemType other = (ItemType) obj;
 
-        return ItemStack.areItemsAndComponentsEqual(this.stack, other.stack);
+        return ItemStack.isSameItemSameComponents(this.stack, other.stack);
     }
 
     /**
      * Returns a map that has a list of the indices for each different item in the input list
      *
-     * @param stacks
-     * @return
+     * @param stacks ()
+     * @return ()
      */
     public static Map<ItemType, IntArrayList> getSlotsPerItem(ItemStack[] stacks)
     {

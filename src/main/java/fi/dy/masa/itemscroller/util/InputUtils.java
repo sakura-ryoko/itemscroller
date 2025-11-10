@@ -1,12 +1,10 @@
 package fi.dy.masa.itemscroller.util;
 
 import javax.annotation.Nullable;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.KeyInput;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
 import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.util.GuiUtils;
@@ -24,9 +22,9 @@ public class InputUtils
                CraftingHandler.isCraftingGui(GuiUtils.getCurrentScreen());
     }
 
-    public static boolean canShiftDropItems(HandledScreen<?> gui, MinecraftClient mc, int mouseX, int mouseY)
+    public static boolean canShiftDropItems(AbstractContainerScreen<?> gui, Minecraft mc, int mouseX, int mouseY)
     {
-        if (InventoryUtils.isStackEmpty(gui.getScreenHandler().getCursorStack()) == false)
+        if (InventoryUtils.isStackEmpty(gui.getMenu().getCarried()) == false)
         {
             int left = AccessorUtils.getGuiLeft(gui);
             int top = AccessorUtils.getGuiTop(gui);
@@ -130,45 +128,45 @@ public class InputUtils
         return MoveAmount.NONE;
     }
 
-	public static boolean isAttack(int keyCode, MinecraftClient mc)
+	public static boolean isAttack(int keyCode, Minecraft mc)
 	{
-		return keyCode == KeybindMulti.getKeyCode(mc.options.attackKey);
+		return keyCode == KeybindMulti.getKeyCode(mc.options.keyAttack);
 	}
 
-	public static boolean isUse(int keyCode, MinecraftClient mc)
+	public static boolean isUse(int keyCode, Minecraft mc)
 	{
-		return keyCode == KeybindMulti.getKeyCode(mc.options.useKey);
+		return keyCode == KeybindMulti.getKeyCode(mc.options.keyUse);
 	}
 
-	public static boolean isPickBlock(int keyCode, MinecraftClient mc)
+	public static boolean isPickBlock(int keyCode, Minecraft mc)
 	{
-		return keyCode == KeybindMulti.getKeyCode(mc.options.pickItemKey);
+		return keyCode == KeybindMulti.getKeyCode(mc.options.keyPickItem);
 	}
 
-	public static boolean isAttack(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
+	public static boolean isAttack(@Nullable MouseButtonEvent click, @Nullable KeyEvent input, Minecraft mc)
     {
-	    if (click != null && mc.options.attackKey.matchesMouse(click))
+	    if (click != null && mc.options.keyAttack.matchesMouse(click))
 	    {
 			return true;
 	    }
-		else return input != null && mc.options.attackKey.matchesKey(input);
+		else return input != null && mc.options.keyAttack.matches(input);
     }
 
-    public static boolean isUse(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
+    public static boolean isUse(@Nullable MouseButtonEvent click, @Nullable KeyEvent input, Minecraft mc)
     {
-	    if (click != null && mc.options.useKey.matchesMouse(click))
+	    if (click != null && mc.options.keyUse.matchesMouse(click))
 	    {
 		    return true;
 	    }
-	    else return input != null && mc.options.useKey.matchesKey(input);
+	    else return input != null && mc.options.keyUse.matches(input);
     }
 
-    public static boolean isPickBlock(@Nullable Click click, @Nullable KeyInput input, MinecraftClient mc)
+    public static boolean isPickBlock(@Nullable MouseButtonEvent click, @Nullable KeyEvent input, Minecraft mc)
     {
-	    if (click != null && mc.options.pickItemKey.matchesMouse(click))
+	    if (click != null && mc.options.keyPickItem.matchesMouse(click))
 	    {
 		    return true;
 	    }
-	    else return input != null && mc.options.pickItemKey.matchesKey(input);
+	    else return input != null && mc.options.keyPickItem.matches(input);
     }
 }

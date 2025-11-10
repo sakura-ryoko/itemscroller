@@ -1,18 +1,16 @@
 package fi.dy.masa.itemscroller.villager;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtSizeTracker;
-import net.minecraft.screen.MerchantScreenHandler;
-import net.minecraft.village.TradeOffer;
-import net.minecraft.village.TradeOfferList;
-
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.malilib.util.nbt.NbtUtils;
@@ -82,7 +80,7 @@ public class VillagerDataStorage
         }
     }
 
-    public void toggleGlobalFavorite(TradeOffer trade)
+    public void toggleGlobalFavorite(MerchantOffer trade)
     {
         TradeType type = TradeType.of(trade);
 
@@ -98,12 +96,12 @@ public class VillagerDataStorage
         this.dirty = true;
     }
 
-    public FavoriteData getFavoritesForCurrentVillager(MerchantScreenHandler handler)
+    public FavoriteData getFavoritesForCurrentVillager(MerchantMenu handler)
     {
         return this.getFavoritesForCurrentVillager(((IMerchantScreenHandler) handler).itemscroller$getOriginalList());
     }
 
-    public FavoriteData getFavoritesForCurrentVillager(TradeOfferList originalTrades)
+    public FavoriteData getFavoritesForCurrentVillager(MerchantOffers originalTrades)
     {
         VillagerData data = this.getDataFor(this.lastInteractedUUID, false);
         IntArrayList favorites = data != null ? data.getFavorites() : null;
@@ -121,19 +119,19 @@ public class VillagerDataStorage
         return new FavoriteData(IntArrayList.of(), favorites == null);
     }
 
-    private void readFromNBT(NbtCompound nbt)
+    private void readFromNBT(CompoundTag nbt)
     {
         if (nbt == null || nbt.contains("VillagerData") == false)
         {
             return;
         }
 
-        NbtList tagList = nbt.getListOrEmpty("VillagerData");
+        ListTag tagList = nbt.getListOrEmpty("VillagerData");
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getCompoundOrEmpty(i);
+            CompoundTag tag = tagList.getCompoundOrEmpty(i);
             VillagerData data = VillagerData.fromNBT(tag);
 
             if (data != null)
@@ -147,7 +145,7 @@ public class VillagerDataStorage
 
         for (int i = 0; i < count; i++)
         {
-            NbtCompound tag = tagList.getCompoundOrEmpty(i);
+            CompoundTag tag = tagList.getCompoundOrEmpty(i);
             TradeType type = TradeType.fromTag(tag);
 
             if (type != null)
@@ -157,11 +155,11 @@ public class VillagerDataStorage
         }
     }
 
-    private NbtCompound writeToNBT()
+    private CompoundTag writeToNBT()
     {
-        NbtCompound nbt = new NbtCompound();
-        NbtList favoriteListData = new NbtList();
-        NbtList globalFavoriteData = new NbtList();
+        CompoundTag nbt = new CompoundTag();
+        ListTag favoriteListData = new ListTag();
+        ListTag globalFavoriteData = new ListTag();
 
         for (VillagerData data : this.data.values())
         {
@@ -213,7 +211,7 @@ public class VillagerDataStorage
 
                 if (Files.exists(file))
                 {
-                    NbtCompound nbtIn = NbtUtils.readNbtFromFileAsPath(file, NbtSizeTracker.ofUnlimitedBytes());
+                    CompoundTag nbtIn = NbtUtils.readNbtFromFileAsPath(file, NbtAccounter.unlimitedHeap());
 
                     if (nbtIn != null && !nbtIn.isEmpty())
                     {

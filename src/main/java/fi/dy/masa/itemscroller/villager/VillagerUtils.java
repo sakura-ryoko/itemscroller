@@ -3,14 +3,14 @@ package fi.dy.masa.itemscroller.villager;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.MerchantScreen;
-import net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket;
-import net.minecraft.screen.MerchantScreenHandler;
-import net.minecraft.village.TradeOffer;
-import net.minecraft.village.TradeOfferList;
 import fi.dy.masa.malilib.util.GuiUtils;
 
 public class VillagerUtils
@@ -21,20 +21,20 @@ public class VillagerUtils
 
         if (screen instanceof MerchantScreen merchantScreen)
         {
-            MerchantScreenHandler handler = merchantScreen.getScreenHandler();
+            MerchantMenu handler = merchantScreen.getMenu();
 
             int realIndex = getRealTradeIndexFor(visibleIndex, handler);
 
             if (realIndex >= 0)
             {
                 // Use the real (server-side) index
-                handler.setRecipeIndex(realIndex);
+                handler.setSelectionHint(realIndex);
 
                 // Use the "visible index", since this will access the custom list
-                handler.switchTo(visibleIndex);
+                handler.tryMoveItems(visibleIndex);
 
                 // Use the real (server-side) index
-                MinecraftClient.getInstance().getNetworkHandler().sendPacket(new SelectMerchantTradeC2SPacket(realIndex));
+                Minecraft.getInstance().getConnection().send(new ServerboundSelectTradePacket(realIndex));
 
                 return true;
             }
@@ -43,17 +43,17 @@ public class VillagerUtils
         return false;
     }
 
-    public static int getRealTradeIndexFor(int visibleIndex, MerchantScreenHandler handler)
+    public static int getRealTradeIndexFor(int visibleIndex, MerchantMenu handler)
     {
         if (handler instanceof IMerchantScreenHandler)
         {
-            TradeOfferList originalList = ((IMerchantScreenHandler) handler).itemscroller$getOriginalList();
-            TradeOfferList customList = handler.getRecipes();
+            MerchantOffers originalList = ((IMerchantScreenHandler) handler).itemscroller$getOriginalList();
+            MerchantOffers customList = handler.getOffers();
 
             if (originalList != null && customList != null &&
                 visibleIndex >= 0 && visibleIndex < customList.size())
             {
-                TradeOffer trade = customList.get(visibleIndex);
+                MerchantOffer trade = customList.get(visibleIndex);
 
                 if (trade != null)
                 {
@@ -70,7 +70,7 @@ public class VillagerUtils
         return -1;
     }
 
-    public static TradeOfferList buildCustomTradeList(TradeOfferList originalList)
+    public static MerchantOffers buildCustomTradeList(MerchantOffers originalList)
     {
         FavoriteData data = VillagerDataStorage.getInstance().getFavoritesForCurrentVillager(originalList);
         IntArrayList favorites = data.favorites;
@@ -80,7 +80,7 @@ public class VillagerUtils
         // Some favorites defined
         if (favorites.isEmpty() == false)
         {
-            TradeOfferList list = new TradeOfferList();
+            MerchantOffers list = new MerchantOffers();
             int originalListSize = originalList.size();
 
             // First pick all the favorited recipes, in the order they are in the favorites list
@@ -107,7 +107,7 @@ public class VillagerUtils
         return originalList;
     }
 
-    public static IntArrayList getGlobalFavoritesFor(TradeOfferList originalTrades, Collection<TradeType> globalFavorites)
+    public static IntArrayList getGlobalFavoritesFor(MerchantOffers originalTrades, Collection<TradeType> globalFavorites)
     {
         IntArrayList favorites = new IntArrayList();
         Map<TradeType, Integer> trades = new HashMap<>();
@@ -116,7 +116,7 @@ public class VillagerUtils
         // Build a map from the trade types to the indices in the current villager's trade list
         for (int i = 0; i < size; ++i)
         {
-            TradeOffer trade = originalTrades.get(i);
+            MerchantOffer trade = originalTrades.get(i);
             trades.put(TradeType.of(trade), i);
         }
 
