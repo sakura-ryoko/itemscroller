@@ -5,15 +5,15 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nonnull;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
-import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtSizeTracker;
+import net.minecraft.recipe.NetworkRecipeId;
+import net.minecraft.recipe.RecipeDisplayEntry;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.screen.slot.Slot;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.malilib.util.game.RecipeBookUtils;
@@ -126,12 +126,12 @@ public class RecipeStorage
         return this.getRecipe(this.getSelection());
     }
 
-    public void storeCraftingRecipeToCurrentSelection(Slot slot, AbstractContainerScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, Minecraft mc)
+    public void storeCraftingRecipeToCurrentSelection(Slot slot, HandledScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
     {
         this.storeCraftingRecipe(this.getSelection(), slot, gui, clearIfEmpty, fromKeybind, mc);
     }
 
-    public void storeCraftingRecipe(int index, Slot slot, AbstractContainerScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, Minecraft mc)
+    public void storeCraftingRecipe(int index, Slot slot, HandledScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
     {
         this.getRecipe(index).storeCraftingRecipe(slot, gui, clearIfEmpty, fromKeybind, mc);
         this.dirty = true;
@@ -145,7 +145,7 @@ public class RecipeStorage
 
     public void onAddToRecipeBook(RecipeDisplayEntry entry)
     {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
 
         // DEBUG
 //        RecipeBookUtils.toggleDebugLog(true);
@@ -180,7 +180,7 @@ public class RecipeStorage
         }
     }
 
-    private void readFromNBT(CompoundTag nbt, @Nonnull RegistryAccess registryManager)
+    private void readFromNBT(NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
     {
         if (nbt == null || nbt.contains("Recipes") == false)
         {
@@ -192,14 +192,14 @@ public class RecipeStorage
             this.recipes[i].clearRecipe();
         }
 
-        ListTag tagList = nbt.getListOrEmpty("Recipes");
+        NbtList tagList = nbt.getListOrEmpty("Recipes");
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)
         {
-            CompoundTag tag = tagList.getCompoundOrEmpty(i);
+            NbtCompound tag = tagList.getCompoundOrEmpty(i);
 
-            int index = tag.getByteOr("RecipeIndex", (byte) -1);
+            int index = tag.getByte("RecipeIndex", (byte) -1);
 
             if (index >= 0 && index < this.recipes.length)
             {
@@ -207,15 +207,15 @@ public class RecipeStorage
 
                 if (tag.contains("RecipeCategory"))
                 {
-                    this.recipes[index].storeRecipeCategory(RecipeBookUtils.getRecipeCategoryFromId(tag.getStringOr("RecipeCategory", "")));
+                    this.recipes[index].storeRecipeCategory(RecipeBookUtils.getRecipeCategoryFromId(tag.getString("RecipeCategory", "")));
                 }
                 if (tag.contains("LastNetworkId"))
                 {
-                    this.recipes[index].storeNetworkRecipeId(new RecipeDisplayId(tag.getIntOr("LastNetworkId", -1)));
+                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId", -1)));
                 }
                 if (tag.contains("RecipeType"))
                 {
-                    String recipeType = tag.getStringOr("RecipeType", "");
+                    String recipeType = tag.getString("RecipeType", "");
 
                     if (!recipeType.isEmpty())
                     {
@@ -232,20 +232,20 @@ public class RecipeStorage
             }
         }
 
-        this.changeSelectedRecipe(nbt.getByteOr("Selected", (byte) -1));
+        this.changeSelectedRecipe(nbt.getByte("Selected", (byte) -1));
     }
 
-    private CompoundTag writeToNBT(@Nonnull RegistryAccess registry)
+    private NbtCompound writeToNBT(@Nonnull DynamicRegistryManager registry)
     {
-        ListTag tagRecipes = new ListTag();
-        CompoundTag nbt = new CompoundTag();
+        NbtList tagRecipes = new NbtList();
+        NbtCompound nbt = new NbtCompound();
 
         for (int i = 0; i < this.recipes.length; i++)
         {
             if (this.recipes[i].isValid())
             {
                 RecipePattern entry = this.recipes[i];
-                CompoundTag tag = entry.writeToNBT(registry);
+                NbtCompound tag = entry.writeToNBT(registry);
                 tag.putByte("RecipeIndex", (byte) i);
 
                 if (entry.getRecipeCategory() != null)
@@ -300,7 +300,7 @@ public class RecipeStorage
         return FileUtils.getMinecraftDirectoryAsPath().resolve(Reference.MOD_ID);
     }
 
-    public void readFromDisk(@Nonnull RegistryAccess registry)
+    public void readFromDisk(@Nonnull DynamicRegistryManager registry)
     {
         try
         {
@@ -312,7 +312,7 @@ public class RecipeStorage
 
                 if (Files.exists(file))
                 {
-                    CompoundTag nbtIn = NbtUtils.readNbtFromFileAsPath(file, NbtAccounter.unlimitedHeap());
+                    NbtCompound nbtIn = NbtUtils.readNbtFromFileAsPath(file, NbtSizeTracker.ofUnlimitedBytes());
 
                     if (nbtIn != null && !nbtIn.isEmpty())
                     {
@@ -339,7 +339,7 @@ public class RecipeStorage
         }
     }
 
-    public void writeToDisk(@Nonnull RegistryAccess registry)
+    public void writeToDisk(@Nonnull DynamicRegistryManager registry)
     {
         if (this.dirty)
         {

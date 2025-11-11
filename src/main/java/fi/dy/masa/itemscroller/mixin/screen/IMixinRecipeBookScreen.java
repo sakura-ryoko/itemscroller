@@ -1,13 +1,13 @@
 package fi.dy.masa.itemscroller.mixin.screen;
 
-import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractRecipeBookScreen.class)
+@Mixin(RecipeBookScreen.class)
 public interface IMixinRecipeBookScreen
 {
-    @Accessor("recipeBookComponent")
-    RecipeBookComponent<?> itemscroller_getRecipeBookWidget();
+    @Accessor("recipeBook")
+    RecipeBookWidget<?> itemscroller_getRecipeBookWidget();
 }

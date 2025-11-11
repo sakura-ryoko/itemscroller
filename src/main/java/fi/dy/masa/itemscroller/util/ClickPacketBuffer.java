@@ -2,8 +2,8 @@ package fi.dy.masa.itemscroller.util;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.Packet;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.packet.Packet;
 
 public class ClickPacketBuffer
 {
@@ -47,11 +47,11 @@ public class ClickPacketBuffer
 
     public static void sendBufferedPackets(int maxCount)
     {
-        Minecraft mc = Minecraft.getInstance();
+        MinecraftClient mc = MinecraftClient.getInstance();
 
         if (hasBufferedPackets)
         {
-            if (mc.screen == null)
+            if (mc.currentScreen == null)
             {
                 reset();
             }
@@ -65,7 +65,7 @@ public class ClickPacketBuffer
 
 					if (packet != null)
 					{
-						mc.player.connection.send(packet);
+						mc.player.networkHandler.sendPacket(packet);
 					}
                 }
 

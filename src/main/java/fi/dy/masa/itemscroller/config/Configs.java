@@ -4,15 +4,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.client.gui.screen.ingame.CraftingScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.screen.slot.CraftingResultSlot;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.world.inventory.ResultSlot;
-
 import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
@@ -171,9 +169,9 @@ public class Configs implements IConfigHandler
         CraftingHandler.clearDefinitions();
 
         // "net.minecraft.client.gui.inventory.GuiCrafting,net.minecraft.inventory.SlotCrafting,0,1-9", // vanilla Crafting Table
-        CraftingHandler.addCraftingGridDefinition(CraftingScreen.class.getName(), ResultSlot.class.getName(), 0, new SlotRange(1, 9));
+        CraftingHandler.addCraftingGridDefinition(CraftingScreen.class.getName(), CraftingResultSlot.class.getName(), 0, new SlotRange(1, 9));
         //"net.minecraft.client.gui.inventory.PlayerInventoryScreen,net.minecraft.inventory.SlotCrafting,0,1-4", // vanilla player inventory crafting grid
-        CraftingHandler.addCraftingGridDefinition(InventoryScreen.class.getName(), ResultSlot.class.getName(), 0, new SlotRange(1, 4));
+        CraftingHandler.addCraftingGridDefinition(InventoryScreen.class.getName(), CraftingResultSlot.class.getName(), 0, new SlotRange(1, 4));
 //        CraftingHandler.addCraftingGridDefinition(StonecutterScreen.class.getName(), Slot.class.getName(), 0, new SlotRange(1, 1));
         // TODO FIXME -- Stonecutter Screen (Slot numbering, etc) --> Doesn't work the same as the crafting grid
     }

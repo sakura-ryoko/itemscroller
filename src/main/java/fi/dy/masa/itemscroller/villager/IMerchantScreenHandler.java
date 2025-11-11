@@ -1,8 +1,8 @@
 package fi.dy.masa.itemscroller.villager;
 
-import net.minecraft.world.item.trading.MerchantOffers;
+import net.minecraft.village.TradeOfferList;
 
 public interface IMerchantScreenHandler
 {
-    MerchantOffers itemscroller$getOriginalList();
+    TradeOfferList itemscroller$getOriginalList();
 }

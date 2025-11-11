@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import fi.dy.masa.itemscroller.event.RenderEventHandler;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 
 @Mixin(Screen.class)
 public abstract class MixinScreen
@@ -26,11 +26,11 @@ public abstract class MixinScreen
     }
      */
 
-    @Shadow @Nullable protected Minecraft minecraft;
+    @Shadow @Nullable protected MinecraftClient client;
 
-    @Inject(method = "renderWithTooltipAndSubtitles", at = @At(value = "TAIL"))
-    private void itemscroller_onDrawScreenPost(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    @Inject(method = "renderWithTooltip", at = @At(value = "TAIL"))
+    private void itemscroller_onDrawScreenPost(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
-        RenderEventHandler.instance().onDrawScreenPost(context, this.minecraft, mouseX, mouseY);
+        RenderEventHandler.instance().onDrawScreenPost(context, this.client, mouseX, mouseY);
     }
 }

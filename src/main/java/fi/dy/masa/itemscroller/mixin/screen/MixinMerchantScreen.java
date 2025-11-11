@@ -1,14 +1,14 @@
 package fi.dy.masa.itemscroller.mixin.screen;
 
 import javax.annotation.Nullable;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.MerchantScreen;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.MerchantMenu;
-import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.MerchantScreen;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.screen.MerchantScreenHandler;
+import net.minecraft.text.Text;
+import net.minecraft.village.TradeOffer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,35 +25,35 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 import fi.dy.masa.itemscroller.villager.*;
 
 @Mixin(MerchantScreen.class)
-public abstract class MixinMerchantScreen extends AbstractContainerScreen<MerchantMenu>
+public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHandler>
 {
     @Unique @Nullable private FavoriteData favoriteData;
-    @Shadow private int shopItem;
-    @Shadow int scrollOff;
+    @Shadow private int selectedIndex;
+    @Shadow int indexStartOffset;
     @Unique private int indexStartOffsetLast = -1;
     @Shadow protected abstract boolean canScroll(int listSize);
 
-    private MixinMerchantScreen(MerchantMenu handler, Inventory inventory, Component title)
+    private MixinMerchantScreen(MerchantScreenHandler handler, PlayerInventory inventory, Text title)
     {
         super(handler, inventory, title);
     }
 
     @Inject(
-            method = "renderContents",
+            method = "renderMain",
             at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/screens/inventory/MerchantScreen;renderScroller(Lnet/minecraft/client/gui/GuiGraphics;IILnet/minecraft/world/item/trading/MerchantOffers;)V")
+            target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;renderScrollbar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/village/TradeOfferList;)V")
     )
-    private void fixRenderScrollBar(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    private void fixRenderScrollBar(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue())
         {
             VillagerData data = VillagerDataStorage.getInstance().getDataForLastInteractionTarget();
-            int listSize = this.menu.getOffers().size();
+            int listSize = this.handler.getRecipes().size();
 
             if (data != null && this.canScroll(listSize))
             {
-                this.scrollOff = this.getClampedIndex(data.getTradeListPosition());
+                this.indexStartOffset = this.getClampedIndex(data.getTradeListPosition());
             }
         }
     }
@@ -63,49 +63,49 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
-            this.indexStartOffsetLast != this.scrollOff)
+            this.indexStartOffsetLast != this.indexStartOffset)
         {
-            int index = this.getClampedIndex(this.scrollOff);
+            int index = this.getClampedIndex(this.indexStartOffset);
             VillagerDataStorage.getInstance().setTradeListPosition(index);
             this.indexStartOffsetLast = index;
         }
     }
 
     @Inject(method = "mouseDragged", at = @At("RETURN"))
-    private void onMouseDragPost(MouseButtonEvent click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseDragPost(Click click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
-            this.indexStartOffsetLast != this.scrollOff)
+            this.indexStartOffsetLast != this.indexStartOffset)
         {
-            int index = this.getClampedIndex(this.scrollOff);
+            int index = this.getClampedIndex(this.indexStartOffset);
             VillagerDataStorage.getInstance().setTradeListPosition(index);
             this.indexStartOffsetLast = index;
         }
     }
 
     @Inject(method = "mouseClicked", at = @At("RETURN"), cancellable = true)
-    private void onMouseClicked(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir)
+    private void onMouseClicked(Click click, boolean doubled, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
             int visibleIndex = this.getHoveredTradeButtonIndex(click.x(), click.y());
-            int realIndex = VillagerUtils.getRealTradeIndexFor(visibleIndex, this.menu);
+            int realIndex = VillagerUtils.getRealTradeIndexFor(visibleIndex, this.handler);
 
             if (realIndex >= 0)
             {
                 // right click, trade everything with this trade
-                if (click.input() == 1)
+                if (click.getKeycode() == 1)
                 {
                     InventoryUtils.villagerTradeEverythingPossibleWithTrade(visibleIndex);
                     cir.setReturnValue(true);
                 }
                 // Middle click, toggle trade favorite
-                else if (click.input() == 2)
+                else if (click.getKeycode() == 2)
                 {
                     if (Hotkeys.MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE.getKeybind().isKeybindHeld())
                     {
-                        MerchantOffer trade = this.menu.getOffers().get(visibleIndex);
+                        TradeOffer trade = this.handler.getRecipes().get(visibleIndex);
                         VillagerDataStorage.getInstance().toggleGlobalFavorite(trade);
                     }
                     else
@@ -116,7 +116,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
                     this.favoriteData = null; // Force a re-build of the list
 
                     // Rebuild the custom list based on the new favorites (See the Mixin for MerchantScreenHandler#setOffers())
-                    this.menu.setOffers(((IMerchantScreenHandler) this.menu).itemscroller$getOriginalList());
+                    this.handler.setOffers(((IMerchantScreenHandler) this.handler).itemscroller$getOriginalList());
 
                     cir.setReturnValue(true);
                 }
@@ -124,22 +124,22 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
         }
     }
 
-    @Inject(method = "postButtonClick", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "syncRecipeIndex", at = @At("HEAD"), cancellable = true)
     private void fixRecipeIndex(CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
-            this.getMenu() instanceof IMerchantScreenHandler)
+            this.getScreenHandler() instanceof IMerchantScreenHandler)
         {
-            if (VillagerUtils.switchToTradeByVisibleIndex(this.shopItem))
+            if (VillagerUtils.switchToTradeByVisibleIndex(this.selectedIndex))
             {
                 ci.cancel();
             }
         }
     }
 
-    @Inject(method = "renderContents", at = @At(value = "FIELD",
-            target = "Lnet/minecraft/client/gui/screens/inventory/MerchantScreen;tradeOfferButtons:[Lnet/minecraft/client/gui/screens/inventory/MerchantScreen$TradeOfferButton;"))
-    private void renderFavoriteMarker(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    @Inject(method = "renderMain", at = @At(value = "FIELD",
+            target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;offers:[Lnet/minecraft/client/gui/screen/ingame/MerchantScreen$WidgetButtonPage;"))
+    private void renderFavoriteMarker(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
@@ -147,16 +147,16 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
 
             if (favoriteData == null)
             {
-                favoriteData = VillagerDataStorage.getInstance().getFavoritesForCurrentVillager(this.menu);
+                favoriteData = VillagerDataStorage.getInstance().getFavoritesForCurrentVillager(this.handler);
                 this.favoriteData = favoriteData;
             }
 
             int numFavorites = favoriteData.favorites.size();
 
-            if (numFavorites > 0 && this.scrollOff < numFavorites)
+            if (numFavorites > 0 && this.indexStartOffset < numFavorites)
             {
-                int screenX = (this.width - this.imageWidth) / 2;
-                int screenY = (this.height - this.imageHeight) / 2;
+                int screenX = (this.width - this.backgroundWidth) / 2;
+                int screenY = (this.height - this.backgroundHeight) / 2;
                 int buttonsStartX = screenX + 5;
                 int buttonsStartY = screenY + 16 + 2;
                 int x = buttonsStartX + 89 - 8;
@@ -164,7 +164,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
                 float z = 300;
                 IGuiIcon icon = favoriteData.isGlobal ? ItemScrollerIcons.STAR_5_PURPLE : ItemScrollerIcons.STAR_5_YELLOW;
 
-                for (int i = 0; i < (numFavorites - this.scrollOff); ++i)
+                for (int i = 0; i < (numFavorites - this.indexStartOffset); ++i)
                 {
                     //RenderUtils.bindTexture(icon.getTexture());
                     icon.renderAt(context, x, y, z, false, false);
@@ -177,15 +177,15 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     @Unique
     private int getClampedIndex(int index)
     {
-        int listSize = this.menu.getOffers().size();
+        int listSize = this.handler.getRecipes().size();
         return Math.max(0, Math.min(index, listSize - 7));
     }
 
     @Unique
     private int getHoveredTradeButtonIndex(double mouseX, double mouseY)
     {
-        int screenX = (this.width - this.imageWidth) / 2;
-        int screenY = (this.height - this.imageHeight) / 2;
+        int screenX = (this.width - this.backgroundWidth) / 2;
+        int screenY = (this.height - this.backgroundHeight) / 2;
         int buttonsStartX = screenX + 5;
         int buttonsStartY = screenY + 16 + 2;
         int buttonWidth = 89;
@@ -194,7 +194,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
         if (mouseX >= buttonsStartX && mouseX <= buttonsStartX + buttonWidth &&
             mouseY >= buttonsStartY && mouseY <= buttonsStartY + 7 * buttonHeight)
         {
-            return this.scrollOff + (((int) mouseY - buttonsStartY) / buttonHeight);
+            return this.indexStartOffset + (((int) mouseY - buttonsStartY) / buttonHeight);
         }
 
         return -1;

@@ -1,31 +1,31 @@
 package fi.dy.masa.itemscroller.mixin.screen;
 
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.screen.slot.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(net.minecraft.client.gui.screens.inventory.AbstractContainerScreen.class)
+@Mixin(net.minecraft.client.gui.screen.ingame.HandledScreen.class)
 public interface IMixinScreenWithHandler
 {
-    @Invoker("getHoveredSlot")
+    @Invoker("getSlotAt")
     Slot itemscroller_getSlotAtPositionInvoker(double x, double y);
 
-    @Invoker("slotClicked")
-    void itemscroller_handleMouseClickInvoker(Slot slotIn, int slotId, int mouseButton, net.minecraft.world.inventory.ClickType type);
+    @Invoker("onMouseClick")
+    void itemscroller_handleMouseClickInvoker(Slot slotIn, int slotId, int mouseButton, net.minecraft.screen.slot.SlotActionType type);
 
-    @Accessor("hoveredSlot")
+    @Accessor("focusedSlot")
     Slot itemscroller_getHoveredSlot();
 
-    @Accessor("leftPos")
+    @Accessor("x")
     int itemscroller_getGuiLeft();
 
-    @Accessor("topPos")
+    @Accessor("y")
     int itemscroller_getGuiTop();
 
-    @Accessor("imageWidth")
+    @Accessor("backgroundWidth")
     int itemscroller_getBackgroundWidth();
 
-    @Accessor("imageHeight")
+    @Accessor("backgroundHeight")
     int itemscroller_getBackgroundHeight();
 }
