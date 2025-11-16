@@ -15,8 +15,6 @@ import net.minecraft.client.gui.screen.ingame.StonecutterScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.RecipeBookCategory;
 import net.minecraft.recipe.input.CraftingRecipeInput;
@@ -31,7 +29,6 @@ import net.minecraft.world.World;
 import fi.dy.masa.malilib.util.data.Constants;
 import fi.dy.masa.malilib.util.data.tag.CompoundData;
 import fi.dy.masa.malilib.util.data.tag.ListData;
-import fi.dy.masa.malilib.util.data.tag.converter.DataConverterNbt;
 import fi.dy.masa.malilib.util.game.RecipeBookUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinClientRecipeBook;
@@ -483,7 +480,7 @@ public class RecipePattern
         this.recipeSaveTime = System.currentTimeMillis();
     }
 
-    public void readFromNBT(@Nonnull CompoundData data, @Nonnull DynamicRegistryManager registryManager)
+    public void readFromData(@Nonnull CompoundData data, @Nonnull DynamicRegistryManager registry)
     {
         if (data.contains("Result", Constants.NBT.TAG_COMPOUND) && data.contains("Ingredients", Constants.NBT.TAG_LIST))
         {
@@ -503,22 +500,22 @@ public class RecipePattern
 
                 if (slot >= 0 && slot < this.recipe.length)
                 {
-                    this.recipe[slot] = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registryManager, tag);
+                    this.recipe[slot] = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registry, tag);
                 }
             }
 
-            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registryManager, data.getCompound("Result"));
+            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registry, data.getCompound("Result"));
         }
     }
 
     @Nonnull
-    public CompoundData writeToNBT(@Nonnull DynamicRegistryManager registryManager)
+    public CompoundData writeToData(@Nonnull DynamicRegistryManager registry)
     {
 	    CompoundData data = new CompoundData();
 
         if (this.isValid())
         {
-	        CompoundData tag = DataConverterNbt.fromVanillaCompound((NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.result).getPartialOrThrow());
+	        CompoundData tag = fi.dy.masa.malilib.util.InventoryUtils.toDataOrEmpty(this.result, registry);
 
 	        data.putInt("Length", this.recipe.length);
 	        data.put("Result", tag);
@@ -529,7 +526,7 @@ public class RecipePattern
             {
                 if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
                 {
-	                tag = DataConverterNbt.fromVanillaCompound((NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.recipe[i]).getPartialOrThrow());
+	                tag = fi.dy.masa.malilib.util.InventoryUtils.toDataOrEmpty(this.recipe[i], registry);
                     tag.putInt("Slot", i);
                     tagIngredients.add(tag);
                 }

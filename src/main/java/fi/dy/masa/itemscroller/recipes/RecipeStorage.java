@@ -205,7 +205,7 @@ public class RecipeStorage
 
             if (index >= 0 && index < this.recipes.length)
             {
-                this.recipes[index].readFromNBT(tag, registryManager);
+                this.recipes[index].readFromData(tag, registryManager);
 
                 if (tag.contains("RecipeCategory", Constants.NBT.TAG_STRING))
                 {
@@ -247,7 +247,7 @@ public class RecipeStorage
             if (this.recipes[i].isValid())
             {
                 RecipePattern entry = this.recipes[i];
-                CompoundData tag = entry.writeToNBT(registry);
+                CompoundData tag = entry.writeToData(registry);
                 tag.putByte("RecipeIndex", (byte) i);
 
                 if (entry.getRecipeCategory() != null)
