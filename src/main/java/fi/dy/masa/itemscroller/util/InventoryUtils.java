@@ -48,8 +48,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.rule.GameRules;
 
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.game.wrap.GameWrap;
@@ -162,7 +162,7 @@ public class InventoryUtils
                 GameRules rules = new GameRules(((ClientPlayerEntity) player).networkHandler.getEnabledFeatures());
 
                 if ((recipe.isIgnoredInRecipeBook() ||
-                    rules.getBoolean(GameRules.DO_LIMITED_CRAFTING) == false))
+                    rules.getValue(GameRules.LIMITED_CRAFTING) == false))
                 {
                     inventoryCraftResult.setLastRecipe(recipeEntry);
                     stack = recipe.craft(recipeInput, world.getRegistryManager());
@@ -844,7 +844,7 @@ public class InventoryUtils
         if (screen instanceof MerchantScreen)
         {
             MerchantScreenHandler handler = ((MerchantScreen) screen).getScreenHandler();
-            IntArrayList favorites = VillagerDataStorage.getInstance().getFavoritesForCurrentVillager(handler).favorites;
+            IntArrayList favorites = VillagerDataStorage.getInstance().getFavoritesForCurrentVillager(handler).favorites();
 
             for (int index = 0; index < favorites.size(); ++index)
             {

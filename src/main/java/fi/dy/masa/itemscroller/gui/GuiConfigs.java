@@ -3,15 +3,17 @@ package fi.dy.masa.itemscroller.gui;
 import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import fi.dy.masa.itemscroller.Reference;
-import fi.dy.masa.itemscroller.config.Configs;
-import fi.dy.masa.itemscroller.config.Hotkeys;
+import org.jetbrains.annotations.NotNull;
+
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.util.StringUtils;
+import fi.dy.masa.itemscroller.Reference;
+import fi.dy.masa.itemscroller.config.Configs;
+import fi.dy.masa.itemscroller.config.Hotkeys;
 
 public class GuiConfigs extends GuiConfigsBase
 {
@@ -85,27 +87,18 @@ public class GuiConfigs extends GuiConfigsBase
         return ConfigOptionWrapper.createFor(configs);
     }
 
-    private static class ButtonListener implements IButtonActionListener
-    {
-        private final GuiConfigs parent;
-        private final ConfigGuiTab tab;
+	private record ButtonListener(ConfigGuiTab tab, GuiConfigs parent) implements IButtonActionListener
+	{
+		@Override
+		public void actionPerformedWithButton(ButtonBase button, int mouseButton)
+		{
+			GuiConfigs.tab = this.tab;
 
-        public ButtonListener(ConfigGuiTab tab, GuiConfigs parent)
-        {
-            this.tab = tab;
-            this.parent = parent;
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
-        {
-            GuiConfigs.tab = this.tab;
-
-            this.parent.reCreateListWidget(); // apply the new config width
-            this.parent.getListWidget().resetScrollbarPosition();
-            this.parent.initGui();
-        }
-    }
+			this.parent.reCreateListWidget(); // apply the new config width
+			this.parent.getListWidget().resetScrollbarPosition();
+			this.parent.initGui();
+		}
+	}
 
     public enum ConfigGuiTab
     {
@@ -115,7 +108,7 @@ public class GuiConfigs extends GuiConfigsBase
 
         private final String translationKey;
 
-        public static final ImmutableList<ConfigGuiTab> VALUES = ImmutableList.copyOf(values());
+        public static final ImmutableList<@NotNull ConfigGuiTab> VALUES = ImmutableList.copyOf(values());
 
         ConfigGuiTab(String translationKey)
         {

@@ -73,7 +73,7 @@ public class VillagerUtils
     public static TradeOfferList buildCustomTradeList(TradeOfferList originalList)
     {
         FavoriteData data = VillagerDataStorage.getInstance().getFavoritesForCurrentVillager(originalList);
-        IntArrayList favorites = data.favorites;
+        IntArrayList favorites = data.favorites();
 
         //System.out.printf("build - fav: %s (%s), or: %d\n", favorites, data.isGlobal, originalList.size());
 

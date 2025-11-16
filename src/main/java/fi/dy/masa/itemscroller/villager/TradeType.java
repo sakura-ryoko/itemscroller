@@ -2,14 +2,16 @@ package fi.dy.masa.itemscroller.villager;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
+
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.village.TradeOffer;
+
+import fi.dy.masa.malilib.util.data.tag.CompoundData;
 
 public class TradeType
 {
@@ -36,9 +38,9 @@ public class TradeType
         return this.buyItem1 == buyItem1 && this.buyItem2 == buyItem2 && this.sellItem == sellItem;
     }
 
-    public NbtCompound toTag()
+    public CompoundData toTag()
     {
-        NbtCompound tag = new NbtCompound();
+	    CompoundData tag = new CompoundData();
 
         tag.putString("Buy1", getNameForItem(this.buyItem1));
         tag.putString("Buy2", getNameForItem(this.buyItem2));
@@ -48,11 +50,11 @@ public class TradeType
     }
 
     @Nullable
-    public static TradeType fromTag(NbtCompound tag)
+    public static TradeType fromTag(CompoundData tag)
     {
-        Item buy1 = getItemForName(tag.getString("Buy1", ""));
-        Item buy2 = getItemForName(tag.getString("Buy2", ""));
-        Item sell = getItemForName(tag.getString("Sell", ""));
+        Item buy1 = getItemForName(tag.getString("Buy1"));
+        Item buy2 = getItemForName(tag.getString("Buy2"));
+        Item sell = getItemForName(tag.getString("Sell"));
 
         if (buy1 != Items.AIR || buy2 != Items.AIR || sell != Items.AIR)
         {

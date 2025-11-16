@@ -1,6 +1,8 @@
 package fi.dy.masa.itemscroller.mixin.screen;
 
 import javax.annotation.Nullable;
+import org.objectweb.asm.Opcodes;
+
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -18,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
+import fi.dy.masa.malilib.render.GuiContext;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.ItemScrollerIcons;
@@ -41,7 +44,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     @Inject(
             method = "renderMain",
             at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;renderScrollbar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/village/TradeOfferList;)V")
+            target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;renderScrollbar(Lnet/minecraft/client/gui/DrawContext;IIIILnet/minecraft/village/TradeOfferList;)V")
     )
     private void fixRenderScrollBar(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
@@ -138,7 +141,8 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
     }
 
     @Inject(method = "renderMain", at = @At(value = "FIELD",
-            target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;offers:[Lnet/minecraft/client/gui/screen/ingame/MerchantScreen$WidgetButtonPage;"))
+                                            target = "Lnet/minecraft/client/gui/screen/ingame/MerchantScreen;offers:[Lnet/minecraft/client/gui/screen/ingame/MerchantScreen$WidgetButtonPage;",
+                                            opcode = Opcodes.GETFIELD))
     private void renderFavoriteMarker(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
@@ -151,7 +155,7 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
                 this.favoriteData = favoriteData;
             }
 
-            int numFavorites = favoriteData.favorites.size();
+            int numFavorites = favoriteData.favorites().size();
 
             if (numFavorites > 0 && this.indexStartOffset < numFavorites)
             {
@@ -162,12 +166,12 @@ public abstract class MixinMerchantScreen extends HandledScreen<MerchantScreenHa
                 int x = buttonsStartX + 89 - 8;
                 int y = buttonsStartY + 2;
                 float z = 300;
-                IGuiIcon icon = favoriteData.isGlobal ? ItemScrollerIcons.STAR_5_PURPLE : ItemScrollerIcons.STAR_5_YELLOW;
+                IGuiIcon icon = favoriteData.isGlobal() ? ItemScrollerIcons.STAR_5_PURPLE : ItemScrollerIcons.STAR_5_YELLOW;
 
                 for (int i = 0; i < (numFavorites - this.indexStartOffset); ++i)
                 {
                     //RenderUtils.bindTexture(icon.getTexture());
-                    icon.renderAt(context, x, y, z, false, false);
+                    icon.renderAt(GuiContext.fromGuiGraphics(context), x, y, z, false, false);
                     y += 20;
                 }
             }

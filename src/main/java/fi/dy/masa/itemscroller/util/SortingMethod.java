@@ -3,6 +3,8 @@ package fi.dy.masa.itemscroller.util;
 import javax.annotation.Nonnull;
 import net.minecraft.util.StringIdentifiable;
 import com.google.common.collect.ImmutableList;
+import org.jetbrains.annotations.NotNull;
+
 import fi.dy.masa.malilib.config.IConfigOptionListEntry;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.itemscroller.Reference;
@@ -19,7 +21,7 @@ public enum SortingMethod implements IConfigOptionListEntry, StringIdentifiable
     ITEM_RAWID          ("item_rawid",      "item_rawid");
 
     public static final StringIdentifiable.EnumCodec<SortingMethod> CODEC = StringIdentifiable.createCodec(SortingMethod::values);
-    public static final ImmutableList<SortingMethod> VALUES = ImmutableList.copyOf(values());
+    public static final ImmutableList<@NotNull SortingMethod> VALUES = ImmutableList.copyOf(values());
 
     private final String configString;
     private final String translationKey;

@@ -11,6 +11,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+
 import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
@@ -29,8 +31,8 @@ public class Configs implements IConfigHandler
 {
     private static final String CONFIG_FILE_NAME = Reference.MOD_ID + ".json";
 
-    private static final ImmutableList<String> DEFAULT_TOP_SORTING = ImmutableList.of("minecraft:diamond_sword","minecraft:diamond_pickaxe","minecraft:diamond_axe","minecraft:diamond_shovel","minecraft:diamond_hoe","minecraft:netherite_sword","minecraft:netherite_pickaxe","minecraft:netherite_axe","minecraft:netherite_shovel","minecraft:netherite_hoe");
-    private static final ImmutableList<String> DEFAULT_BOTTOM_SORTING = ImmutableList.of();
+    private static final ImmutableList<@NotNull String> DEFAULT_TOP_SORTING = ImmutableList.of("minecraft:diamond_sword", "minecraft:diamond_pickaxe", "minecraft:diamond_axe", "minecraft:diamond_shovel", "minecraft:diamond_hoe", "minecraft:netherite_sword", "minecraft:netherite_pickaxe", "minecraft:netherite_axe", "minecraft:netherite_shovel", "minecraft:netherite_hoe");
+    private static final ImmutableList<@NotNull String> DEFAULT_BOTTOM_SORTING = ImmutableList.of();
 
     private static final String GENERIC_KEY = Reference.MOD_ID+".config.generic";
     public static class Generic
@@ -68,7 +70,7 @@ public class Configs implements IConfigHandler
         public static final ConfigOptionList SORT_METHOD_DEFAULT                = new ConfigOptionList("sortMethodDefault",                     SortingMethod.CATEGORY_NAME).apply(GENERIC_KEY);
         public static final ConfigLockedList SORT_CATEGORY_ORDER                = new ConfigLockedList("sortCategoryOrder",                     SortingCategory.INSTANCE).apply(GENERIC_KEY);
 
-        public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
+        public static final ImmutableList<@NotNull IConfigBase> OPTIONS = ImmutableList.of(
                 CARPET_CTRL_Q_CRAFTING,
                 CLIENT_CRAFTING_FIX,
                 CRAFTING_RENDER_RECIPE_ITEMS,
@@ -120,7 +122,7 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean SHIFT_PLACE_ITEMS         = new ConfigBoolean("enableShiftPlaceItems",            true).apply(TOGGLES_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_FEATURES   = new ConfigBoolean("enableVillagerTradeFeatures",      true).apply(TOGGLES_KEY);
 
-        public static final ImmutableList<IConfigValue> OPTIONS = ImmutableList.of(
+        public static final ImmutableList<@NotNull IConfigValue> OPTIONS = ImmutableList.of(
                 CRAFTING_FEATURES,
                 DROP_MATCHING,
                 RIGHT_CLICK_CRAFT_STACK,

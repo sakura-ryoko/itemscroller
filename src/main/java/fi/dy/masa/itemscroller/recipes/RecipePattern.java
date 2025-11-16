@@ -16,7 +16,6 @@ import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.recipebook.ClientRecipeBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.RecipeBookCategory;
@@ -29,6 +28,10 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.context.ContextParameterMap;
 import net.minecraft.world.World;
 
+import fi.dy.masa.malilib.util.data.Constants;
+import fi.dy.masa.malilib.util.data.tag.CompoundData;
+import fi.dy.masa.malilib.util.data.tag.ListData;
+import fi.dy.masa.malilib.util.data.tag.converter.DataConverterNbt;
 import fi.dy.masa.malilib.util.game.RecipeBookUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinClientRecipeBook;
@@ -480,13 +483,13 @@ public class RecipePattern
         this.recipeSaveTime = System.currentTimeMillis();
     }
 
-    public void readFromNBT(@Nonnull NbtCompound nbt, @Nonnull DynamicRegistryManager registryManager)
+    public void readFromNBT(@Nonnull CompoundData data, @Nonnull DynamicRegistryManager registryManager)
     {
-        if (nbt.contains("Result") && nbt.contains("Ingredients"))
+        if (data.contains("Result", Constants.NBT.TAG_COMPOUND) && data.contains("Ingredients", Constants.NBT.TAG_LIST))
         {
-            NbtList tagIngredients = nbt.getListOrEmpty("Ingredients");
+            ListData tagIngredients = data.getList("Ingredients");
             int count = tagIngredients.size();
-            int length = nbt.getInt("Length" , -1);
+            int length = data.getInt("Length");
 
             if (length > 0)
             {
@@ -495,49 +498,47 @@ public class RecipePattern
 
             for (int i = 0; i < count; i++)
             {
-                NbtCompound tag = tagIngredients.getCompoundOrEmpty(i);
-                int slot = tag.getInt("Slot", -1);
+                CompoundData tag = tagIngredients.getCompoundAt(i);
+                int slot = tag.getInt("Slot");
 
                 if (slot >= 0 && slot < this.recipe.length)
                 {
-                    this.recipe[slot] = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, tag);
+                    this.recipe[slot] = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registryManager, tag);
                 }
             }
 
-            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromNbtOrEmpty(registryManager, nbt.getCompoundOrEmpty("Result"));
+            this.result = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registryManager, data.getCompound("Result"));
         }
     }
 
     @Nonnull
-    public NbtCompound writeToNBT(@Nonnull DynamicRegistryManager registryManager)
+    public CompoundData writeToNBT(@Nonnull DynamicRegistryManager registryManager)
     {
-        NbtCompound nbt = new NbtCompound();
+	    CompoundData data = new CompoundData();
 
         if (this.isValid())
         {
-//            NbtCompound tag = (NbtCompound) this.result.toNbt(registryManager);
-            NbtCompound tag = (NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.result).getPartialOrThrow();
+	        CompoundData tag = DataConverterNbt.fromVanillaCompound((NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.result).getPartialOrThrow());
 
-            nbt.putInt("Length", this.recipe.length);
-            nbt.put("Result", tag);
+	        data.putInt("Length", this.recipe.length);
+	        data.put("Result", tag);
 
-            NbtList tagIngredients = new NbtList();
+            ListData tagIngredients = new ListData();
 
             for (int i = 0; i < this.recipe.length; i++)
             {
                 if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
                 {
-//                    tag.copyFrom((NbtCompound) this.recipe[i].toNbt(registryManager));
-                    tag = (NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.recipe[i]).getPartialOrThrow();
+	                tag = DataConverterNbt.fromVanillaCompound((NbtCompound) ItemStack.CODEC.encodeStart(registryManager.getOps(NbtOps.INSTANCE), this.recipe[i]).getPartialOrThrow());
                     tag.putInt("Slot", i);
                     tagIngredients.add(tag);
                 }
             }
 
-            nbt.put("Ingredients", tagIngredients);
+	        data.put("Ingredients", tagIngredients);
         }
 
-        return nbt;
+        return data;
     }
 
     public ItemStack getResult()

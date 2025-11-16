@@ -1,9 +1,10 @@
 package fi.dy.masa.itemscroller.gui;
 
-import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
-import fi.dy.masa.malilib.render.RenderUtils;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Identifier;
+
+import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
+import fi.dy.masa.malilib.render.GuiContext;
+import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.itemscroller.Reference;
 
 public enum ItemScrollerIcons implements IGuiIcon
@@ -63,7 +64,7 @@ public enum ItemScrollerIcons implements IGuiIcon
     }
 
     @Override
-    public void renderAt(DrawContext drawContext, int x, int y, float zLevel, boolean enabled, boolean selected)
+    public void renderAt(GuiContext ctx, int x, int y, float zLevel, boolean enabled, boolean selected)
     {
         int u = this.u;
         int v = this.v;
@@ -80,7 +81,7 @@ public enum ItemScrollerIcons implements IGuiIcon
             v += this.hoverOffV;
         }
 
-        RenderUtils.drawTexturedRect(drawContext, this.getTexture(), x, y, u, v, this.w, this.h, zLevel);
+        RenderUtils.drawTexturedRect(ctx, this.getTexture(), x, y, u, v, this.w, this.h, zLevel);
     }
 
     @Override

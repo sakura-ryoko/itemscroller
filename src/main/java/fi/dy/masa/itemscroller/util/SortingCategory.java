@@ -11,6 +11,8 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import com.google.common.collect.ImmutableList;
+import org.jetbrains.annotations.NotNull;
+
 import fi.dy.masa.malilib.config.IConfigLockedListEntry;
 import fi.dy.masa.malilib.config.IConfigLockedListType;
 import fi.dy.masa.malilib.util.StringUtils;
@@ -19,7 +21,7 @@ import fi.dy.masa.itemscroller.Reference;
 public class SortingCategory implements IConfigLockedListType
 {
     public static final SortingCategory INSTANCE = new SortingCategory();
-    public ImmutableList<Entry> VALUES = ImmutableList.copyOf(Entry.values());
+    public ImmutableList<@NotNull Entry> VALUES = ImmutableList.copyOf(Entry.values());
     //public static final Codec<SortingCategory> CODEC = Entry.CODEC.listOf().xmap(getDefault);
 
     @Nullable
@@ -96,9 +98,9 @@ public class SortingCategory implements IConfigLockedListType
     }
 
     @Override
-    public ImmutableList<IConfigLockedListEntry> getDefaultEntries()
+    public ImmutableList<@NotNull IConfigLockedListEntry> getDefaultEntries()
     {
-        ImmutableList.Builder<IConfigLockedListEntry> list = ImmutableList.builder();
+        ImmutableList.Builder<@NotNull IConfigLockedListEntry> list = ImmutableList.builder();
 
         VALUES.forEach((list::add));
 
@@ -128,7 +130,7 @@ public class SortingCategory implements IConfigLockedListType
         OTHER               ("other",               "other");
 
         public static final StringIdentifiable.EnumCodec<Entry> CODEC = StringIdentifiable.createCodec(Entry::values);
-        public static final ImmutableList<Entry> VALUES = ImmutableList.copyOf(values());
+        public static final ImmutableList<@NotNull Entry> VALUES = ImmutableList.copyOf(values());
 
         private final String configKey;
         private final String translationKey;
