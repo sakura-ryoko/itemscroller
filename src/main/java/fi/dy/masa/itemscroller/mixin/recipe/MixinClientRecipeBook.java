@@ -6,8 +6,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
-import net.minecraft.client.recipebook.ClientRecipeBook;
-import net.minecraft.recipe.RecipeDisplayEntry;
+import net.minecraft.client.ClientRecipeBook;
+import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 
 @Mixin(ClientRecipeBook.class)
 public class MixinClientRecipeBook

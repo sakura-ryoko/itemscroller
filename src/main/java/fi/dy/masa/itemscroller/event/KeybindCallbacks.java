@@ -10,12 +10,12 @@ import fi.dy.masa.malilib.hotkeys.KeyCallbackToggleBooleanConfigWithMessage;
 import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.InfoUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
@@ -72,9 +72,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
     private boolean onKeyActionImpl(KeyAction action, IKeybind key)
     {
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
 
-        if (mc.player == null || mc.world == null)
+        if (mc.player == null || mc.level == null)
         {
             return false;
         }
@@ -93,13 +93,13 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         }
 
         if (this.functionalityEnabled() == false ||
-            (GuiUtils.getCurrentScreen() instanceof HandledScreen) == false ||
+            (GuiUtils.getCurrentScreen() instanceof AbstractContainerScreen) == false ||
             Configs.GUI_BLACKLIST.contains(GuiUtils.getCurrentScreen().getClass().getName()))
         {
             return false;
         }
 
-        HandledScreen<?> gui = (HandledScreen<?>) GuiUtils.getCurrentScreen();
+        AbstractContainerScreen<?> gui = (AbstractContainerScreen<?>) GuiUtils.getCurrentScreen();
         Slot slot = AccessorUtils.getSlotUnderMouse(gui);
         RecipeStorage recipes = RecipeStorage.getInstance();
         MoveAction moveAction = InputUtils.getDragMoveAction(key);
@@ -121,9 +121,9 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             {
                 if (Configs.Toggles.DROP_MATCHING.getBooleanValue() &&
                     Configs.GUI_BLACKLIST.contains(gui.getClass().getName()) == false &&
-                    slot.hasStack())
+                    slot.hasItem())
                 {
-                    InventoryUtils.dropStacks(gui, slot.getStack(), slot, true);
+                    InventoryUtils.dropStacks(gui, slot.getItem(), slot, true);
                     return true;
                 }
             }
@@ -182,7 +182,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
     }
 
     @Override
-    public void onClientTick(MinecraftClient mc)
+    public void onClientTick(Minecraft mc)
     {
         if (InventoryUtils.dontUpdateRecipeBook > 0)
         {
@@ -190,7 +190,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         }
 
         if (this.functionalityEnabled() == false ||
-	        mc.interactionManager == null || mc.player == null || mc.world == null)
+	        mc.gameMode == null || mc.player == null || mc.level == null)
         {
             return;
         }
@@ -202,8 +202,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             return;
         }
 
-        if (GuiUtils.getCurrentScreen() instanceof HandledScreen<?> gui &&
-            (GuiUtils.getCurrentScreen() instanceof CreativeInventoryScreen) == false &&
+        if (GuiUtils.getCurrentScreen() instanceof AbstractContainerScreen<?> gui &&
+            (GuiUtils.getCurrentScreen() instanceof CreativeModeInventoryScreen) == false &&
             Configs.GUI_BLACKLIST.contains(GuiUtils.getCurrentScreen().getClass().getName()) == false &&
             (Hotkeys.MASS_CRAFT.getKeybind().isKeybindHeld() || Configs.Generic.MASS_CRAFT_HOLD.getBooleanValue()))
         {
@@ -235,19 +235,19 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         // todo
                         //InventoryUtils.setInhibitCraftingOutputUpdate(true);
 
-                        RecipeInputInventory craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
-                        if (recipe.getVanillaRecipe() != null && !recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
+                        CraftingContainer craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+                        if (recipe.getVanillaRecipe() != null && !recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
                         {
                             CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
-                            final int invSlots = gui.getScreenHandler().slots.size();
+                            final int invSlots = gui.getMenu().slots.size();
                             final int rangeSlots = range.getSlotCount();
 
                             for (int j = 0, slotNum = range.getFirst(); j < rangeSlots && slotNum < invSlots; j++, slotNum++)
                             {
                                 InventoryUtils.shiftClickSlot(gui, slotNum);
 
-                                Slot slotTmp = gui.getScreenHandler().getSlot(slotNum);
-                                ItemStack stack = slotTmp.getStack();
+                                Slot slotTmp = gui.getMenu().getSlot(slotNum);
+                                ItemStack stack = slotTmp.getItem();
                                 if (!stack.isEmpty())
                                 {
                                     InventoryUtils.dropStack(gui, slotNum);
@@ -255,20 +255,20 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                             }
                         }
 
-                        mc.interactionManager.clickRecipe(gui.getScreenHandler().syncId, recipe.getNetworkRecipeId(), true);
+                        mc.gameMode.handlePlaceRecipe(gui.getMenu().containerId, recipe.getNetworkRecipeId(), true);
 //                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
 //                        InventoryUtils.updateCraftingOutputSlot(outputSlot);
 
                         craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
 
                         if (recipe.getVanillaRecipe() != null &&
-	                        recipe.getVanillaRecipe().matches(craftingInv.createRecipeInput(), mc.world))
+	                        recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
                         {
                             break;
                         }
 
-                        InventoryUtils.shiftClickSlot(gui, outputSlot.id);
-                        InventoryUtils.dropStack(gui, outputSlot.id);
+                        InventoryUtils.shiftClickSlot(gui, outputSlot.index);
+                        InventoryUtils.dropStack(gui, outputSlot.index);
                         recipeBookClicks = true;
                     }
 
@@ -283,7 +283,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         InventoryUtils.setInhibitCraftingOutputUpdate(true);
                         InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
                         InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
-                        RecipeInputInventory inv = ((IMixinCraftingResultSlot) (outputSlot)).itemscroller_getCraftingInventory();
+                        CraftingContainer inv = ((IMixinCraftingResultSlot) (outputSlot)).itemscroller_getCraftingInventory();
                         //System.out.println("Before:");
                         //debugPrintInv(inv);
                         try
@@ -300,12 +300,12 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
                         //System.out.printf("Output slot: %s\n", outputSlot.getStack());
 
-                        if (InventoryUtils.areStacksEqual(outputSlot.getStack(), recipe.getResult()) == false)
+                        if (InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()) == false)
                         {
                             break;
                         }
 
-                        InventoryUtils.shiftClickSlot(gui, outputSlot.id);
+                        InventoryUtils.shiftClickSlot(gui, outputSlot.index);
                         //System.out.println("Shift clicked");
                         //debugPrintInv(inv);
                     }
@@ -324,18 +324,18 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         InventoryUtils.setInhibitCraftingOutputUpdate(false);
                         InventoryUtils.updateCraftingOutputSlot(outputSlot);
 
-                        if (InventoryUtils.areStacksEqual(outputSlot.getStack(), recipe.getResult()) == false)
+                        if (InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()) == false)
                         {
                             break;
                         }
 
                         if (Configs.Generic.CARPET_CTRL_Q_CRAFTING.getBooleanValue())
                         {
-                            InventoryUtils.dropStack(gui, outputSlot.id);
+                            InventoryUtils.dropStack(gui, outputSlot.index);
                         }
                         else
                         {
-                            InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.id, recipe.getResult());
+                            InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.index, recipe.getResult());
                         }
                     }
                 }
@@ -347,7 +347,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             InventoryUtils.bufferInvUpdates = false;
             InventoryUtils.invUpdatesBuffer.removeIf(packet ->
                                                      {
-														 packet.apply(mc.player.networkHandler);
+														 packet.handle(mc.player.connection);
 														 return true;
 													 });
         }

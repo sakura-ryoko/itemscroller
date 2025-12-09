@@ -1,10 +1,10 @@
 package fi.dy.masa.itemscroller.util;
 
 import javax.annotation.Nullable;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.MerchantScreen;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import fi.dy.masa.itemscroller.mixin.screen.IMixinMerchantScreen;
 import fi.dy.masa.itemscroller.mixin.screen.IMixinScreenWithHandler;
 import fi.dy.masa.itemscroller.mixin.item.IMixinSlot;
@@ -12,38 +12,38 @@ import fi.dy.masa.itemscroller.mixin.item.IMixinSlot;
 public class AccessorUtils
 {
     @Nullable
-    public static Slot getSlotUnderMouse(HandledScreen<?> gui)
+    public static Slot getSlotUnderMouse(AbstractContainerScreen<?> gui)
     {
         return ((IMixinScreenWithHandler) gui).itemscroller_getHoveredSlot();
     }
 
     @Nullable
-    public static Slot getSlotAtPosition(HandledScreen<?> gui, double x, double y)
+    public static Slot getSlotAtPosition(AbstractContainerScreen<?> gui, double x, double y)
     {
         return ((IMixinScreenWithHandler) gui).itemscroller_getSlotAtPositionInvoker(x, y);
     }
 
-    public static void handleMouseClick(HandledScreen<?> gui, Slot slotIn, int slotId, int mouseButton, SlotActionType type)
+    public static void handleMouseClick(AbstractContainerScreen<?> gui, Slot slotIn, int slotId, int mouseButton, ClickType type)
     {
         ((IMixinScreenWithHandler) gui).itemscroller_handleMouseClickInvoker(slotIn, slotId, mouseButton, type);
     }
 
-    public static int getGuiLeft(HandledScreen<?> gui)
+    public static int getGuiLeft(AbstractContainerScreen<?> gui)
     {
         return ((IMixinScreenWithHandler) gui).itemscroller_getGuiLeft();
     }
 
-    public static int getGuiTop(HandledScreen<?> gui)
+    public static int getGuiTop(AbstractContainerScreen<?> gui)
     {
         return ((IMixinScreenWithHandler) gui).itemscroller_getGuiTop();
     }
 
-    public static int getGuiXSize(HandledScreen<?> gui)
+    public static int getGuiXSize(AbstractContainerScreen<?> gui)
     {
         return ((IMixinScreenWithHandler) gui).itemscroller_getBackgroundWidth();
     }
 
-    public static int getGuiYSize(HandledScreen<?> gui)
+    public static int getGuiYSize(AbstractContainerScreen<?> gui)
     {
         return ((IMixinScreenWithHandler) gui).itemscroller_getBackgroundHeight();
     }

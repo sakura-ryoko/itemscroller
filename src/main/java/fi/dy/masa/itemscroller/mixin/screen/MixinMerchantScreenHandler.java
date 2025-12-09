@@ -12,25 +12,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.villager.IMerchantScreenHandler;
 import fi.dy.masa.itemscroller.villager.VillagerUtils;
-import net.minecraft.screen.MerchantScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.village.Merchant;
-import net.minecraft.village.TradeOfferList;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.item.trading.Merchant;
+import net.minecraft.world.item.trading.MerchantOffers;
 
-@Mixin(MerchantScreenHandler.class)
-public abstract class MixinMerchantScreenHandler extends ScreenHandler implements IMerchantScreenHandler
+@Mixin(MerchantMenu.class)
+public abstract class MixinMerchantScreenHandler extends AbstractContainerMenu implements IMerchantScreenHandler
 {
-    @Shadow @Final private Merchant merchant;
-    @Unique @Nullable private TradeOfferList customList;
+    @Shadow @Final private Merchant trader;
+    @Unique @Nullable private MerchantOffers customList;
 
-    protected MixinMerchantScreenHandler(@Nullable ScreenHandlerType<?> type, int syncId)
+    protected MixinMerchantScreenHandler(@Nullable MenuType<?> type, int syncId)
     {
         super(type, syncId);
     }
 
-    @Inject(method = "getRecipes", at = @At("HEAD"), cancellable = true)
-    private void replaceTradeList(CallbackInfoReturnable<TradeOfferList> cir)
+    @Inject(method = "getOffers", at = @At("HEAD"), cancellable = true)
+    private void replaceTradeList(CallbackInfoReturnable<MerchantOffers> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() && this.customList != null)
         {
@@ -39,7 +39,7 @@ public abstract class MixinMerchantScreenHandler extends ScreenHandler implement
     }
 
     @Inject(method = "setOffers", at = @At("HEAD"))
-    private void onTradeListSet(TradeOfferList offers, CallbackInfo ci)
+    private void onTradeListSet(MerchantOffers offers, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
@@ -48,8 +48,8 @@ public abstract class MixinMerchantScreenHandler extends ScreenHandler implement
     }
 
     @Override
-    public TradeOfferList itemscroller$getOriginalList()
+    public MerchantOffers itemscroller$getOriginalList()
     {
-        return this.merchant.getOffers();
+        return this.trader.getOffers();
     }
 }

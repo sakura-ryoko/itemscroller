@@ -5,14 +5,12 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nonnull;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.recipe.NetworkRecipeId;
-import net.minecraft.recipe.RecipeDisplayEntry;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.screen.slot.Slot;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.malilib.util.data.Constants;
@@ -128,12 +126,12 @@ public class RecipeStorage
         return this.getRecipe(this.getSelection());
     }
 
-    public void storeCraftingRecipeToCurrentSelection(Slot slot, HandledScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
+    public void storeCraftingRecipeToCurrentSelection(Slot slot, AbstractContainerScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, Minecraft mc)
     {
         this.storeCraftingRecipe(this.getSelection(), slot, gui, clearIfEmpty, fromKeybind, mc);
     }
 
-    public void storeCraftingRecipe(int index, Slot slot, HandledScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, MinecraftClient mc)
+    public void storeCraftingRecipe(int index, Slot slot, AbstractContainerScreen<?> gui, boolean clearIfEmpty, boolean fromKeybind, Minecraft mc)
     {
         this.getRecipe(index).storeCraftingRecipe(slot, gui, clearIfEmpty, fromKeybind, mc);
         this.dirty = true;
@@ -147,7 +145,7 @@ public class RecipeStorage
 
     public void onAddToRecipeBook(RecipeDisplayEntry entry)
     {
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
 
         // DEBUG
 //        RecipeBookUtils.toggleDebugLog(true);
@@ -182,7 +180,7 @@ public class RecipeStorage
         }
     }
 
-    private void readFromNBT(CompoundData data, @Nonnull DynamicRegistryManager registryManager)
+    private void readFromNBT(CompoundData data, @Nonnull RegistryAccess registryManager)
     {
         if (data == null || data.contains("Recipes", Constants.NBT.TAG_LIST) == false)
         {
@@ -213,7 +211,7 @@ public class RecipeStorage
                 }
                 if (tag.contains("LastNetworkId", Constants.NBT.TAG_INT))
                 {
-                    this.recipes[index].storeNetworkRecipeId(new NetworkRecipeId(tag.getInt("LastNetworkId")));
+                    this.recipes[index].storeNetworkRecipeId(new RecipeDisplayId(tag.getInt("LastNetworkId")));
                 }
                 if (tag.contains("RecipeType", Constants.NBT.TAG_STRING))
                 {
@@ -237,7 +235,7 @@ public class RecipeStorage
         this.changeSelectedRecipe(data.getByte("Selected"));
     }
 
-    private CompoundData writeToNBT(@Nonnull DynamicRegistryManager registry)
+    private CompoundData writeToNBT(@Nonnull RegistryAccess registry)
     {
         ListData tagRecipes = new ListData();
         CompoundData data = new CompoundData();
@@ -302,7 +300,7 @@ public class RecipeStorage
         return FileUtils.getMinecraftDirectoryAsPath().resolve(Reference.MOD_ID);
     }
 
-    public void readFromDisk(@Nonnull DynamicRegistryManager registry)
+    public void readFromDisk(@Nonnull RegistryAccess registry)
     {
         try
         {
@@ -341,7 +339,7 @@ public class RecipeStorage
         }
     }
 
-    public void writeToDisk(@Nonnull DynamicRegistryManager registry)
+    public void writeToDisk(@Nonnull RegistryAccess registry)
     {
         if (this.dirty)
         {

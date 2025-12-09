@@ -1,7 +1,7 @@
 package fi.dy.masa.itemscroller.util;
 
 import javax.annotation.Nonnull;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -40,7 +40,7 @@ public record ItemType(ItemStack stack)
 
         ItemType other = (ItemType) obj;
 
-        return ItemStack.areItemsAndComponentsEqual(this.stack, other.stack);
+        return ItemStack.isSameItemSameComponents(this.stack, other.stack);
     }
 
     /**

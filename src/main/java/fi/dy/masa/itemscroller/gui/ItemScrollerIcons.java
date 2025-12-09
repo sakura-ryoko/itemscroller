@@ -1,10 +1,9 @@
 package fi.dy.masa.itemscroller.gui;
 
-import net.minecraft.util.Identifier;
-
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.render.GuiContext;
 import fi.dy.masa.malilib.render.RenderUtils;
+import net.minecraft.resources.Identifier;
 import fi.dy.masa.itemscroller.Reference;
 
 public enum ItemScrollerIcons implements IGuiIcon
@@ -15,7 +14,7 @@ public enum ItemScrollerIcons implements IGuiIcon
     STAR_5_YELLOW           (112, 18, 5, 5),
     STAR_5_PURPLE           (117, 18, 5, 5);
 
-    public static final Identifier TEXTURE = Identifier.of(Reference.MOD_ID, "textures/gui/gui_widgets.png");
+    public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Reference.MOD_ID, "textures/gui/gui_widgets.png");
 
     private final int u;
     private final int v;

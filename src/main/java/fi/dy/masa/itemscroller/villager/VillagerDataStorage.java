@@ -4,12 +4,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import javax.annotation.Nullable;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-
-import net.minecraft.screen.MerchantScreenHandler;
-import net.minecraft.village.TradeOffer;
-import net.minecraft.village.TradeOfferList;
-
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.malilib.util.data.Constants;
@@ -82,7 +80,7 @@ public class VillagerDataStorage
         }
     }
 
-    public void toggleGlobalFavorite(TradeOffer trade)
+    public void toggleGlobalFavorite(MerchantOffer trade)
     {
         TradeType type = TradeType.of(trade);
 
@@ -98,12 +96,12 @@ public class VillagerDataStorage
         this.dirty = true;
     }
 
-    public FavoriteData getFavoritesForCurrentVillager(MerchantScreenHandler handler)
+    public FavoriteData getFavoritesForCurrentVillager(MerchantMenu handler)
     {
         return this.getFavoritesForCurrentVillager(((IMerchantScreenHandler) handler).itemscroller$getOriginalList());
     }
 
-    public FavoriteData getFavoritesForCurrentVillager(TradeOfferList originalTrades)
+    public FavoriteData getFavoritesForCurrentVillager(MerchantOffers originalTrades)
     {
         VillagerData data = this.getDataFor(this.lastInteractedUUID, false);
         IntArrayList favorites = data != null ? data.getFavorites() : null;

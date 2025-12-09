@@ -2,15 +2,13 @@ package fi.dy.masa.itemscroller.villager;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
-
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.village.TradeOffer;
-
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.MerchantOffer;
 import fi.dy.masa.malilib.util.data.tag.CompoundData;
 
 public class TradeType
@@ -26,11 +24,11 @@ public class TradeType
         this.sellItem = sellItem;
     }
 
-    public boolean matchesTrade(TradeOffer trade)
+    public boolean matchesTrade(MerchantOffer trade)
     {
-        ItemStack stackBuyItem1 = trade.getOriginalFirstBuyItem();
-        ItemStack stackBuyItem2 = trade.getDisplayedSecondBuyItem();
-        ItemStack stackSellItem = trade.getSellItem();
+        ItemStack stackBuyItem1 = trade.getBaseCostA();
+        ItemStack stackBuyItem2 = trade.getCostB();
+        ItemStack stackSellItem = trade.getResult();
         Item buyItem1 = stackBuyItem1.getItem();
         Item buyItem2 = stackBuyItem2.getItem();
         Item sellItem = stackSellItem.getItem();
@@ -72,8 +70,8 @@ public class TradeType
 
 			if (id != null)
 			{
-				Optional<RegistryEntry.Reference<Item>> opt = Registries.ITEM.getEntry(id);
-				return opt.map(RegistryEntry.Reference::value).orElse(Items.AIR);
+				Optional<Holder.Reference<Item>> opt = BuiltInRegistries.ITEM.get(id);
+				return opt.map(Holder.Reference::value).orElse(Items.AIR);
 			}
         }
         catch (Exception ignored) { }
@@ -85,7 +83,7 @@ public class TradeType
     {
         try
         {
-            return Registries.ITEM.getId(item).toString();
+            return BuiltInRegistries.ITEM.getKey(item).toString();
         }
         catch (Exception e)
         {
@@ -115,11 +113,11 @@ public class TradeType
         return result;
     }
 
-    public static TradeType of(TradeOffer trade)
+    public static TradeType of(MerchantOffer trade)
     {
-        ItemStack stackBuyItem1 = trade.getOriginalFirstBuyItem();
-        ItemStack stackBuyItem2 = trade.getDisplayedSecondBuyItem();
-        ItemStack stackSellItem = trade.getSellItem();
+        ItemStack stackBuyItem1 = trade.getBaseCostA();
+        ItemStack stackBuyItem2 = trade.getCostB();
+        ItemStack stackSellItem = trade.getResult();
         Item buyItem1 = stackBuyItem1.getItem();
         Item buyItem2 = stackBuyItem2.getItem();
         Item sellItem = stackSellItem.getItem();
