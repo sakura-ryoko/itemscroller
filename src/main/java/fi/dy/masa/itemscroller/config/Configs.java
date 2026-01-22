@@ -38,7 +38,7 @@ public class Configs implements IConfigHandler
     public static class Generic
     {
         public static final ConfigBoolean CARPET_CTRL_Q_CRAFTING                = new ConfigBoolean("carpetCtrlQCraftingEnabledOnServer",      false).apply(GENERIC_KEY);
-        public static final ConfigBoolean CLIENT_CRAFTING_FIX                   = new ConfigBoolean("clientCraftingFixOn1.12",                 true).apply(GENERIC_KEY);
+        public static final ConfigBoolean CLIENT_CRAFTING_FIX                   = new ConfigBoolean("clientCraftingFixOn1.12",                 false).apply(GENERIC_KEY);
         public static final ConfigBoolean CRAFTING_RENDER_RECIPE_ITEMS          = new ConfigBoolean("craftingRenderRecipeItems",               true).apply(GENERIC_KEY);
         public static final ConfigBoolean DEBUG_MESSAGES                        = new ConfigBoolean("debugMessages",                           false).apply(GENERIC_KEY);
         public static final ConfigBoolean MOD_MAIN_TOGGLE                       = new ConfigBoolean("modMainToggle",                           true).apply(GENERIC_KEY);
