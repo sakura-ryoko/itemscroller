@@ -1,21 +1,24 @@
 package fi.dy.masa.itemscroller.gui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
+import fi.dy.masa.malilib.MaLiLibConfigGui;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
+import fi.dy.masa.malilib.gui.interfaces.IConfigGuiAllTab;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 
-public class GuiConfigs extends GuiConfigsBase
+public class GuiConfigs extends GuiConfigsBase implements IConfigGuiAllTab
 {
     private static ConfigGuiTab tab = ConfigGuiTab.GENERIC;
 
@@ -67,7 +70,11 @@ public class GuiConfigs extends GuiConfigsBase
         List<? extends IConfigBase> configs;
         ConfigGuiTab tab = GuiConfigs.tab;
 
-        if (tab == ConfigGuiTab.GENERIC)
+        if (tab == ConfigGuiTab.ALL && this.useAllTab())
+        {
+            return this.getAllConfigs();
+        }
+        else if (tab == ConfigGuiTab.GENERIC)
         {
             configs = Configs.Generic.OPTIONS;
         }
@@ -87,7 +94,31 @@ public class GuiConfigs extends GuiConfigsBase
         return ConfigOptionWrapper.createFor(configs);
     }
 
-	private record ButtonListener(ConfigGuiTab tab, GuiConfigs parent) implements IButtonActionListener
+    @Override
+    public boolean useAllTab()
+    {
+        return true;
+    }
+
+    @Override
+    protected boolean useKeybindSearch()
+    {
+        return tab == ConfigGuiTab.ALL || tab == ConfigGuiTab.HOTKEYS;
+    }
+
+    @Override
+    public List<ConfigOptionWrapper> getAllConfigs()
+    {
+        List<ConfigOptionWrapper> configs = new ArrayList<>();
+
+        configs.addAll(ConfigOptionWrapper.createFor(Configs.Generic.OPTIONS));
+        configs.addAll(ConfigOptionWrapper.createFor(Configs.Toggles.OPTIONS));
+        configs.addAll(ConfigOptionWrapper.createFor(Hotkeys.HOTKEY_LIST));
+
+        return configs;
+    }
+
+    private record ButtonListener(ConfigGuiTab tab, GuiConfigs parent) implements IButtonActionListener
 	{
 		@Override
 		public void actionPerformedWithButton(ButtonBase button, int mouseButton)
@@ -102,9 +133,10 @@ public class GuiConfigs extends GuiConfigsBase
 
     public enum ConfigGuiTab
     {
-        GENERIC ("itemscroller.gui.button.config_gui.generic"),
-        TOGGLES ("itemscroller.gui.button.config_gui.toggles"),
-        HOTKEYS ("itemscroller.gui.button.config_gui.hotkeys");
+        ALL         (IConfigGuiAllTab.getTranslationKey()),
+        GENERIC     ("itemscroller.gui.button.config_gui.generic"),
+        TOGGLES     ("itemscroller.gui.button.config_gui.toggles"),
+        HOTKEYS     ("itemscroller.gui.button.config_gui.hotkeys");
 
         private final String translationKey;
 
