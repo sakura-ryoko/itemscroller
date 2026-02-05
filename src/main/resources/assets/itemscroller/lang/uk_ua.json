@@ -35,7 +35,7 @@
     "itemscroller.config.generic.name.craftingRecipesSaveFileIsGlobal": "craftingRecipesSaveFileIsGlobal",
     "itemscroller.config.generic.name.craftingRecipesSaveToFile": "craftingRecipesSaveToFile",
     "itemscroller.config.generic.name.craftingRenderRecipeItems": "craftingRenderRecipeItems",
-    "itemscroller.config.generic.name.debugMessages": "debugMessages",
+    "itemscroller.config.generic.name.debugMessages": "Повідомлення про налагодження",
     "itemscroller.config.generic.name.massCraftHold": "massCraftHold",
     "itemscroller.config.generic.name.massCraftInhibitMidUpdates": "massCraftInhibitMidUpdates",
     "itemscroller.config.generic.name.massCraftInterval": "massCraftInterval",
