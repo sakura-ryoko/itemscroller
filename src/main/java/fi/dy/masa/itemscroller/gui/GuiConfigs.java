@@ -38,6 +38,7 @@ public class GuiConfigs extends GuiConfigsBase implements IConfigGuiAllTab
 
         for (ConfigGuiTab tab : ConfigGuiTab.VALUES)
         {
+            if (!this.useAllTab() && tab == ConfigGuiTab.ALL) continue;
             x += this.createButton(x, y, -1, tab);
         }
     }
@@ -126,7 +127,10 @@ public class GuiConfigs extends GuiConfigsBase implements IConfigGuiAllTab
 			GuiConfigs.tab = this.tab;
 
 			this.parent.reCreateListWidget(); // apply the new config width
-			this.parent.getListWidget().resetScrollbarPosition();
+            if (this.parent.getListWidget() != null)
+            {
+                this.parent.getListWidget().resetScrollbarPosition();
+            }
 			this.parent.initGui();
 		}
 	}
