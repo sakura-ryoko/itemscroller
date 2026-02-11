@@ -155,11 +155,37 @@ public class VillagerDataStorage
         }
     }
 
+    private boolean isEmpty()
+    {
+        return (this.data.isEmpty() || this.isVillagerDataEmpty()) && this.globalFavorites.isEmpty();
+    }
+
+    private boolean isVillagerDataEmpty()
+    {
+        boolean empty = true;
+
+        for (VillagerData data : this.data.values())
+        {
+            if (!data.isEmpty())
+            {
+                empty = false;
+            }
+        }
+
+        return empty;
+    }
+
     private CompoundData writeToNBT()
     {
 	    CompoundData tags = new CompoundData();
         ListData favoriteListData = new ListData();
 	    ListData globalFavoriteData = new ListData();
+
+        if (this.isEmpty())
+        {
+            dirty = false;
+            return tags;
+        }
 
         for (VillagerData data : this.data.values())
         {
@@ -258,6 +284,19 @@ public class VillagerDataStorage
 
 //                    NbtUtils.writeCompressed(this.writeToNBT(), fileTmp);
 	                CompoundData data = this.writeToNBT();
+
+                    // Don't save file if there are no entries.
+                    if (data.isEmpty())
+                    {
+                        if (Files.exists(fileReal))
+                        {
+                            Files.delete(fileReal);
+                        }
+
+                        this.dirty = false;
+                        return;
+                    }
+
 					DataFileUtils.writeCompoundDataToCompressedNbtFile(fileTmp, data);
 
                     if (Files.exists(fileReal))

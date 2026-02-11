@@ -52,9 +52,19 @@ public class VillagerData
         return this.favorites;
     }
 
+    protected boolean isEmpty()
+    {
+        return this.favorites.isEmpty();
+    }
+
     public CompoundData toNBT()
     {
 	    CompoundData data = new CompoundData();
+
+        if (this.isEmpty())
+        {
+            return data;
+        }
 
 	    data.putLong("UUIDM", this.uuid.getMostSignificantBits());
 	    data.putLong("UUIDL", this.uuid.getLeastSignificantBits());

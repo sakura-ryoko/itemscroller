@@ -143,6 +143,26 @@ public class RecipeStorage
         this.dirty = true;
     }
 
+    private boolean isEmpty()
+    {
+        return !(this.recipes.length > 0) || this.isRecipesEmpty();
+    }
+
+    private boolean isRecipesEmpty()
+    {
+        boolean empty = true;
+
+	    for (RecipePattern recipe : this.recipes)
+	    {
+		    if (!recipe.isEmpty())
+		    {
+			    empty = false;
+		    }
+	    }
+
+        return empty;
+    }
+
     public void onAddToRecipeBook(RecipeDisplayEntry entry)
     {
         Minecraft mc = Minecraft.getInstance();
@@ -239,6 +259,11 @@ public class RecipeStorage
     {
         ListData tagRecipes = new ListData();
         CompoundData data = new CompoundData();
+
+        if (this.isEmpty())
+        {
+            return data;
+        }
 
         for (int i = 0; i < this.recipes.length; i++)
         {
@@ -360,6 +385,19 @@ public class RecipeStorage
 
 //                    NbtUtils.writeCompressed(this.writeToNBT(registry), fileTmp);
 	                CompoundData data = this.writeToNBT(registry);
+
+                    // Don't save a file if there are no recipe's to save.
+                    if (data.isEmpty())
+                    {
+                        if (Files.exists(fileReal))
+                        {
+                            Files.delete(fileReal);
+                        }
+
+                        this.dirty = false;
+                        return;
+                    }
+
 	                DataFileUtils.writeCompoundDataToCompressedNbtFile(fileTmp, data);
 
                     if (Files.exists(fileReal))
