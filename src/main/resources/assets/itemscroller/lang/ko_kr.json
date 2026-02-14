@@ -3,7 +3,7 @@
     "itemscroller.config.generic.comment.clientCraftingFixOn1_12": "클라이언트 측에 직접 제작 조합법 출력을 업데이트합니다.\n이것은 1.12에서 고장 난 빠른/대량 제작과\n오른쪽-클릭-제작-한-스택 기능을 개선합니다.",
     "itemscroller.config.generic.comment.craftingRecipesSaveFileIsGlobal": "true인 경우, 조합법 파일은 월드 또는 서버\n별로 저장되지 않고 전역적으로 저장됩니다.",
     "itemscroller.config.generic.comment.craftingRecipesSaveToFile": "활성화된 경우, 제작 기능 조합법이 다음 파일에 저장됩니다.\nminecraft/itemscroller/recipes_worldorservername.nbt\n이렇게 하면 게임을 재시작해도 조합법이 유지됩니다.",
-    "itemscroller.config.generic.comment.craftingRenderRecipeItems": "활성화된 경우, 아이템 스크롤러 조합법 GUI에서\n조합 아이템이 렌더링 됩니다.",
+    "itemscroller.config.generic.comment.craftingRenderRecipeItems": "활성화된 경우, 아이템 스크롤러 조합법 GUI에서\n조합 아이템이 렌더링됩니다.",
     "itemscroller.config.generic.comment.debugMessages": "게임 콘솔에서 몇몇 디버그 메시지를 활성화합니다.",
     "itemscroller.config.generic.comment.massCraftHold": "Andrew54757의 \"Craft-Fix\" 포크를 참고한 \"대량 제작 홀드\"를 사용합니다.\n§6참고: 이 기능은 \"전송률 제한 클릭 패킷\"과 호환되지 않습니다.",
     "itemscroller.config.generic.comment.massCraftInhibitMidUpdates": "아이템이 제작 그리드로 이동 중에 조합법 출력 슬롯이 업데이트\n되는 것을 방지합니다. 이것은 그리드에 아이템이 변경될 때마다\n조합법을 확인하지 않음으로써 CPU 사용량을 절약합니다.",
