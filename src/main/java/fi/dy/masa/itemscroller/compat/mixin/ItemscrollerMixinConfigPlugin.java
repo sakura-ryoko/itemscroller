@@ -18,7 +18,7 @@ public class ItemscrollerMixinConfigPlugin extends RestrictiveMixinConfigPlugin
 	@Override
 	public String getRefMapperConfig()
 	{
-		return "";
+		return null;
 	}
 
 	@Override

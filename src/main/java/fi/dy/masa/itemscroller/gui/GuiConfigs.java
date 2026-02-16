@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
-import fi.dy.masa.malilib.MaLiLibConfigGui;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
@@ -59,7 +58,7 @@ public class GuiConfigs extends GuiConfigsBase implements IConfigGuiAllTab
 
         if (tab == ConfigGuiTab.GENERIC || tab == ConfigGuiTab.TOGGLES)
         {
-            return 100;
+            return 140;
         }
 
         return super.getConfigWidth();
