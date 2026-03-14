@@ -4,14 +4,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.world.inventory.ResultSlot;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
+
+import net.minecraft.client.gui.screens.inventory.CraftingScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.world.inventory.ResultSlot;
 
 import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigBase;
@@ -19,7 +20,7 @@ import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.util.FileUtils;
-import fi.dy.masa.malilib.util.JsonUtils;
+import fi.dy.masa.malilib.util.data.json.JsonUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
@@ -147,7 +148,7 @@ public class Configs implements IConfigHandler
 
         if (Files.exists(configFile) && Files.isReadable(configFile))
         {
-            JsonElement element = JsonUtils.parseJsonFileAsPath(configFile);
+            JsonElement element = JsonUtils.parseJsonFile(configFile);
 
             if (element != null && element.isJsonObject())
             {
@@ -199,7 +200,7 @@ public class Configs implements IConfigHandler
             writeStrings(root, GUI_BLACKLIST, "guiBlacklist");
             writeStrings(root, SLOT_BLACKLIST, "slotBlacklist");
 
-            JsonUtils.writeJsonToFileAsPath(root, dir.resolve(CONFIG_FILE_NAME));
+            JsonUtils.writeJsonToFile(root, dir.resolve(CONFIG_FILE_NAME));
         }
         else
         {

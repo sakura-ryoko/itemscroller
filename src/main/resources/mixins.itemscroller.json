@@ -1,30 +1,31 @@
 {
-  "required": true,
-  "package": "fi.dy.masa.itemscroller.mixin",
+    "required": true,
+    "package": "fi.dy.masa.itemscroller.mixin",
     "plugin": "fi.dy.masa.itemscroller.compat.mixin.ItemscrollerMixinConfigPlugin",
-  "compatibilityLevel": "JAVA_21",
-  "minVersion": "0.8",
-  "mixins": [
-      "MixinStatusEffectsDisplay",
-      "item.IMixinSlot",
-      "item.MixinItemStack",
-      "network.MixinClientPlayerInteractionManager",
-      "network.MixinClientPlayNetworkHandler",
-      "recipe.IMixinClientRecipeBook",
-      "recipe.IMixinCraftingResultSlot",
-      "recipe.IMixinRecipeBookWidget",
-      "recipe.MixinClientRecipeBook",
-      "screen.IMixinAbstractCraftingScreenHandler",
-      "screen.IMixinMerchantScreen",
-      "screen.IMixinRecipeBookScreen",
-      "screen.IMixinScreenWithHandler",
-      "screen.MixinCraftingScreenHandler",
-      "screen.MixinHandledScreen",
-      "screen.MixinMerchantScreen",
-      "screen.MixinMerchantScreenHandler",
-      "screen.MixinScreen"
-  ],
-  "injectors": {
-    "defaultRequire": 1
+    "compatibilityLevel": "JAVA_21",
+    "minVersion": "0.8",
+    "mixins": [
+        "hud.MixinEffectsInInventory",
+        "item.IMixinItemInstance",
+        "item.IMixinSlot",
+        "item.MixinItemStack",
+        "network.MixinClientPlayerInteractionManager",
+        "network.MixinClientPlayNetworkHandler",
+        "recipe.IMixinClientRecipeBook",
+        "recipe.IMixinCraftingResultSlot",
+        "recipe.IMixinRecipeBookWidget",
+        "recipe.MixinClientRecipeBook",
+        "screen.IMixinAbstractCraftingScreenHandler",
+        "screen.IMixinMerchantScreen",
+        "screen.IMixinRecipeBookScreen",
+        "screen.IMixinScreenWithHandler",
+        "screen.MixinCraftingScreenHandler",
+        "screen.MixinHandledScreen",
+        "screen.MixinMerchantScreen",
+        "screen.MixinMerchantScreenHandler",
+        "screen.MixinScreen"
+    ],
+    "injectors": {
+        "defaultRequire": 1
   }
 }

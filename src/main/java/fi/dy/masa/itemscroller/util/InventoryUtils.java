@@ -158,7 +158,7 @@ public class InventoryUtils
                     rules.get(GameRules.LIMITED_CRAFTING) == false))
                 {
                     inventoryCraftResult.setRecipeUsed(recipeEntry);
-                    stack = recipe.assemble(recipeInput, world.registryAccess());
+                    stack = recipe.assemble(recipeInput);
                 }
 
                 if (setEmptyStack || stack.isEmpty() == false)
@@ -480,7 +480,7 @@ public class InventoryUtils
                     break;
 
                 case DROP_ONE:
-                    clickSlot(gui, slot.index, 0, ClickType.THROW);
+                    clickSlot(gui, slot.index, 0, ContainerInput.THROW);
                     break;
 
                 case DROP_LEAVE_ONE:
@@ -490,7 +490,7 @@ public class InventoryUtils
                     break;
 
                 case DROP_STACKS:
-                    clickSlot(gui, slot.index, 1, ClickType.THROW);
+                    clickSlot(gui, slot.index, 1, ContainerInput.THROW);
                     break;
 
                 case MOVE_DOWN_MOVE_ONE:
@@ -574,7 +574,7 @@ public class InventoryUtils
                     break;
 
                 case DROP_ONE:
-                    clickSlot(gui, slot.index, 0, ClickType.THROW);
+                    clickSlot(gui, slot.index, 0, ContainerInput.THROW);
                     break;
 
                 case DROP_LEAVE_ONE:
@@ -584,7 +584,7 @@ public class InventoryUtils
                     break;
 
                 case DROP_STACKS:
-                    clickSlot(gui, slot.index, 1, ClickType.THROW);
+                    clickSlot(gui, slot.index, 1, ContainerInput.THROW);
                     cancel = true;
                     break;
 
@@ -1735,7 +1735,7 @@ public class InventoryUtils
                             if (ingredientSlot.container instanceof Inventory && ingredientSlot.getContainerSlot() < 9)
                             {
                                 // hotbar
-                                clickSlot(gui, slotNum, ingredientSlot.getContainerSlot(), ClickType.SWAP);
+                                clickSlot(gui, slotNum, ingredientSlot.getContainerSlot(), ContainerInput.SWAP);
                             }
                             else
                             {
@@ -2862,7 +2862,7 @@ public class InventoryUtils
             snapshot.set(src_ix, hold);
             hold = src;
             ItemScroller.LOGGER.debug("quickSort(): pick up {}; holding {}", src_ix, hold);
-            clickSlot(gui, slotindex_by_arrayindex[src_ix], swapSlot, ClickType.SWAP);
+            clickSlot(gui, slotindex_by_arrayindex[src_ix], swapSlot, ContainerInput.SWAP);
 
             // continually place the held item into its correct place, following the chain to its end
             // todo: we could skip swapping empty slots, but for some reason, this is not reliable. it seems to swap
@@ -2871,7 +2871,7 @@ public class InventoryUtils
             {
                 snapshot.set(dst_ix, hold);
                 hold = dst;
-                clickSlot(gui, slotindex_by_arrayindex[dst_ix], swapSlot, ClickType.SWAP);
+                clickSlot(gui, slotindex_by_arrayindex[dst_ix], swapSlot, ContainerInput.SWAP);
 
                 ItemScroller.LOGGER.debug("quickSort(): ... swap {} {}; holding {}", dst_ix, dst != null ? dst.value() : "null", hold);
                 if (hold == null)
@@ -2948,8 +2948,8 @@ public class InventoryUtils
         // sort by shulker box contents
         if (stack1IsBox && stack2IsBox)
         {
-            List<ItemStack> contents1 = stack1.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyStream().toList();
-            List<ItemStack> contents2 = stack2.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyStream().toList();
+            List<ItemStack> contents1 = stack1.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
+            List<ItemStack> contents2 = stack2.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().toList();
             int flip = (Configs.Generic.SORT_SHULKER_BOXES_INVERTED.getBooleanValue() ? -1 : 1);
 
             return Integer.compare(contents1.size(), contents2.size()) * flip;
@@ -2961,8 +2961,8 @@ public class InventoryUtils
             BundleContents bundle1 = stack1.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
             BundleContents bundle2 = stack2.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
             int flip = (Configs.Generic.SORT_BUNDLES_INVERTED.getBooleanValue() ? -1 : 1);
-            Fraction occupancy1 = bundle1.weight();
-            Fraction occupancy2 = bundle2.weight();
+            Fraction occupancy1 = bundle1.weight().getOrThrow();
+            Fraction occupancy2 = bundle2.weight().getOrThrow();
 
             return occupancy1.compareTo(occupancy2) * flip;
         }
@@ -3113,7 +3113,7 @@ public class InventoryUtils
 
     private static boolean isEmptyShulkerBox(ItemStack stack)
     {
-        return isShulkerBox(stack) && stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyStream().findAny().isEmpty();
+        return isShulkerBox(stack) && stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItemCopyStream().findAny().isEmpty();
     }
 
     private static boolean isBundle(ItemStack stack)
@@ -3164,8 +3164,8 @@ public class InventoryUtils
 
         if (targetStack.isEmpty())
         {
-            clickSlot(gui, slot, slot.index, 0, ClickType.PICKUP);
-            clickSlot(gui, target, target.index, 0, ClickType.PICKUP);
+            clickSlot(gui, slot, slot.index, 0, ContainerInput.PICKUP);
+            clickSlot(gui, target, target.index, 0, ContainerInput.PICKUP);
             //System.out.printf("Moved stack from slot %d to slot %d\n", slot.id, target.id);
             //ItemScroller.printDebug("Moved stack from slot {} to slot {}", slot.id, target.id);
             return false;
@@ -3183,9 +3183,9 @@ public class InventoryUtils
             return true;
         }
 
-        clickSlot(gui, slot, slot.index, 0, ClickType.PICKUP);
-        clickSlot(gui, target, target.index, 0, ClickType.PICKUP);
-        clickSlot(gui, slot, slot.index, 0, ClickType.PICKUP);
+        clickSlot(gui, slot, slot.index, 0, ContainerInput.PICKUP);
+        clickSlot(gui, target, target.index, 0, ContainerInput.PICKUP);
+        clickSlot(gui, slot, slot.index, 0, ContainerInput.PICKUP);
         assumeEmptyShulkerStacking = false;
         int amount = stackSize + targetSize - maxSize;
 
@@ -3284,7 +3284,7 @@ public class InventoryUtils
     public static void clickSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui,
                                  int slotNum,
                                  int mouseButton,
-                                 ClickType type)
+                                 ContainerInput type)
     {
         if (slotNum >= 0 && slotNum < gui.getMenu().slots.size())
         {
@@ -3296,7 +3296,7 @@ public class InventoryUtils
             try
             {
                 Minecraft mc = Minecraft.getInstance();
-                mc.gameMode.handleInventoryMouseClick(gui.getMenu().containerId, slotNum, mouseButton, type, mc.player);
+                mc.gameMode.handleContainerInput(gui.getMenu().containerId, slotNum, mouseButton, type, mc.player);
             }
             catch (Exception e)
             {
@@ -3310,7 +3310,7 @@ public class InventoryUtils
                                  Slot slot,
                                  int slotNum,
                                  int mouseButton,
-                                 ClickType type)
+                                 ContainerInput type)
     {
         try
         {
@@ -3325,56 +3325,56 @@ public class InventoryUtils
 
     public static void leftClickSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui, Slot slot, int slotNumber)
     {
-        clickSlot(gui, slot, slotNumber, 0, ClickType.PICKUP);
+        clickSlot(gui, slot, slotNumber, 0, ContainerInput.PICKUP);
     }
 
     public static void rightClickSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui, Slot slot, int slotNumber)
     {
-        clickSlot(gui, slot, slotNumber, 1, ClickType.PICKUP);
+        clickSlot(gui, slot, slotNumber, 1, ContainerInput.PICKUP);
     }
 
     public static void shiftClickSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui, Slot slot, int slotNumber)
     {
-        clickSlot(gui, slot, slotNumber, 0, ClickType.QUICK_MOVE);
+        clickSlot(gui, slot, slotNumber, 0, ContainerInput.QUICK_MOVE);
     }
 
     public static void leftClickSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui, int slotNum)
     {
-        clickSlot(gui, slotNum, 0, ClickType.PICKUP);
+        clickSlot(gui, slotNum, 0, ContainerInput.PICKUP);
     }
 
     public static void rightClickSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui, int slotNum)
     {
-        clickSlot(gui, slotNum, 1, ClickType.PICKUP);
+        clickSlot(gui, slotNum, 1, ContainerInput.PICKUP);
     }
 
     public static void shiftClickSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui, int slotNum)
     {
-        clickSlot(gui, slotNum, 0, ClickType.QUICK_MOVE);
+        clickSlot(gui, slotNum, 0, ContainerInput.QUICK_MOVE);
     }
 
     public static void dropItemsFromCursor(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
     {
-        clickSlot(gui, -999, 0, ClickType.PICKUP);
+        clickSlot(gui, -999, 0, ContainerInput.PICKUP);
     }
 
     public static void dropItem(AbstractContainerScreen<? extends AbstractContainerMenu> gui, int slotNum)
     {
-        clickSlot(gui, slotNum, 0, ClickType.THROW);
+        clickSlot(gui, slotNum, 0, ContainerInput.THROW);
     }
 
     public static void dropStack(AbstractContainerScreen<? extends AbstractContainerMenu> gui, int slotNum)
     {
-        clickSlot(gui, slotNum, 1, ClickType.THROW);
+        clickSlot(gui, slotNum, 1, ContainerInput.THROW);
     }
 
     public static void swapSlots(AbstractContainerScreen<? extends AbstractContainerMenu> gui, int slotNum, int otherSlot)
     {
         //System.out.printf("swapSlots: [%d -> %d]\n", slotNum, otherSlot);
 
-        clickSlot(gui, slotNum, 8, ClickType.SWAP);
-        clickSlot(gui, otherSlot, 8, ClickType.SWAP);
-        clickSlot(gui, slotNum, 8, ClickType.SWAP);
+        clickSlot(gui, slotNum, 8, ContainerInput.SWAP);
+        clickSlot(gui, otherSlot, 8, ContainerInput.SWAP);
+        clickSlot(gui, slotNum, 8, ContainerInput.SWAP);
     }
 
     private static void dragSplitItemsIntoSlots(AbstractContainerScreen<? extends AbstractContainerMenu> gui,
@@ -3396,7 +3396,7 @@ public class InventoryUtils
         int numSlots = gui.getMenu().slots.size();
 
         // Start the drag
-        clickSlot(gui, -999, 0, ClickType.QUICK_CRAFT);
+        clickSlot(gui, -999, 0, ContainerInput.QUICK_CRAFT);
 
         for (int slotNum : targetSlots)
         {
@@ -3405,11 +3405,11 @@ public class InventoryUtils
                 break;
             }
 
-            clickSlot(gui, slotNum, 1, ClickType.QUICK_CRAFT);
+            clickSlot(gui, slotNum, 1, ContainerInput.QUICK_CRAFT);
         }
 
         // End the drag
-        clickSlot(gui, -999, 2, ClickType.QUICK_CRAFT);
+        clickSlot(gui, -999, 2, ContainerInput.QUICK_CRAFT);
     }
 
     /**************************************************************

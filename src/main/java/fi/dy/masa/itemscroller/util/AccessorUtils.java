@@ -1,13 +1,15 @@
 package fi.dy.masa.itemscroller.util;
 
 import javax.annotation.Nullable;
+
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
+
+import fi.dy.masa.itemscroller.mixin.item.IMixinSlot;
 import fi.dy.masa.itemscroller.mixin.screen.IMixinMerchantScreen;
 import fi.dy.masa.itemscroller.mixin.screen.IMixinScreenWithHandler;
-import fi.dy.masa.itemscroller.mixin.item.IMixinSlot;
 
 public class AccessorUtils
 {
@@ -23,7 +25,7 @@ public class AccessorUtils
         return ((IMixinScreenWithHandler) gui).itemscroller_getSlotAtPositionInvoker(x, y);
     }
 
-    public static void handleMouseClick(AbstractContainerScreen<?> gui, Slot slotIn, int slotId, int mouseButton, ClickType type)
+    public static void handleMouseClick(AbstractContainerScreen<?> gui, Slot slotIn, int slotId, int mouseButton, ContainerInput type)
     {
         ((IMixinScreenWithHandler) gui).itemscroller_handleMouseClickInvoker(slotIn, slotId, mouseButton, type);
     }

@@ -115,7 +115,7 @@ public class RecipePattern
             {
                 RecipeHolder<CraftingRecipe> recipeEntry = opt.get();
                 Recipe<CraftingInput> match = opt.get().value();
-                ItemStack result = match.assemble(input, serverWorld.registryAccess());
+                ItemStack result = match.assemble(input);
 
                 if (result != null && !result.isEmpty())
                 {

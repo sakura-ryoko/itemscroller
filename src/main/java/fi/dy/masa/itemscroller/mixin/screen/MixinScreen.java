@@ -2,6 +2,9 @@ package fi.dy.masa.itemscroller.mixin.screen;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -9,11 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import fi.dy.masa.itemscroller.event.RenderEventHandler;
 import fi.dy.masa.malilib.render.GuiContext;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
+import fi.dy.masa.itemscroller.event.RenderEventHandler;
 
 @Mixin(Screen.class)
 public abstract class MixinScreen
@@ -31,9 +31,9 @@ public abstract class MixinScreen
 
     @Final @Shadow @Nullable protected Minecraft minecraft;
 
-    @Inject(method = "renderWithTooltipAndSubtitles", at = @At(value = "TAIL"))
-    private void itemscroller_onDrawScreenPost(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    @Inject(method = "extractRenderStateWithTooltipAndSubtitles", at = @At(value = "TAIL"))
+    private void itemscroller_onDrawScreenPost(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci)
     {
-        RenderEventHandler.instance().onDrawScreenPost(GuiContext.fromGuiGraphics(context), this.minecraft, mouseX, mouseY);
+        RenderEventHandler.instance().onDrawScreenPost(GuiContext.fromGuiGraphics(graphics), this.minecraft, mouseX, mouseY);
     }
 }

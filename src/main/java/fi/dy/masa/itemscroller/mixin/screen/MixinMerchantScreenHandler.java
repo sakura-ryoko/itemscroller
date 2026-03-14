@@ -30,7 +30,7 @@ public abstract class MixinMerchantScreenHandler extends AbstractContainerMenu i
     }
 
     @Inject(method = "getOffers", at = @At("HEAD"), cancellable = true)
-    private void replaceTradeList(CallbackInfoReturnable<MerchantOffers> cir)
+    private void itemscroller_replaceTradeList(CallbackInfoReturnable<MerchantOffers> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() && this.customList != null)
         {
@@ -39,7 +39,7 @@ public abstract class MixinMerchantScreenHandler extends AbstractContainerMenu i
     }
 
     @Inject(method = "setOffers", at = @At("HEAD"))
-    private void onTradeListSet(MerchantOffers offers, CallbackInfo ci)
+    private void itemscroller_onTradeListSet(MerchantOffers offers, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {

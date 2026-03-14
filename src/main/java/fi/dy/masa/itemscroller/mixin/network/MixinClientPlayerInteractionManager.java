@@ -1,19 +1,23 @@
 package fi.dy.masa.itemscroller.mixin.network;
 
-import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import fi.dy.masa.itemscroller.util.ClickPacketBuffer;
 
 @Mixin(MultiPlayerGameMode.class)
 public class MixinClientPlayerInteractionManager
 {
-    @Inject(method = "handleInventoryMouseClick", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "handleInventoryButtonClick", at = @At("HEAD"), cancellable = true)
     private void cancelWindowClicksWhileReplayingBufferedPackets(CallbackInfo ci)
     {
         if (ClickPacketBuffer.shouldCancelWindowClicks())
@@ -22,10 +26,10 @@ public class MixinClientPlayerInteractionManager
         }
     }
 
-    @Redirect(method = "handleInventoryMouseClick",
-              at = @At(value = "INVOKE",
+    @WrapOperation(method = "handleInventoryButtonClick",
+                   at = @At(value = "INVOKE",
                        target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
-    private void bufferClickPacketsAndCancel(ClientPacketListener netHandler, Packet<?> packet)
+    private <T extends PacketListener> void bufferClickPacketsAndCancel(ClientPacketListener instance, Packet<T> packet, Operation<Void> original)
     {
         /*
         if (packet instanceof ClickSlotC2SPacket clickPacket)
@@ -42,6 +46,6 @@ public class MixinClientPlayerInteractionManager
             return;
         }
 
-        netHandler.send(packet);
+        original.call(instance, packet);
     }
 }

@@ -1,7 +1,9 @@
 package fi.dy.masa.itemscroller.mixin.screen;
 
 import javax.annotation.Nullable;
-import net.minecraft.client.gui.GuiGraphics;
+import org.objectweb.asm.Opcodes;
+
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -9,7 +11,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.trading.MerchantOffer;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -31,7 +32,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
 {
     @Unique @Nullable private FavoriteData favoriteData;
     @Shadow private int shopItem;
-    @Shadow int scrollOff;
+    @Shadow private int scrollOff;
     @Unique private int indexStartOffsetLast = -1;
     @Shadow protected abstract boolean canScroll(int listSize);
 
@@ -40,12 +41,12 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
         super(handler, inventory, title);
     }
 
-    @Inject(
-            method = "renderContents",
+    @Inject(method = "extractContents",
             at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/screens/inventory/MerchantScreen;renderScroller(Lnet/minecraft/client/gui/GuiGraphics;IIIILnet/minecraft/world/item/trading/MerchantOffers;)V")
+                     target = "Lnet/minecraft/client/gui/screens/inventory/MerchantScreen;extractScroller(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIIILnet/minecraft/world/item/trading/MerchantOffers;)V"
+            )
     )
-    private void fixRenderScrollBar(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    private void itemscroller_fixRenderScrollBar(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue())
@@ -61,7 +62,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "mouseScrolled", at = @At("RETURN"))
-    private void onMouseScrollPost(double mouseX, double mouseY, double horizontalAmount, double verticalAmount, CallbackInfoReturnable<Boolean> cir)
+    private void itemscroller_onMouseScrollPost(double mouseX, double mouseY, double horizontalAmount, double verticalAmount, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
@@ -74,7 +75,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "mouseDragged", at = @At("RETURN"))
-    private void onMouseDragPost(MouseButtonEvent click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir)
+    private void itemscroller_onMouseDragPost(MouseButtonEvent click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
@@ -87,7 +88,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "mouseClicked", at = @At("RETURN"), cancellable = true)
-    private void onMouseClicked(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir)
+    private void itemscroller_onMouseClicked(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
@@ -127,7 +128,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "postButtonClick", at = @At("HEAD"), cancellable = true)
-    private void fixRecipeIndex(CallbackInfo ci)
+    private void itemscroller_fixRecipeIndex(CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             this.getMenu() instanceof IMerchantScreenHandler)
@@ -139,10 +140,10 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
         }
     }
 
-    @Inject(method = "renderContents", at = @At(value = "FIELD",
+    @Inject(method = "extractContents", at = @At(value = "FIELD",
                                             target = "Lnet/minecraft/client/gui/screens/inventory/MerchantScreen;tradeOfferButtons:[Lnet/minecraft/client/gui/screens/inventory/MerchantScreen$TradeOfferButton;",
                                             opcode = Opcodes.GETFIELD))
-    private void renderFavoriteMarker(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    private void itemscroller_renderFavoriteMarker(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
@@ -170,7 +171,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
                 for (int i = 0; i < (numFavorites - this.scrollOff); ++i)
                 {
                     //RenderUtils.bindTexture(icon.getTexture());
-                    icon.renderAt(GuiContext.fromGuiGraphics(context), x, y, z, false, false);
+                    icon.renderAt(GuiContext.fromGuiGraphics(graphics), x, y, z, false, false);
                     y += 20;
                 }
             }

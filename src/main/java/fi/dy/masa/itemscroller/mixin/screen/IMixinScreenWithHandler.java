@@ -1,5 +1,6 @@
 package fi.dy.masa.itemscroller.mixin.screen;
 
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -12,7 +13,7 @@ public interface IMixinScreenWithHandler
     Slot itemscroller_getSlotAtPositionInvoker(double x, double y);
 
     @Invoker("slotClicked")
-    void itemscroller_handleMouseClickInvoker(Slot slotIn, int slotId, int mouseButton, net.minecraft.world.inventory.ClickType type);
+    void itemscroller_handleMouseClickInvoker(Slot slotIn, int slotId, int mouseButton, ContainerInput type);
 
     @Accessor("hoveredSlot")
     Slot itemscroller_getHoveredSlot();
