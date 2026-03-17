@@ -320,16 +320,16 @@ public class RecipeStorage
         return "recipes.nbt";
     }
 
-    private Path getSaveDirAsPath()
+    private Path getSaveDir()
     {
-        return FileUtils.getMinecraftDirectoryAsPath().resolve(Reference.MOD_ID);
+        return FileUtils.getMinecraftDirectory().resolve(Reference.MOD_ID);
     }
 
     public void readFromDisk(@Nonnull RegistryAccess registry)
     {
         try
         {
-            Path saveDir = this.getSaveDirAsPath();
+            Path saveDir = this.getSaveDir();
 
             if (Files.isDirectory(saveDir))
             {
@@ -370,7 +370,7 @@ public class RecipeStorage
         {
             try
             {
-                Path saveDir = this.getSaveDirAsPath();
+                Path saveDir = this.getSaveDir();
 
                 if (!Files.exists(saveDir))
                 {

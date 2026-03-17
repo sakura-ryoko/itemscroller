@@ -217,9 +217,9 @@ public class VillagerDataStorage
         return "villager_data.nbt";
     }
 
-    private Path getSaveDirPath()
+    private Path getSaveDir()
     {
-        return FileUtils.getMinecraftDirectoryAsPath().resolve(Reference.MOD_ID);
+        return FileUtils.getMinecraftDirectory().resolve(Reference.MOD_ID);
     }
 
     public void readFromDisk()
@@ -229,7 +229,7 @@ public class VillagerDataStorage
 
         try
         {
-            Path saveDir = this.getSaveDirPath();
+            Path saveDir = this.getSaveDir();
 
             if (Files.isDirectory(saveDir))
             {
@@ -269,7 +269,7 @@ public class VillagerDataStorage
         {
             try
             {
-                Path saveDir = this.getSaveDirPath();
+                Path saveDir = this.getSaveDir();
 
                 if (!Files.exists(saveDir))
                 {
