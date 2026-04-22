@@ -43,13 +43,14 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean CRAFTING_RENDER_RECIPE_ITEMS          = new ConfigBoolean("craftingRenderRecipeItems",               true).apply(GENERIC_KEY);
         public static final ConfigBoolean DEBUG_MESSAGES                        = new ConfigBoolean("debugMessages",                           false).apply(GENERIC_KEY);
         public static final ConfigBoolean MOD_MAIN_TOGGLE                       = new ConfigBoolean("modMainToggle",                           true).apply(GENERIC_KEY);
-        public static final ConfigBoolean MASS_CRAFT_INHIBIT_MID_UPDATES        = new ConfigBoolean("massCraftInhibitMidUpdates",              true).apply(GENERIC_KEY);
+//        public static final ConfigBoolean MASS_CRAFT_INHIBIT_MID_UPDATES        = new ConfigBoolean("massCraftInhibitMidUpdates",              true).apply(GENERIC_KEY);
         public static final ConfigInteger MASS_CRAFT_INTERVAL                   = new ConfigInteger("massCraftInterval",                       2, 1, 60).apply(GENERIC_KEY);
         public static final ConfigInteger MASS_CRAFT_ITERATIONS                 = new ConfigInteger("massCraftIterations",                     36, 1, 256).apply(GENERIC_KEY);
         public static final ConfigBoolean MASS_CRAFT_SWAPS                      = new ConfigBoolean("massCraftSwapsOnly",                      false).apply(GENERIC_KEY);
         public static final ConfigBoolean MASS_CRAFT_RECIPE_BOOK                = new ConfigBoolean("massCraftUseRecipeBook",                  true).apply(GENERIC_KEY);
         public static final ConfigBoolean MASS_CRAFT_HOLD                       = new ConfigBoolean("massCraftHold",                           false).apply(GENERIC_KEY);
         public static final ConfigInteger PACKET_RATE_LIMIT                     = new ConfigInteger("packetRateLimit",                         4, 1, 1024).apply(GENERIC_KEY);
+        public static final ConfigInteger RECIPE_BOOK_FAILURE_LIMIT             = new ConfigInteger("recipeBookFailureLimit",                  0, 0, 512).apply(GENERIC_KEY);
         public static final ConfigBoolean SCROLL_CRAFT_STORE_RECIPES_TO_FILE    = new ConfigBoolean("craftingRecipesSaveToFile",               true).apply(GENERIC_KEY);
         public static final ConfigBoolean SCROLL_CRAFT_RECIPE_FILE_GLOBAL       = new ConfigBoolean("craftingRecipesSaveFileIsGlobal",         false).apply(GENERIC_KEY);
         public static final ConfigBoolean RATE_LIMIT_CLICK_PACKETS              = new ConfigBoolean("rateLimitClickPackets",                   false).apply(GENERIC_KEY);
@@ -76,7 +77,7 @@ public class Configs implements IConfigHandler
                 CLIENT_CRAFTING_FIX,
                 CRAFTING_RENDER_RECIPE_ITEMS,
                 DEBUG_MESSAGES,
-                MASS_CRAFT_INHIBIT_MID_UPDATES,
+//                MASS_CRAFT_INHIBIT_MID_UPDATES,
                 MASS_CRAFT_INTERVAL,
                 MASS_CRAFT_ITERATIONS,
                 MASS_CRAFT_SWAPS,
@@ -85,6 +86,7 @@ public class Configs implements IConfigHandler
                 MOD_MAIN_TOGGLE,
                 PACKET_RATE_LIMIT,
                 RATE_LIMIT_CLICK_PACKETS,
+                RECIPE_BOOK_FAILURE_LIMIT,
                 SCROLL_CRAFT_STORE_RECIPES_TO_FILE,
                 SCROLL_CRAFT_RECIPE_FILE_GLOBAL,
                 REVERSE_SCROLL_DIRECTION_SINGLE,
@@ -112,12 +114,12 @@ public class Configs implements IConfigHandler
     {
         public static final ConfigBoolean CRAFTING_FEATURES         = new ConfigBoolean("enableCraftingFeatures",           true).apply(TOGGLES_KEY);
         public static final ConfigBoolean DROP_MATCHING             = new ConfigBoolean("enableDropkeyDropMatching",        true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean ITEM_MOVING_FALLBACK      = new ConfigBoolean("enableItemMovingFallback",         false).apply(TOGGLES_KEY);
         public static final ConfigBoolean RIGHT_CLICK_CRAFT_STACK   = new ConfigBoolean("enableRightClickCraftingOneStack", true).apply(TOGGLES_KEY);
         public static final ConfigBoolean SCROLL_EVERYTHING         = new ConfigBoolean("enableScrollingEverything",        true).apply(TOGGLES_KEY);
         public static final ConfigBoolean SCROLL_MATCHING           = new ConfigBoolean("enableScrollingMatchingStacks",    true).apply(TOGGLES_KEY);
         public static final ConfigBoolean SCROLL_SINGLE             = new ConfigBoolean("enableScrollingSingle",            true).apply(TOGGLES_KEY);
         public static final ConfigBoolean SCROLL_STACKS             = new ConfigBoolean("enableScrollingStacks",            true).apply(TOGGLES_KEY);
-        public static final ConfigBoolean SCROLL_STACKS_FALLBACK    = new ConfigBoolean("enableScrollingStacksFallback",    true).apply(TOGGLES_KEY);
         public static final ConfigBoolean SCROLL_VILLAGER           = new ConfigBoolean("enableScrollingVillager",          true).apply(TOGGLES_KEY);
         public static final ConfigBoolean SHIFT_DROP_ITEMS          = new ConfigBoolean("enableShiftDropItems",             true).apply(TOGGLES_KEY);
         public static final ConfigBoolean SHIFT_PLACE_ITEMS         = new ConfigBoolean("enableShiftPlaceItems",            true).apply(TOGGLES_KEY);
@@ -126,12 +128,12 @@ public class Configs implements IConfigHandler
         public static final ImmutableList<@NotNull IConfigValue> OPTIONS = ImmutableList.of(
                 CRAFTING_FEATURES,
                 DROP_MATCHING,
+                ITEM_MOVING_FALLBACK,
                 RIGHT_CLICK_CRAFT_STACK,
                 SCROLL_EVERYTHING,
                 SCROLL_MATCHING,
                 SCROLL_SINGLE,
                 SCROLL_STACKS,
-                SCROLL_STACKS_FALLBACK,
                 SCROLL_VILLAGER,
                 SHIFT_DROP_ITEMS,
                 SHIFT_PLACE_ITEMS,

@@ -17,6 +17,7 @@ import fi.dy.masa.malilib.hotkeys.KeyCallbackToggleBooleanConfigWithMessage;
 import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.InfoUtils;
+import fi.dy.masa.malilib.util.MathUtils;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
@@ -30,15 +31,17 @@ import fi.dy.masa.itemscroller.util.*;
 public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 {
     private static final KeybindCallbacks INSTANCE = new KeybindCallbacks();
-    protected int massCraftTicker;
-    private boolean recipeBookClicks = false;
     public static KeybindCallbacks getInstance()
     {
         return INSTANCE;
     }
 
+    protected int massCraftTicker;
+    private long badRecipeClicks;
+
     private KeybindCallbacks()
     {
+        this.badRecipeClicks = 0L;
     }
 
     public void setCallbacks()
@@ -203,6 +206,13 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             return;
         }
 
+        this.onClientTickMassCraftImpl(mc);
+    }
+
+    private void onClientTickMassCraftImpl(Minecraft mc)
+    {
+        if (mc.player == null || mc.level == null) { return; }
+
         if (GuiUtils.getCurrentScreen() instanceof AbstractContainerScreen<?> gui &&
             (GuiUtils.getCurrentScreen() instanceof CreativeModeInventoryScreen) == false &&
             Configs.GUI_BLACKLIST.contains(GuiUtils.getCurrentScreen().getClass().getName()) == false &&
@@ -214,148 +224,220 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             }
 
             InventoryUtils.bufferInvUpdates = true;
-            Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
+            final Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
 
             if (outputSlot != null)
             {
-                if (Configs.Generic.RATE_LIMIT_CLICK_PACKETS.getBooleanValue())
+                final CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
+                final RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
+                final int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
+
+                if (!recipe.getResult().isEmpty() && range != null)
                 {
-                    ClickPacketBuffer.setShouldBufferClickPackets(true);
-                }
-
-                RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
-
-                int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
-
-                if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
-                {
-                    InventoryUtils.dontUpdateRecipeBook = 2;
-
-                    for (int i = 0; i < limit; ++i)
+                    // Too small of a grid; Cancel.
+                    if (range.getSlotCount() < recipe.countRecipeItems())
                     {
-                        // todo
-                        //InventoryUtils.setInhibitCraftingOutputUpdate(true);
-
-                        CraftingContainer craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
-                        if (recipe.getVanillaRecipe() != null && !recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
-                        {
-                            CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
-                            final int invSlots = gui.getMenu().slots.size();
-                            final int rangeSlots = range.getSlotCount();
-
-                            for (int j = 0, slotNum = range.getFirst(); j < rangeSlots && slotNum < invSlots; j++, slotNum++)
-                            {
-                                InventoryUtils.shiftClickSlot(gui, slotNum);
-
-                                Slot slotTmp = gui.getMenu().getSlot(slotNum);
-                                ItemStack stack = slotTmp.getItem();
-                                if (!stack.isEmpty())
-                                {
-                                    InventoryUtils.dropStack(gui, slotNum);
-                                }
-                            }
-                        }
-
-                        mc.gameMode.handlePlaceRecipe(gui.getMenu().containerId, recipe.getNetworkRecipeId(), true);
-//                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
-//                        InventoryUtils.updateCraftingOutputSlot(outputSlot);
-
-                        craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
-
-                        if (recipe.getVanillaRecipe() != null &&
-	                        recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
-                        {
-                            break;
-                        }
-
-                        InventoryUtils.shiftClickSlot(gui, outputSlot.index);
-                        InventoryUtils.dropStack(gui, outputSlot.index);
-                        recipeBookClicks = true;
+                        return;
                     }
 
-                    InventoryUtils.tryClearCursor(gui);
-                    InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
-                }
-                else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
-                {
-                    for (int i = 0; i < limit; ++i)
+                    if (Configs.Generic.RATE_LIMIT_CLICK_PACKETS.getBooleanValue())
                     {
-                        InventoryUtils.tryClearCursor(gui);
-                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
-                        InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
-                        InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
-                        CraftingContainer inv = ((IMixinCraftingResultSlot) (outputSlot)).itemscroller_getCraftingInventory();
-                        //System.out.println("Before:");
-                        //debugPrintInv(inv);
-                        try
-                        {
-                            Thread.sleep(0);
-                        }
-						catch (InterruptedException ignored) { }
-
-                        InventoryUtils.setCraftingGridContentsUsingSwaps(gui, mc.player.getInventory(), recipe, outputSlot);
-                        //System.out.println("After:");
-                        //debugPrintInv(inv);
-                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
-                        InventoryUtils.updateCraftingOutputSlot(outputSlot);
-
-                        //System.out.printf("Output slot: %s\n", outputSlot.getStack());
-
-                        if (InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()) == false)
-                        {
-                            break;
-                        }
-
-                        InventoryUtils.shiftClickSlot(gui, outputSlot.index);
-                        //System.out.println("Shift clicked");
-                        //debugPrintInv(inv);
+                        ClickPacketBuffer.setShouldBufferClickPackets(true);
                     }
-                }
-                else
-                {
-                    int failsafe = 0;
 
-                    while (++failsafe < limit)
+                    if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
                     {
-                        InventoryUtils.tryClearCursor(gui);
-                        InventoryUtils.setInhibitCraftingOutputUpdate(true);
-                        InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
-                        InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
-                        InventoryUtils.tryMoveItemsToFirstCraftingGrid(recipe, gui, true);
-                        InventoryUtils.setInhibitCraftingOutputUpdate(false);
-                        InventoryUtils.updateCraftingOutputSlot(outputSlot);
+                        this.onTickRecipeBook(mc, gui, range, outputSlot, recipe, limit);
 
-                        if (InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()) == false)
+                        if (this.badRecipeClicks < 0L)
                         {
-                            break;
-                        }
-
-                        if (Configs.Generic.CARPET_CTRL_Q_CRAFTING.getBooleanValue())
-                        {
-                            InventoryUtils.dropStack(gui, outputSlot.index);
-                        }
-                        else
-                        {
-                            InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.index, recipe.getResult());
+                            this.badRecipeClicks = 0L;
                         }
                     }
-                }
+                    else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
+                    {
+                        this.onTickSwapsOnly(mc, gui, range, outputSlot, recipe, limit);
+                    }
+                    else
+                    {
+                        this.onTickFallback(mc, gui, range, outputSlot, recipe, limit);
+                    }
 
-                ClickPacketBuffer.setShouldBufferClickPackets(false);
+                    ClickPacketBuffer.setShouldBufferClickPackets(false);
+                }
             }
 
             this.massCraftTicker = 0;
             InventoryUtils.bufferInvUpdates = false;
             InventoryUtils.invUpdatesBuffer.removeIf(packet ->
                                                      {
-														 packet.handle(mc.player.connection);
-														 return true;
-													 });
+                                                         packet.handle(mc.player.connection);
+                                                         return true;
+                                                     });
+        }
+        else
+        {
+            // Released Hotkey, or Wrong Screen --> Re-Zero
+            if (this.badRecipeClicks > 0L)
+            {
+                this.badRecipeClicks = 0L;
+            }
         }
     }
 
-//    public void onPacket(ScreenHandlerSlotUpdateS2CPacket packet)
-//    {
-////        var mc = MinecraftClient.getInstance();
-//    }
+    private void onTickRecipeBook(Minecraft mc,
+                                  final AbstractContainerScreen<?> gui, final CraftingHandler.SlotRange range,
+                                  final Slot outputSlot, final RecipePattern recipe,
+                                  final int limit)
+    {
+        if (mc.level == null || mc.gameMode == null ||
+            mc.player == null || recipe.getNetworkRecipeId() == null)
+        {
+            return;
+        }
+
+        final int badLimit = Configs.Generic.RECIPE_BOOK_FAILURE_LIMIT.getIntegerValue();
+
+        if (badLimit > 0)
+        {
+            if (this.badRecipeClicks > badLimit)
+            {
+                // Allow an iteration for next tick; so we don't lock the mass Craft.
+                this.badRecipeClicks -= MathUtils.max((badLimit / 16), 1);
+                return;
+            }
+        }
+
+        InventoryUtils.dontUpdateRecipeBook = 2;
+
+        for (int i = 0; i < limit; i++)
+        {
+            //InventoryUtils.setInhibitCraftingOutputUpdate(true);
+            CraftingContainer craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+
+            if (recipe.getVanillaRecipe() != null && !recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
+            {
+                if (range == null) { return; }
+                final int invSlots = gui.getMenu().slots.size();
+                final int rangeSlots = range.getSlotCount();
+
+                for (int j = 0, slotNum = range.getFirst(); j < rangeSlots && slotNum < invSlots; j++, slotNum++)
+                {
+                    InventoryUtils.shiftClickSlot(gui, slotNum);
+                    Slot slotTmp = gui.getMenu().getSlot(slotNum);
+                    ItemStack stack = slotTmp.getItem();
+
+                    if (!stack.isEmpty())
+                    {
+                        InventoryUtils.dropStack(gui, slotNum);
+                    }
+                }
+            }
+
+            // Yeet packet
+            mc.gameMode.handlePlaceRecipe(gui.getMenu().containerId, recipe.getNetworkRecipeId(), true);
+//            InventoryUtils.setInhibitCraftingOutputUpdate(false);
+//            InventoryUtils.updateCraftingOutputSlot(outputSlot);
+            craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+
+            if (recipe.getVanillaRecipe() != null && recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
+            {
+                break;
+            }
+            else if (!InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()))
+            {
+                this.badRecipeClicks++;
+
+                if (badLimit > 0)
+                {
+                    if (this.badRecipeClicks > badLimit)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                // Successful Click, reduce burden.
+                this.badRecipeClicks -= MathUtils.max((badLimit / 8), 1);
+            }
+
+            InventoryUtils.shiftClickSlot(gui, outputSlot.index);
+            InventoryUtils.dropStack(gui, outputSlot.index);
+        }
+
+        InventoryUtils.tryClearCursor(gui);
+        InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+    }
+
+    private void onTickSwapsOnly(Minecraft mc,
+                                 final AbstractContainerScreen<?> gui, final CraftingHandler.SlotRange range,
+                                 final Slot outputSlot, final RecipePattern recipe,
+                                 final int limit)
+    {
+        if (mc.player == null) { return; }
+
+        for (int i = 0; i < limit; ++i)
+        {
+            InventoryUtils.tryClearCursor(gui);
+            InventoryUtils.setInhibitCraftingOutputUpdate(true);
+            InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+            InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
+//            CraftingContainer inv = ((IMixinCraftingResultSlot) (outputSlot)).itemscroller_getCraftingInventory();
+
+            try
+            {
+                Thread.sleep(0);
+            }
+            catch (InterruptedException ignored) { }
+
+            InventoryUtils.setCraftingGridContentsUsingSwaps(gui, mc.player.getInventory(), recipe, outputSlot);
+            InventoryUtils.setInhibitCraftingOutputUpdate(false);
+            InventoryUtils.updateCraftingOutputSlot(outputSlot);
+            //System.out.printf("Output slot: %s\n", outputSlot.getStack());
+
+            if (InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()) == false)
+            {
+                this.badRecipeClicks++;
+                break;
+            }
+
+            InventoryUtils.shiftClickSlot(gui, outputSlot.index);
+            //System.out.println("Shift clicked");
+        }
+    }
+
+    private void onTickFallback(Minecraft mc,
+                                final AbstractContainerScreen<?> gui, final CraftingHandler.SlotRange range,
+                                final Slot outputSlot, final RecipePattern recipe,
+                                final int limit)
+    {
+        int failsafe = 0;
+
+        while (++failsafe < limit)
+        {
+            InventoryUtils.tryClearCursor(gui);
+            InventoryUtils.setInhibitCraftingOutputUpdate(true);
+            InventoryUtils.throwAllCraftingResultsToGround(recipe, gui);
+            InventoryUtils.throwAllNonRecipeItemsToGround(recipe, gui);
+            InventoryUtils.tryMoveItemsToFirstCraftingGrid(recipe, gui, true);
+            InventoryUtils.setInhibitCraftingOutputUpdate(false);
+            InventoryUtils.updateCraftingOutputSlot(outputSlot);
+
+            if (InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()) == false)
+            {
+                this.badRecipeClicks++;
+                break;
+            }
+
+            if (Configs.Generic.CARPET_CTRL_Q_CRAFTING.getBooleanValue())
+            {
+                InventoryUtils.dropStack(gui, outputSlot.index);
+            }
+            else
+            {
+                InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.index, recipe.getResult());
+            }
+        }
+    }
 }
