@@ -16,6 +16,7 @@ repositories {
 	maven { url = 'https://jitpack.io'
 		content {includeGroupAndSubgroups("com.github")}
 	}
+	mavenLocal()
 }
 
 dependencies {
