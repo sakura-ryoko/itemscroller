@@ -1111,7 +1111,7 @@ public class InventoryUtils
                 boolean success = shiftClickSlotWithCheck(gui, slotTmp.index);
 
                 // Failed to shift-click items, try a manual method
-                if (success == false && Configs.Toggles.SCROLL_STACKS_FALLBACK.getBooleanValue())
+                if (success == false && Configs.Toggles.ITEM_MOVING_FALLBACK.getBooleanValue())
                 {
                     clickSlotsToMoveItemsFromSlot(slotTmp, gui, toOtherInventory);
                 }
@@ -1126,7 +1126,7 @@ public class InventoryUtils
         // If moving to the other inventory, then move the hovered slot's stack last
         if (toOtherInventory &&
             shiftClickSlotWithCheck(gui, slot.index) == false &&
-            Configs.Toggles.SCROLL_STACKS_FALLBACK.getBooleanValue())
+            Configs.Toggles.ITEM_MOVING_FALLBACK.getBooleanValue())
         {
             clickSlotsToMoveItemsFromSlot(slot, gui, toOtherInventory);
         }
