@@ -28,7 +28,7 @@
     "itemscroller.config.generic.comment.sortShulkerBoxesInverted": "셜커 상자 정렬 시 빈 상자가 앞에 오고,\n가득 찬 상자가 뒤에 가도록 정렬합니다.",
     "itemscroller.config.generic.comment.sortTopPriorityInventory": "이 아이템들은 정렬 시 우선순위를 갖습니다.\n아이템 ID (예시 \"minecraft:diamond_sword\") 또는\n사용자 지정 이름(예시 \"Wither killer\")을 사용할 수 있습니다.\n사용자 지정 이름을 사용하는 경우, 이것은 ID보다 우선됩니다.\n리스트에 아이템들은 리스트에 따라 앞에 정렬됩니다.",
     "itemscroller.config.generic.comment.translationLanguage": "Set the ItemScroller language independently of\nMinecraft's Language setting.\nRequires MaLiLib's §btranslationOverrides§r to be enabled.\nBe aware that enabling §btranslationTryBaseLanguage§r\nallows MaLiLib to override this choice.\n§eChanges only take effect after closing\n§eand re-opening the config screen.",
-    "itemscroller.config.generic.comment.translationTryBaseLanguage": "Enable tracking MaLiLib's configured language.\nLeave this disabled to customize ItemScroller's\nlanguage independently.\n§eYou may need to open/close this config\n§escreen for the changes to take effect.",
+    "itemscroller.config.generic.comment.translationTryBaseLanguage": "MaLiLib에서 설정된 언어 설정을 추종합니다.\n아이템스크롤러의 언어를 독립적으로\n설정하려면 이 옵션을 비활성화하세요.\n§e변경 사항을 적용하려면 이 설정 화면을\n§e닫았다가 다시 열어야 할 수 있습니다.",
     "itemscroller.config.generic.comment.useRecipeCaching": "제작 조합법 출력 아이템 가져오기 코드에서 마지막으로\n사용된 조합법을 캐싱할 수 있도록 합니다. 이는 대량 제작\n시 CPU 사용량을 줄이는 데 큰 도움이 될 수 있습니다.",
     "itemscroller.config.generic.comment.useSlotPositionAwareScrollDirection": "활성화 되면, 아이템 이동 방향이 화면에서 슬롯의\ny-위치에 의존합니다. 더 복잡한 보관함에서는 작동이\n이상할 수 있으니 주의해서 사용하세요!",
     "itemscroller.config.generic.comment.villagerTradeListRememberScrollPosition": "주민 거래 GUI를 다시 열 때 거래 목록의\n마지막 스크롤 위치를 기억하고 복원합니다.",
