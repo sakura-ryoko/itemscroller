@@ -3,6 +3,8 @@ package fi.dy.masa.itemscroller.config;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -19,8 +21,12 @@ import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigValue;
 import fi.dy.masa.malilib.config.options.*;
+import fi.dy.masa.malilib.registry.Registry;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.data.json.JsonUtils;
+import fi.dy.masa.malilib.util.i18n.i18nConfig;
+import fi.dy.masa.malilib.util.i18n.i18nManager;
+import fi.dy.masa.malilib.util.i18n.i18nOption;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
@@ -31,8 +37,12 @@ import fi.dy.masa.itemscroller.util.SortingMethod;
 public class Configs implements IConfigHandler
 {
     private static final String CONFIG_FILE_NAME = Reference.MOD_ID + ".json";
+    public static final Optional<i18nManager> LANG = Optional.ofNullable(i18nManager.create(Reference.MOD_ID));
 
-    private static final ImmutableList<@NotNull String> DEFAULT_TOP_SORTING = ImmutableList.of("minecraft:diamond_sword", "minecraft:diamond_pickaxe", "minecraft:diamond_axe", "minecraft:diamond_shovel", "minecraft:diamond_hoe", "minecraft:netherite_sword", "minecraft:netherite_pickaxe", "minecraft:netherite_axe", "minecraft:netherite_shovel", "minecraft:netherite_hoe");
+    private static final ImmutableList<@NotNull String> DEFAULT_TOP_SORTING = ImmutableList.of(
+            "minecraft:diamond_sword", "minecraft:diamond_spear", "minecraft:diamond_pickaxe", "minecraft:diamond_axe", "minecraft:diamond_shovel", "minecraft:diamond_hoe",
+            "minecraft:netherite_sword", "minecraft:netherite_spear", "minecraft:netherite_pickaxe", "minecraft:netherite_axe", "minecraft:netherite_shovel", "minecraft:netherite_hoe"
+    );
     private static final ImmutableList<@NotNull String> DEFAULT_BOTTOM_SORTING = ImmutableList.of();
 
     private static final String GENERIC_KEY = Reference.MOD_ID+".config.generic";
@@ -58,6 +68,8 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean REVERSE_SCROLL_DIRECTION_STACKS       = new ConfigBoolean("reverseScrollDirectionStacks",            false).apply(GENERIC_KEY);
         public static final ConfigBoolean USE_RECIPE_CACHING                    = new ConfigBoolean("useRecipeCaching",                        true).apply(GENERIC_KEY);
         public static final ConfigBoolean SLOT_POSITION_AWARE_SCROLL_DIRECTION  = new ConfigBoolean("useSlotPositionAwareScrollDirection",     false).apply(GENERIC_KEY);
+        public static final ConfigBoolean TRANSLATION_TRY_BASE_LANGUAGE         = new ConfigBoolean("translationTryBaseLanguage",              false).apply(GENERIC_KEY);
+        public static final ConfigOptionList TRANSLATION_LANGUAGE               = new ConfigOptionList("translationLanguage",                  new i18nConfig(LANG.orElseThrow())).apply(GENERIC_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",         true).apply(GENERIC_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true).apply(GENERIC_KEY);
 
@@ -92,6 +104,8 @@ public class Configs implements IConfigHandler
                 REVERSE_SCROLL_DIRECTION_SINGLE,
                 REVERSE_SCROLL_DIRECTION_STACKS,
                 SLOT_POSITION_AWARE_SCROLL_DIRECTION,
+                TRANSLATION_TRY_BASE_LANGUAGE,
+                TRANSLATION_LANGUAGE,
                 USE_RECIPE_CACHING,
                 VILLAGER_TRADE_USE_GLOBAL_FAVORITES,
                 VILLAGER_TRADE_LIST_REMEMBER_SCROLL,
@@ -171,6 +185,7 @@ public class Configs implements IConfigHandler
             ItemScroller.LOGGER.error("loadFromFile(): Failed to load config file '{}'.", configFile.toAbsolutePath());
         }
 
+        checkBaseLanguage();
         CraftingHandler.clearDefinitions();
 
         // "net.minecraft.client.gui.inventory.GuiCrafting,net.minecraft.inventory.SlotCrafting,0,1-9", // vanilla Crafting Table
@@ -250,6 +265,36 @@ public class Configs implements IConfigHandler
             }
 
             obj.add(arrayName, arr);
+        }
+    }
+
+    // Attempts to load the same language file as MaLiLib; where available -- on occasion
+    public static void checkBaseLanguage()
+    {
+        if (Generic.TRANSLATION_TRY_BASE_LANGUAGE.getBooleanValue())
+        {
+            LANG.ifPresent(
+                    i18nManager ->
+                    {
+                        String baseKey = Registry.TRANSLATION_OVERRIDE_MANAGER.getBaseLanguageCode();
+
+                        // Try setting language if it doesn't match
+                        if (!i18nManager.getLang().getLangCode().equals(baseKey))
+                        {
+                            List<i18nOption> list = i18nManager.getLanguageOptions();
+
+                            for (i18nOption entry : list)
+                            {
+                                if (entry.getKey().equals(baseKey))
+                                {
+                                    i18nConfig newConfig = ((i18nConfig) Generic.TRANSLATION_LANGUAGE.getOptionListValue()).fromString(baseKey);
+                                    Generic.TRANSLATION_LANGUAGE.setOptionListValue(newConfig);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+            );
         }
     }
 }

@@ -23,12 +23,4 @@ public class ItemScroller implements ModInitializer
             LOGGER.info(key, args);
         }
     }
-
-    public static void debugLogError(String key, Object... args)
-    {
-        if (Configs.Generic.DEBUG_MESSAGES.getBooleanValue())
-        {
-            LOGGER.error(key, args);
-        }
-    }
 }

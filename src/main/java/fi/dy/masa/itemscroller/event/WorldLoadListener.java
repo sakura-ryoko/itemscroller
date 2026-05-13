@@ -32,6 +32,7 @@ public class WorldLoadListener implements IWorldLoadListener
         // Logging in to a world, load the data
         if (worldBefore == null && worldAfter != null)
         {
+            Configs.checkBaseLanguage();
             this.readStoredData(worldAfter.registryAccess());
             VillagerDataStorage.getInstance().readFromDisk();
         }
