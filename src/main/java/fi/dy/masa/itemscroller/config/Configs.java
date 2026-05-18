@@ -6,16 +6,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.world.inventory.ResultSlot;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
-import fi.dy.masa.malilib.MaLiLibConfigs;
+import net.minecraft.client.gui.screens.inventory.CraftingScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.world.inventory.ResultSlot;
+
 import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
@@ -24,7 +24,10 @@ import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.registry.Registry;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.data.json.JsonUtils;
-import fi.dy.masa.malilib.util.i18n.*;
+import fi.dy.masa.malilib.util.i18n.i18nConfig;
+import fi.dy.masa.malilib.util.i18n.i18nManager;
+import fi.dy.masa.malilib.util.i18n.i18nMode;
+import fi.dy.masa.malilib.util.i18n.i18nOption;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
@@ -304,7 +307,7 @@ public class Configs implements IConfigHandler
                             if (!found)
                             {
                                 i18nManager.resetLangToDefault();
-                                MaLiLibConfigs.Generic.TRANSLATION_LANGUAGE.resetToDefault();
+                                Generic.TRANSLATION_LANGUAGE.resetToDefault();
                             }
                         }
                     }
@@ -338,7 +341,7 @@ public class Configs implements IConfigHandler
                             if (!found)
                             {
                                 i18nManager.resetLangToDefault();
-                                MaLiLibConfigs.Generic.TRANSLATION_LANGUAGE.resetToDefault();
+                                Generic.TRANSLATION_LANGUAGE.resetToDefault();
                             }
                         }
                     }
