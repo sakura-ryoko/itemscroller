@@ -24,9 +24,7 @@ import fi.dy.masa.malilib.config.options.*;
 import fi.dy.masa.malilib.registry.Registry;
 import fi.dy.masa.malilib.util.FileUtils;
 import fi.dy.masa.malilib.util.data.json.JsonUtils;
-import fi.dy.masa.malilib.util.i18n.i18nConfig;
-import fi.dy.masa.malilib.util.i18n.i18nManager;
-import fi.dy.masa.malilib.util.i18n.i18nOption;
+import fi.dy.masa.malilib.util.i18n.*;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
@@ -68,8 +66,8 @@ public class Configs implements IConfigHandler
         public static final ConfigBoolean REVERSE_SCROLL_DIRECTION_STACKS       = new ConfigBoolean("reverseScrollDirectionStacks",            false).apply(GENERIC_KEY);
         public static final ConfigBoolean USE_RECIPE_CACHING                    = new ConfigBoolean("useRecipeCaching",                        true).apply(GENERIC_KEY);
         public static final ConfigBoolean SLOT_POSITION_AWARE_SCROLL_DIRECTION  = new ConfigBoolean("useSlotPositionAwareScrollDirection",     false).apply(GENERIC_KEY);
-        public static final ConfigBoolean TRANSLATION_TRY_BASE_LANGUAGE         = new ConfigBoolean("translationTryBaseLanguage",              false).apply(GENERIC_KEY);
         public static final ConfigOptionList TRANSLATION_LANGUAGE               = new ConfigOptionList("translationLanguage",                  new i18nConfig(LANG.orElseThrow())).apply(GENERIC_KEY);
+        public static final ConfigOptionList TRANSLATION_MODE                   = new ConfigOptionList("translationMode",                      i18nMode.FOLLOW_VANILLA).apply(GENERIC_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_USE_GLOBAL_FAVORITES   = new ConfigBoolean("villagerTradeUseGlobalFavorites",         true).apply(GENERIC_KEY);
         public static final ConfigBoolean VILLAGER_TRADE_LIST_REMEMBER_SCROLL   = new ConfigBoolean("villagerTradeListRememberScrollPosition", true).apply(GENERIC_KEY);
 
@@ -104,8 +102,8 @@ public class Configs implements IConfigHandler
                 REVERSE_SCROLL_DIRECTION_SINGLE,
                 REVERSE_SCROLL_DIRECTION_STACKS,
                 SLOT_POSITION_AWARE_SCROLL_DIRECTION,
-                TRANSLATION_TRY_BASE_LANGUAGE,
                 TRANSLATION_LANGUAGE,
+                TRANSLATION_MODE,
                 USE_RECIPE_CACHING,
                 VILLAGER_TRADE_USE_GLOBAL_FAVORITES,
                 VILLAGER_TRADE_LIST_REMEMBER_SCROLL,
@@ -237,6 +235,12 @@ public class Configs implements IConfigHandler
         saveToFile();
     }
 
+    @Override
+    public void onLanguageChanged(String newLang)
+    {
+        checkBaseLanguage();
+    }
+
     private static void getStrings(JsonObject obj, Set<String> outputSet, String arrayName)
     {
         outputSet.clear();
@@ -268,10 +272,11 @@ public class Configs implements IConfigHandler
         }
     }
 
-    // Attempts to load the same language file as MaLiLib; where available -- on occasion
     public static void checkBaseLanguage()
     {
-        if (Generic.TRANSLATION_TRY_BASE_LANGUAGE.getBooleanValue())
+        i18nMode mode = (i18nMode) Generic.TRANSLATION_MODE.getOptionListValue();
+
+        if (mode == i18nMode.FOLLOW_MALILIB)
         {
             LANG.ifPresent(
                     i18nManager ->
@@ -279,18 +284,61 @@ public class Configs implements IConfigHandler
                         String baseKey = Registry.TRANSLATION_OVERRIDE_MANAGER.getBaseLanguageCode();
 
                         // Try setting language if it doesn't match
-                        if (!i18nManager.getLang().getLangCode().equals(baseKey))
+                        if (!i18nManager.getLang().getLangCode().equalsIgnoreCase(baseKey))
                         {
                             List<i18nOption> list = i18nManager.getLanguageOptions();
+                            boolean found = false;
 
                             for (i18nOption entry : list)
                             {
-                                if (entry.getKey().equals(baseKey))
+                                if (entry.getKey().equalsIgnoreCase(baseKey))
                                 {
-                                    i18nConfig newConfig = ((i18nConfig) Generic.TRANSLATION_LANGUAGE.getOptionListValue()).fromString(baseKey);
+                                    i18nManager.setLang(baseKey);
+                                    i18nConfig newConfig = new i18nConfig(i18nManager).fromString(baseKey);
                                     Generic.TRANSLATION_LANGUAGE.setOptionListValue(newConfig);
+                                    found = true;
                                     break;
                                 }
+                            }
+
+                            if (!found)
+                            {
+                                i18nManager.resetLangToDefault();
+                                MaLiLibConfigs.Generic.TRANSLATION_LANGUAGE.resetToDefault();
+                            }
+                        }
+                    }
+            );
+        }
+        else if (mode == i18nMode.FOLLOW_VANILLA)
+        {
+            LANG.ifPresent(
+                    i18nManager ->
+                    {
+                        String vanCode = Registry.TRANSLATION_OVERRIDE_MANAGER.getVanillaLanguageCode();
+
+                        // Try setting language if it doesn't match
+                        if (!i18nManager.getLang().getLangCode().equalsIgnoreCase(vanCode))
+                        {
+                            List<i18nOption> list = i18nManager.getLanguageOptions();
+                            boolean found = false;
+
+                            for (i18nOption entry : list)
+                            {
+                                if (entry.getKey().equalsIgnoreCase(vanCode))
+                                {
+                                    i18nManager.setLang(vanCode);
+                                    i18nConfig newConfig = new i18nConfig(i18nManager).fromString(vanCode);
+                                    Generic.TRANSLATION_LANGUAGE.setOptionListValue(newConfig);
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if (!found)
+                            {
+                                i18nManager.resetLangToDefault();
+                                MaLiLibConfigs.Generic.TRANSLATION_LANGUAGE.resetToDefault();
                             }
                         }
                     }
