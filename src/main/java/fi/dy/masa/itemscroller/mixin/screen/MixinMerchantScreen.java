@@ -34,7 +34,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     @Shadow private int shopItem;
     @Shadow private int scrollOff;
     @Unique private int indexStartOffsetLast = -1;
-    @Shadow protected abstract boolean canScroll(int listSize);
+    @Shadow protected abstract boolean canScroll(int numberOfOffers);
 
     private MixinMerchantScreen(MerchantMenu handler, Inventory inventory, Component title)
     {
@@ -46,7 +46,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
                      target = "Lnet/minecraft/client/gui/screens/inventory/MerchantScreen;extractScroller(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIIILnet/minecraft/world/item/trading/MerchantOffers;)V"
             )
     )
-    private void itemscroller_fixRenderScrollBar(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo ci)
+    private void itemscroller_fixRenderScrollBar(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta, CallbackInfo ci)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue())
@@ -62,7 +62,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "mouseScrolled", at = @At("RETURN"))
-    private void itemscroller_onMouseScrollPost(double mouseX, double mouseY, double horizontalAmount, double verticalAmount, CallbackInfoReturnable<Boolean> cir)
+    private void itemscroller_onMouseScrollPost(double x, double y, double scrollX, double scrollY, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
@@ -75,7 +75,7 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "mouseDragged", at = @At("RETURN"))
-    private void itemscroller_onMouseDragPost(MouseButtonEvent click, double offsetX, double offsetY, CallbackInfoReturnable<Boolean> cir)
+    private void itemscroller_onMouseDragPost(MouseButtonEvent event, double dx, double dy, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue() &&
             Configs.Generic.VILLAGER_TRADE_LIST_REMEMBER_SCROLL.getBooleanValue() &&
@@ -88,23 +88,23 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "mouseClicked", at = @At("RETURN"), cancellable = true)
-    private void itemscroller_onMouseClicked(MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir)
+    private void itemscroller_onMouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
-            int visibleIndex = this.getHoveredTradeButtonIndex(click.x(), click.y());
+            int visibleIndex = this.getHoveredTradeButtonIndex(event.x(), event.y());
             int realIndex = VillagerUtils.getRealTradeIndexFor(visibleIndex, this.menu);
 
             if (realIndex >= 0)
             {
                 // right click, trade everything with this trade
-                if (click.input() == 1)
+                if (event.input() == 1)
                 {
                     InventoryUtils.villagerTradeEverythingPossibleWithTrade(visibleIndex);
                     cir.setReturnValue(true);
                 }
                 // Middle click, toggle trade favorite
-                else if (click.input() == 2)
+                else if (event.input() == 2)
                 {
                     if (Hotkeys.MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE.getKeybind().isKeybindHeld())
                     {

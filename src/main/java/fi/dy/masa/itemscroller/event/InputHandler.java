@@ -150,7 +150,7 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
             {
                 VillagerDataStorage storage = VillagerDataStorage.getInstance();
 
-                if (mc.screen == null && mc.hitResult != null &&
+                if (mc.gui.screen() == null && mc.hitResult != null &&
                     mc.hitResult.getType() == HitResult.Type.ENTITY &&
                     ((EntityHitResult) mc.hitResult).getEntity() instanceof AbstractVillager)
                 {
@@ -158,9 +158,9 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                 }
             }
 
-            if (mc.screen instanceof AbstractContainerScreen<?> gui &&
-                (mc.screen instanceof CreativeModeInventoryScreen) == false &&
-                Configs.GUI_BLACKLIST.contains(mc.screen.getClass().getName()) == false)
+            if (mc.gui.screen() instanceof AbstractContainerScreen<?> gui &&
+                (mc.gui.screen() instanceof CreativeModeInventoryScreen) == false &&
+                Configs.GUI_BLACKLIST.contains(mc.gui.screen().getClass().getName()) == false)
             {
 	            RecipeStorage recipes = RecipeStorage.getInstance();
 

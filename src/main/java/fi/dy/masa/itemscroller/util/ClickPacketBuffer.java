@@ -51,7 +51,7 @@ public class ClickPacketBuffer
 
         if (hasBufferedPackets)
         {
-            if (mc.screen == null)
+            if (mc.gui.screen() == null)
             {
                 reset();
             }

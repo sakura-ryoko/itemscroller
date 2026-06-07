@@ -13,8 +13,8 @@ import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 public class MixinClientRecipeBook
 {
     @Inject(method = "add", at = @At("RETURN"))
-    private void itemscroller_addToRecipeBook(RecipeDisplayEntry entry, CallbackInfo ci)
+    private void itemscroller_addToRecipeBook(RecipeDisplayEntry display, CallbackInfo ci)
     {
-        RecipeStorage.getInstance().onAddToRecipeBook(entry);
+        RecipeStorage.getInstance().onAddToRecipeBook(display);
     }
 }

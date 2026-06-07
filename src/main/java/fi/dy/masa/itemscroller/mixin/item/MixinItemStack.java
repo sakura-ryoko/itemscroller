@@ -13,7 +13,7 @@ import fi.dy.masa.itemscroller.config.Configs;
 public abstract class MixinItemStack
 {
     @Inject(method = "limitSize", at = @At("HEAD"), cancellable = true)
-    private void itemscroller_dontCap(int maxCount, CallbackInfo ci)
+    private void itemscroller_dontCap(int maxStackSize, CallbackInfo ci)
     {
         // Client-side fx for empty shulker box stacking
         if (Minecraft.getInstance().isSameThread() &&

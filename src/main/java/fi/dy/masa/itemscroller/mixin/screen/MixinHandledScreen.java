@@ -16,8 +16,8 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 public class MixinHandledScreen
 {
 	@Inject(method = "getTooltipFromContainerItem(Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;", at = @At("HEAD"))
-	private void itemscroller_ignore_bundleTooltipsForScrolling(ItemStack stack, CallbackInfoReturnable<List<Component>> cir)
+	private void itemscroller_ignore_bundleTooltipsForScrolling(ItemStack itemStack, CallbackInfoReturnable<List<Component>> cir)
 	{
-		InventoryUtils.setIgnoreScrollingInsideOfBundles(stack.getItem() instanceof BundleItem);
+		InventoryUtils.setIgnoreScrollingInsideOfBundles(itemStack.getItem() instanceof BundleItem);
 	}
 }

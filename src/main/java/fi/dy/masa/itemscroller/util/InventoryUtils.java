@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.gamerules.GameRules;
 
 import fi.dy.masa.malilib.util.GuiUtils;
+import fi.dy.masa.malilib.util.data.ItemType;
 import fi.dy.masa.malilib.util.game.wrap.GameWrap;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
@@ -1462,7 +1463,7 @@ public class InventoryUtils
 
             for (Map.Entry<ItemType, IntArrayList> entry : ingredientSlots.entrySet())
             {
-                ItemStack ingredientReference = entry.getKey().stack();
+                ItemStack ingredientReference = entry.getKey().getStack();
                 IntArrayList recipeSlots = entry.getValue();
                 IntArrayList targetSlots = new IntArrayList();
 
