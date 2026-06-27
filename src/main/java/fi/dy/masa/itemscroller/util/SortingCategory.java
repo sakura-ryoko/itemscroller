@@ -91,7 +91,12 @@ public class SortingCategory implements IConfigLockedListType
 
         if (id != null)
         {
-            return Entry.fromString(id.getPath());
+            Entry entry = Entry.fromString(id.getPath());
+
+            if (entry != null)
+            {
+                return entry;
+            }
         }
 
         return Entry.OTHER;

@@ -390,56 +390,42 @@ public class RecipePattern
                             return;
                         }
 
-                        ItemStack result = stacks.getFirst();
-
-                        if (RecipeBookUtils.areStacksEqual(this.getResult(), result))
+                        for (ItemStack resultStack : stacks)
                         {
-                            if (entry.craftingRequirements().isPresent())
+                            if (RecipeBookUtils.areStacksEqual(this.getResult(), resultStack))
                             {
-                                if (RecipeBookUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), RecipeBookUtils.Type.fromRecipeDisplay(entry.display()), types))
+                                if (entry.craftingRequirements().isPresent())
                                 {
-                                    ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+                                    if (RecipeBookUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), RecipeBookUtils.Type.fromRecipeDisplay(entry.display()), types))
+                                    {
+                                        ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+                                        this.storeNetworkRecipeId(id);
+                                        this.storeRecipeCategory(entry.category());
+                                        this.storeRecipeDisplayEntry(entry);
+                                        this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
+                                    }
+                                    else
+                                    {
+                                        ItemScroller.LOGGER.warn("storeSelectedRecipeIdFromGui(): failed to match Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+                                    }
+                                }
+                                else
+                                {
+                                    ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): No craftingRequirements present, Saving Blindly for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
                                     this.storeNetworkRecipeId(id);
                                     this.storeRecipeCategory(entry.category());
                                     this.storeRecipeDisplayEntry(entry);
                                     this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
                                 }
-                                else
-                                {
-                                    ItemScroller.LOGGER.warn("storeSelectedRecipeIdFromGui(): failed to match Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
-                                }
                             }
                             else
                             {
-                                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): No craftingRequirements present, Saving Blindly for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
-                                this.storeNetworkRecipeId(id);
-                                this.storeRecipeCategory(entry.category());
-                                this.storeRecipeDisplayEntry(entry);
-                                this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
-                            }
-                        }
-                        else
-                        {
-                            // Go for broke, and iterate it.
-                            Pair<RecipeDisplayId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
-
-                            if (pair != null)
-                            {
-                                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): matching pair for result stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
-                                this.storeNetworkRecipeId(pair.getLeft());
-                                this.storeRecipeCategory(pair.getRight().category());
-                                this.storeRecipeDisplayEntry(pair.getRight());
-                                this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
-                            }
-                            else
-                            {
-                                // Sometimes the result gets de-sync to like an Iron Nugget, just copy it and try one last time (It should work)
-                                this.result = result.copy();
-                                pair = this.matchClientRecipeBook(mc);
+                                // Go for broke, and iterate it.
+                                Pair<RecipeDisplayId, RecipeDisplayEntry> pair = this.matchClientRecipeBook(mc);
 
                                 if (pair != null)
                                 {
-                                    ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): RE-matching pair results stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
+                                    ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): matching pair for result stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
                                     this.storeNetworkRecipeId(pair.getLeft());
                                     this.storeRecipeCategory(pair.getRight().category());
                                     this.storeRecipeDisplayEntry(pair.getRight());
@@ -447,8 +433,23 @@ public class RecipePattern
                                 }
                                 else
                                 {
-                                    ItemScroller.LOGGER.error("storeSelectedRecipeIdFromGui(): Final Exception matching results stack [{}] versus [{}] --> Clearing Recipe", this.getResult().toString(), result.toString());
-                                    this.clearRecipe();
+                                    // Sometimes the result gets de-sync to like an Iron Nugget, just copy it and try one last time (It should work)
+                                    this.result = resultStack.copy();
+                                    pair = this.matchClientRecipeBook(mc);
+
+                                    if (pair != null)
+                                    {
+                                        ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): RE-matching pair results stack [{}] networkId [{}]", this.getResult().toString(), pair.getLeft().index());
+                                        this.storeNetworkRecipeId(pair.getLeft());
+                                        this.storeRecipeCategory(pair.getRight().category());
+                                        this.storeRecipeDisplayEntry(pair.getRight());
+                                        this.storeRecipeType(RecipeBookUtils.Type.fromRecipeDisplay(entry.display()));
+                                    }
+                                    else
+                                    {
+                                        ItemScroller.LOGGER.error("storeSelectedRecipeIdFromGui(): Final Exception matching results stack [{}] versus [{}] --> Clearing Recipe", this.getResult().toString(), result.toString());
+                                        this.clearRecipe();
+                                    }
                                 }
                             }
                         }
