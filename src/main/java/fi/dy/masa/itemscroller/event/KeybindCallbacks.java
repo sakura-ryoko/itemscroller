@@ -245,7 +245,11 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                         ClickPacketBuffer.setShouldBufferClickPackets(true);
                     }
 
-                    if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
+                    if (Configs.Generic.MASS_CRAFT_DROP_OUTPUT.getBooleanValue() && recipe.getNetworkRecipeId() != null)
+                    {
+                        this.onTickCraftAndDropOutput(mc, gui, outputSlot, recipe, limit);
+                    }
+                    else if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
                     {
                         this.onTickRecipeBook(mc, gui, range, outputSlot, recipe, limit);
 
@@ -282,6 +286,37 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             {
                 this.badRecipeClicks = 0L;
             }
+        }
+    }
+
+    /**
+     * "Drop output" mass-craft mode. Each iteration fills the crafting grid from the inventory via
+     * the recipe book, then throws (drop-stack / Ctrl+Q) ONLY the crafting output slot, letting
+     * vanilla craft and eject a whole stack of the result to the ground per throw.
+     *
+     * <p>This is drop-safe by construction, in singleplayer and multiplayer alike, without any
+     * mixins or server-side interception: the crafting output slot can only ever hold the recipe
+     * result (never an ingredient), so throwing it can never eject ingredients. And because the
+     * result goes to the ground instead of the player inventory, the inventory stays roomy, so the
+     * grid-fill never has to return (and possibly drop) ingredients either.
+     *
+     * <p>Throughput is comparable to the recipe-book method because a drop-stack on a crafting
+     * result crafts a whole stack in one action; total crafts/tick scale with massCraftIterations.
+     */
+    private void onTickCraftAndDropOutput(Minecraft mc,
+                                          final AbstractContainerScreen<?> gui,
+                                          final Slot outputSlot, final RecipePattern recipe,
+                                          final int limit)
+    {
+        if (mc.gameMode == null || outputSlot == null || recipe.getNetworkRecipeId() == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < limit; i++)
+        {
+            mc.gameMode.handlePlaceRecipe(gui.getMenu().containerId, recipe.getNetworkRecipeId(), true);
+            InventoryUtils.dropStack(gui, outputSlot.index);
         }
     }
 
