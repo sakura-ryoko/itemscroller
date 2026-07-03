@@ -224,56 +224,67 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             }
 
             InventoryUtils.bufferInvUpdates = true;
-            final Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
 
-            if (outputSlot != null)
+            try
             {
-                final CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
-                final RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
-                final int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
+                final Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
 
-                if (!recipe.getResult().isEmpty() && range != null)
+                if (outputSlot != null)
                 {
-                    // Too small of a grid; Cancel.
-                    if (range.getSlotCount() < recipe.countRecipeItems())
-                    {
-                        return;
-                    }
+                    final CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
+                    final RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
+                    final int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
 
-                    if (Configs.Generic.RATE_LIMIT_CLICK_PACKETS.getBooleanValue())
+                    if (!recipe.getResult().isEmpty() && range != null)
                     {
-                        ClickPacketBuffer.setShouldBufferClickPackets(true);
-                    }
-
-                    if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
-                    {
-                        this.onTickRecipeBook(mc, gui, range, outputSlot, recipe, limit);
-
-                        if (this.badRecipeClicks < 0L)
+                        // Too small of a grid; cancel this tick. The finally block still releases
+                        // the inventory-update buffer, so item pickup never freezes.
+                        if (range.getSlotCount() < recipe.countRecipeItems())
                         {
-                            this.badRecipeClicks = 0L;
+                            return;
+                        }
+
+                        if (Configs.Generic.RATE_LIMIT_CLICK_PACKETS.getBooleanValue())
+                        {
+                            ClickPacketBuffer.setShouldBufferClickPackets(true);
+                        }
+
+                        if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
+                        {
+                            this.onTickRecipeBook(mc, gui, range, outputSlot, recipe, limit);
+
+                            if (this.badRecipeClicks < 0L)
+                            {
+                                this.badRecipeClicks = 0L;
+                            }
+                        }
+                        else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
+                        {
+                            this.onTickSwapsOnly(mc, gui, range, outputSlot, recipe, limit);
+                        }
+                        else
+                        {
+                            this.onTickFallback(mc, gui, range, outputSlot, recipe, limit);
                         }
                     }
-                    else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
-                    {
-                        this.onTickSwapsOnly(mc, gui, range, outputSlot, recipe, limit);
-                    }
-                    else
-                    {
-                        this.onTickFallback(mc, gui, range, outputSlot, recipe, limit);
-                    }
-
-                    ClickPacketBuffer.setShouldBufferClickPackets(false);
                 }
-            }
 
-            this.massCraftTicker = 0;
-            InventoryUtils.bufferInvUpdates = false;
-            InventoryUtils.invUpdatesBuffer.removeIf(packet ->
-                                                     {
-                                                         packet.handle(mc.player.connection);
-                                                         return true;
-                                                     });
+                this.massCraftTicker = 0;
+            }
+            finally
+            {
+                // Always release the click-packet and inventory-update buffers and flush any
+                // queued inventory packets — even on the early return above or an exception.
+                // Leaving bufferInvUpdates true makes the client stop applying inventory updates,
+                // which freezes item pickup entirely.
+                ClickPacketBuffer.setShouldBufferClickPackets(false);
+                InventoryUtils.bufferInvUpdates = false;
+                InventoryUtils.invUpdatesBuffer.removeIf(packet ->
+                                                         {
+                                                             packet.handle(mc.player.connection);
+                                                             return true;
+                                                         });
+            }
         }
         else
         {
