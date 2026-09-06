@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin.screen;
+package fi.dy.masa.itemscroller.mixin.menu;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +21,7 @@ import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
 
 @Mixin(CraftingMenu.class)
-public abstract class MixinCraftingScreenHandler
+public abstract class MixinCraftingMenu
 {
     @Shadow @Final private Player player;
 
@@ -32,8 +32,8 @@ public abstract class MixinCraftingScreenHandler
             Configs.Generic.MOD_MAIN_TOGGLE.getBooleanValue())
         {
             InventoryUtils.onSlotChangedCraftingGrid(this.player,
-                    ((IMixinAbstractCraftingScreenHandler) this).itemscroller_getCraftingInventory(),
-                    ((IMixinAbstractCraftingScreenHandler) this).itemscroller_getCraftingResultInventory());
+                    ((IMixinAbstractCraftingMenu) this).itemscroller_getCraftingInventory(),
+                    ((IMixinAbstractCraftingMenu) this).itemscroller_getCraftingResultInventory());
         }
     }
 

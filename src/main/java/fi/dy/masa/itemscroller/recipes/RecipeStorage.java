@@ -24,6 +24,15 @@ import fi.dy.masa.itemscroller.config.Configs;
 
 public class RecipeStorage
 {
+    public static final String RECIPES = "Recipes";
+    public static final String RECIPE_INDEX = "RecipeIndex";
+    public static final String RECIPE_CATEGORY = "RecipeCategory";
+    public static final String RECIPE_NETWORK_ID = "LastNetworkId";
+    public static final String RECIPE_TYPE = "RecipeType";
+    public static final String RECIPE_SELECTED = "Selected";
+    public static final String RECIPES_FILE_PREFIX = "recipes";
+    public static final String RECIPES_FILE_EXT = ".nbt";
+
     private static final int MAX_PAGES   = 8;           // 8 Pages of 18 = 144 total slots
     private static final int MAX_RECIPES = 18;          // 8 Pages of 18 = 144 total slots
     private static final RecipeStorage INSTANCE = new RecipeStorage(MAX_RECIPES * MAX_PAGES);
@@ -187,7 +196,6 @@ public class RecipeStorage
                 }
 
                 if (RecipeBookUtils.matchClientRecipeBookEntry(recipe.getResult(), Arrays.asList(recipe.getRecipeItems()), entry, types, mc))
-//                if (recipe.matchClientRecipeBookEntry(entry, mc))
                 {
                     ItemScroller.debugLog("onAddToRecipeBook(): Positive Match for result stack: [{}] networkId [{}]", recipe.getResult().toString(), entry.id().index());
                     recipe.storeNetworkRecipeId(entry.id());
@@ -202,7 +210,7 @@ public class RecipeStorage
 
     private void readFromNBT(CompoundData data, @Nonnull RegistryAccess registryManager)
     {
-        if (data == null || data.contains("Recipes", Constants.NBT.TAG_LIST) == false)
+        if (data == null || !data.contains(RECIPES, Constants.NBT.TAG_LIST))
         {
             return;
         }
@@ -212,30 +220,30 @@ public class RecipeStorage
             this.recipes[i].clearRecipe();
         }
 
-        ListData tagList = data.getList("Recipes");
+        ListData tagList = data.getList(RECIPES);
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)
         {
 	        CompoundData tag = tagList.getCompoundAt(i);
 
-            int index = tag.getByte("RecipeIndex");
+            int index = tag.getByte(RECIPE_INDEX);
 
             if (index >= 0 && index < this.recipes.length)
             {
                 this.recipes[index].readFromData(tag, registryManager);
 
-                if (tag.contains("RecipeCategory", Constants.NBT.TAG_STRING))
+                if (tag.contains(RECIPE_CATEGORY, Constants.NBT.TAG_STRING))
                 {
-                    this.recipes[index].storeRecipeCategory(RecipeBookUtils.getRecipeCategoryFromId(tag.getString("RecipeCategory")));
+                    this.recipes[index].storeRecipeCategory(RecipeBookUtils.getRecipeCategoryFromId(tag.getString(RECIPE_CATEGORY)));
                 }
-                if (tag.contains("LastNetworkId", Constants.NBT.TAG_INT))
+                if (tag.contains(RECIPE_NETWORK_ID, Constants.NBT.TAG_INT))
                 {
-                    this.recipes[index].storeNetworkRecipeId(new RecipeDisplayId(tag.getInt("LastNetworkId")));
+                    this.recipes[index].storeNetworkRecipeId(new RecipeDisplayId(tag.getInt(RECIPE_NETWORK_ID)));
                 }
-                if (tag.contains("RecipeType", Constants.NBT.TAG_STRING))
+                if (tag.contains(RECIPE_TYPE, Constants.NBT.TAG_STRING))
                 {
-                    String recipeType = tag.getString("RecipeType");
+                    String recipeType = tag.getString(RECIPE_TYPE);
 
                     if (!recipeType.isEmpty())
                     {
@@ -252,7 +260,7 @@ public class RecipeStorage
             }
         }
 
-        this.changeSelectedRecipe(data.getByte("Selected"));
+        this.changeSelectedRecipe(data.getByte(RECIPE_SELECTED));
     }
 
     private CompoundData writeToNBT(@Nonnull RegistryAccess registry)
@@ -271,7 +279,7 @@ public class RecipeStorage
             {
                 RecipePattern entry = this.recipes[i];
                 CompoundData tag = entry.writeToData(registry);
-                tag.putByte("RecipeIndex", (byte) i);
+                tag.putByte(RECIPE_INDEX, (byte) i);
 
                 if (entry.getRecipeCategory() != null)
                 {
@@ -279,24 +287,24 @@ public class RecipeStorage
 
                     if (!id.isEmpty())
                     {
-                        tag.putString("RecipeCategory", id);
+                        tag.putString(RECIPE_CATEGORY, id);
                     }
                 }
                 if (entry.getNetworkRecipeId() != null)
                 {
-                    tag.putInt("LastNetworkId", entry.getNetworkRecipeId().index());
+                    tag.putInt(RECIPE_NETWORK_ID, entry.getNetworkRecipeId().index());
                 }
                 if (entry.getRecipeType() != null)
                 {
-                    tag.putString("RecipeType", entry.getRecipeType().name().toLowerCase());
+                    tag.putString(RECIPE_TYPE, entry.getRecipeType().name().toLowerCase());
                 }
 
                 tagRecipes.add(tag);
             }
         }
 
-	    data.put("Recipes", tagRecipes);
-	    data.putByte("Selected", (byte) this.selected);
+	    data.put(RECIPES, tagRecipes);
+	    data.putByte(RECIPE_SELECTED, (byte) this.selected);
 
         return data;
     }
@@ -307,17 +315,15 @@ public class RecipeStorage
         {
             String worldName = StringUtils.getWorldOrServerName();
 
-            if (worldName != null)
+            if (worldName == null)
             {
-                return "recipes_" + worldName + ".nbt";
+                worldName = "unknown";
             }
-            else
-            {
-                return "recipes_unknown.nbt";
-            }
+
+            return RECIPES_FILE_PREFIX +"_"+worldName+ RECIPES_FILE_EXT;
         }
 
-        return "recipes.nbt";
+        return RECIPES_FILE_PREFIX+RECIPES_FILE_EXT;
     }
 
     private Path getSaveDir()

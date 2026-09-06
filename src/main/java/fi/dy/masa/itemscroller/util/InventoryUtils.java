@@ -50,7 +50,7 @@ import fi.dy.masa.malilib.util.game.wrap.GameWrap;
 import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
-import fi.dy.masa.itemscroller.mixin.recipe.IMixinCraftingResultSlot;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
@@ -122,7 +122,7 @@ public class InventoryUtils
             outputSlot instanceof ResultSlot resultSlot &&
             resultSlot.container instanceof ResultContainer resultInv)
         {
-            CraftingContainer craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+            CraftingContainer craftingInv = ((IMixinResultSlot) outputSlot).itemscroller_getCraftingInventory();
             updateCraftingOutputSlot(player, craftingInv, resultInv, true);
         }
     }

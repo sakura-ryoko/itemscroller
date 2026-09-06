@@ -20,6 +20,11 @@ import fi.dy.masa.itemscroller.config.Configs;
 
 public class VillagerDataStorage
 {
+    public static final String VILLAGER_DATA = "VillagerData";
+    public static final String VILLAGER_GLOBAL_FAVORITES = "GlobalFavorites";
+    public static final String VILLAGER_DATA_FILE_PREFIX = "villager_data";
+    public static final String VILLAGER_DATA_FILE_EXT = ".nbt";
+
     private static final VillagerDataStorage INSTANCE = new VillagerDataStorage();
 
     private final Map<UUID, VillagerData> data = new HashMap<>();
@@ -121,12 +126,12 @@ public class VillagerDataStorage
 
     private void readFromNBT(CompoundData tags)
     {
-        if (tags == null || tags.contains("VillagerData", Constants.NBT.TAG_LIST) == false)
+        if (tags == null || !tags.contains(VILLAGER_DATA, Constants.NBT.TAG_LIST))
         {
             return;
         }
 
-        ListData tagList = tags.getList("VillagerData");
+        ListData tagList = tags.getList(VILLAGER_DATA);
         int count = tagList.size();
 
         for (int i = 0; i < count; i++)
@@ -140,7 +145,7 @@ public class VillagerDataStorage
             }
         }
 
-        tagList = tags.getList("GlobalFavorites");
+        tagList = tags.getList(VILLAGER_GLOBAL_FAVORITES);
         count = tagList.size();
 
         for (int i = 0; i < count; i++)
@@ -197,8 +202,8 @@ public class VillagerDataStorage
             globalFavoriteData.add(type.toTag());
         }
 
-	    tags.put("VillagerData", favoriteListData);
-	    tags.put("GlobalFavorites", globalFavoriteData);
+	    tags.put(VILLAGER_DATA, favoriteListData);
+	    tags.put(VILLAGER_GLOBAL_FAVORITES, globalFavoriteData);
 
         this.dirty = false;
 
@@ -209,12 +214,12 @@ public class VillagerDataStorage
     {
         String worldName = StringUtils.getWorldOrServerName();
 
-        if (worldName != null)
+        if (worldName == null)
         {
-            return "villager_data_" + worldName + ".nbt";
+            worldName = "unknown";
         }
 
-        return "villager_data.nbt";
+        return VILLAGER_DATA_FILE_PREFIX + "_"+worldName + VILLAGER_DATA_FILE_EXT;
     }
 
     private Path getSaveDir()

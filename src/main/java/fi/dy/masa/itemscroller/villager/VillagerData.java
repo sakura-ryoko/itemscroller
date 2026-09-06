@@ -11,6 +11,11 @@ import fi.dy.masa.malilib.util.data.tag.ListData;
 
 public class VillagerData
 {
+    public static final String VILLAGER_DATA_UUID_M = "UUIDM";
+    public static final String VILLAGER_DATA_UUID_L = "UUIDL";
+    public static final String VILLAGER_DATA_LIST_POSITION = "ListPosition";
+    public static final String VILLAGER_DATA_FAVORITES = "Favorites";
+
     private final UUID uuid;
     private final IntArrayList favorites = new IntArrayList();
     private int tradeListPosition;
@@ -66,9 +71,9 @@ public class VillagerData
             return data;
         }
 
-	    data.putLong("UUIDM", this.uuid.getMostSignificantBits());
-	    data.putLong("UUIDL", this.uuid.getLeastSignificantBits());
-	    data.putInt("ListPosition", this.tradeListPosition);
+	    data.putLong(VILLAGER_DATA_UUID_M, this.uuid.getMostSignificantBits());
+	    data.putLong(VILLAGER_DATA_UUID_L, this.uuid.getLeastSignificantBits());
+	    data.putInt(VILLAGER_DATA_LIST_POSITION, this.tradeListPosition);
 
         ListData tagList = new ListData();
 
@@ -77,7 +82,7 @@ public class VillagerData
             tagList.add(new IntData(val));
         }
 
-	    data.put("Favorites", tagList);
+	    data.put(VILLAGER_DATA_FAVORITES, tagList);
 
         return data;
     }
@@ -85,14 +90,14 @@ public class VillagerData
     @Nullable
     public static VillagerData fromNBT(CompoundData tag)
     {
-        if (tag.contains("UUIDM", Constants.NBT.TAG_LONG) && tag.contains("UUIDL", Constants.NBT.TAG_LONG))
+        if (tag.contains(VILLAGER_DATA_UUID_M, Constants.NBT.TAG_LONG) && tag.contains(VILLAGER_DATA_UUID_L, Constants.NBT.TAG_LONG))
         {
-            VillagerData data = new VillagerData(new UUID(tag.getLong("UUIDM"), tag.getLong("UUIDL")));
-            ListData tagList = tag.getList("Favorites");
+            VillagerData data = new VillagerData(new UUID(tag.getLong(VILLAGER_DATA_UUID_M), tag.getLong(VILLAGER_DATA_UUID_L)));
+            ListData tagList = tag.getList(VILLAGER_DATA_FAVORITES);
             final int count = tagList.size();
 
             data.favorites.clear();
-            data.tradeListPosition = tag.getInt("ListPosition");
+            data.tradeListPosition = tag.getInt(VILLAGER_DATA_LIST_POSITION);
 
             for (int i = 0; i < count; ++i)
             {

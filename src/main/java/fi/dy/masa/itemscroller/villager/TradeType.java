@@ -11,18 +11,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import fi.dy.masa.malilib.util.data.tag.CompoundData;
 
-public class TradeType
+public record TradeType(Item buyItem1, Item buyItem2, Item sellItem)
 {
-    public final Item buyItem1;
-    public final Item buyItem2;
-    public final Item sellItem;
-
-    public TradeType(Item buyItem1, Item buyItem2, Item sellItem)
-    {
-        this.buyItem1 = buyItem1;
-        this.buyItem2 = buyItem2;
-        this.sellItem = sellItem;
-    }
+    public static final String TRADE_BUY_1 = "Buy1";
+    public static final String TRADE_BUY_2 = "Buy2";
+    public static final String TRADE_SELL = "Sell";
 
     public boolean matchesTrade(MerchantOffer trade)
     {
@@ -38,11 +31,11 @@ public class TradeType
 
     public CompoundData toTag()
     {
-	    CompoundData tag = new CompoundData();
+        CompoundData tag = new CompoundData();
 
-        tag.putString("Buy1", getNameForItem(this.buyItem1));
-        tag.putString("Buy2", getNameForItem(this.buyItem2));
-        tag.putString("Sell", getNameForItem(this.sellItem));
+        tag.putString(TRADE_BUY_1, getNameForItem(this.buyItem1));
+        tag.putString(TRADE_BUY_2, getNameForItem(this.buyItem2));
+        tag.putString(TRADE_SELL, getNameForItem(this.sellItem));
 
         return tag;
     }
@@ -50,9 +43,9 @@ public class TradeType
     @Nullable
     public static TradeType fromTag(CompoundData tag)
     {
-        Item buy1 = getItemForName(tag.getString("Buy1"));
-        Item buy2 = getItemForName(tag.getString("Buy2"));
-        Item sell = getItemForName(tag.getString("Sell"));
+        Item buy1 = getItemForName(tag.getString(TRADE_BUY_1));
+        Item buy2 = getItemForName(tag.getString(TRADE_BUY_2));
+        Item sell = getItemForName(tag.getString(TRADE_SELL));
 
         if (buy1 != Items.AIR || buy2 != Items.AIR || sell != Items.AIR)
         {
@@ -68,15 +61,17 @@ public class TradeType
         {
             Identifier id = Identifier.tryParse(name);
 
-			if (id != null)
-			{
-				Optional<Holder.Reference<Item>> opt = BuiltInRegistries.ITEM.get(id);
-				return opt.map(Holder.Reference::value).orElse(Items.AIR);
-			}
+            if (id != null)
+            {
+                Optional<Holder.Reference<Item>> opt = BuiltInRegistries.ITEM.get(id);
+                return opt.map(Holder.Reference::value).orElse(Items.AIR);
+            }
         }
-        catch (Exception ignored) { }
+        catch (Exception ignored)
+        {
+        }
 
-	    return Items.AIR;
+        return Items.AIR;
     }
 
     public static String getNameForItem(Item item)
@@ -94,23 +89,26 @@ public class TradeType
     @Override
     public boolean equals(Object o)
     {
-        if (this == o) { return true; }
-        if (o == null || getClass() != o.getClass()) { return false; }
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
 
         TradeType tradeType = (TradeType) o;
 
-        if (!buyItem1.equals(tradeType.buyItem1)) { return false; }
-        if (!buyItem2.equals(tradeType.buyItem2)) { return false; }
+        if (!buyItem1.equals(tradeType.buyItem1))
+        {
+            return false;
+        }
+        if (!buyItem2.equals(tradeType.buyItem2))
+        {
+            return false;
+        }
         return sellItem.equals(tradeType.sellItem);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int result = buyItem1.hashCode();
-        result = 31 * result + buyItem2.hashCode();
-        result = 31 * result + sellItem.hashCode();
-        return result;
     }
 
     public static TradeType of(MerchantOffer trade)

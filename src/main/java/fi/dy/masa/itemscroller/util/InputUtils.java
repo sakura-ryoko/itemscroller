@@ -128,19 +128,19 @@ public class InputUtils
         return MoveAmount.NONE;
     }
 
-	public static boolean isAttack(int keyCode, Minecraft mc)
+	public static boolean isAttack(int scanCode, Minecraft mc)
 	{
-		return keyCode == KeybindMulti.getKeyCode(mc.options.keyAttack);
+		return scanCode == KeybindMulti.getKeyCode(mc.options.keyAttack);
 	}
 
-	public static boolean isUse(int keyCode, Minecraft mc)
+	public static boolean isUse(int scanCode, Minecraft mc)
 	{
-		return keyCode == KeybindMulti.getKeyCode(mc.options.keyUse);
+		return scanCode == KeybindMulti.getKeyCode(mc.options.keyUse);
 	}
 
-	public static boolean isPickBlock(int keyCode, Minecraft mc)
+	public static boolean isPickBlock(int scanCode, Minecraft mc)
 	{
-		return keyCode == KeybindMulti.getKeyCode(mc.options.keyPickItem);
+		return scanCode == KeybindMulti.getKeyCode(mc.options.keyPickItem);
 	}
 
 	public static boolean isAttack(@Nullable MouseButtonEvent click, @Nullable KeyEvent input, Minecraft mc)

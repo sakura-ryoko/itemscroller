@@ -16,7 +16,7 @@ import fi.dy.masa.itemscroller.util.InventoryUtils;
 import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
 
 @Mixin(AbstractContainerScreen.class)
-public class MixinHandledScreen
+public class MixinAbstractContainerScreen
 {
 	@Inject(method = "removed", at = @At("HEAD"))
 	private void itemscroller_saveVillagerDataOnClose(CallbackInfo ci)

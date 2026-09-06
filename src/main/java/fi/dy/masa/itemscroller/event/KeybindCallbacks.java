@@ -22,7 +22,7 @@ import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.GuiConfigs;
-import fi.dy.masa.itemscroller.mixin.recipe.IMixinCraftingResultSlot;
+import fi.dy.masa.itemscroller.mixin.recipe.IMixinResultSlot;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler;
 import fi.dy.masa.itemscroller.recipes.RecipePattern;
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
@@ -112,8 +112,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         {
             if (moveAction != MoveAction.NONE)
             {
-                final int mouseX = fi.dy.masa.malilib.util.InputUtils.getMouseX();
-                final int mouseY = fi.dy.masa.malilib.util.InputUtils.getMouseY();
+                final int mouseX = fi.dy.masa.malilib.util.input.InputUtils.getMouseX();
+                final int mouseY = fi.dy.masa.malilib.util.input.InputUtils.getMouseY();
                 return InventoryUtils.dragMoveItems(gui, moveAction, mouseX, mouseY, true);
             }
             else if (key == Hotkeys.KEY_MOVE_EVERYTHING.getKeybind())
@@ -313,7 +313,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         for (int i = 0; i < limit; i++)
         {
             //InventoryUtils.setInhibitCraftingOutputUpdate(true);
-            CraftingContainer craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+            CraftingContainer craftingInv = ((IMixinResultSlot) outputSlot).itemscroller_getCraftingInventory();
 
             if (recipe.getVanillaRecipe() != null && !recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
             {
@@ -338,7 +338,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
             mc.gameMode.handlePlaceRecipe(gui.getMenu().containerId, recipe.getNetworkRecipeId(), true);
 //            InventoryUtils.setInhibitCraftingOutputUpdate(false);
 //            InventoryUtils.updateCraftingOutputSlot(outputSlot);
-            craftingInv = ((IMixinCraftingResultSlot) outputSlot).itemscroller_getCraftingInventory();
+            craftingInv = ((IMixinResultSlot) outputSlot).itemscroller_getCraftingInventory();
 
             if (recipe.getVanillaRecipe() != null && recipe.getVanillaRecipe().matches(craftingInv.asCraftInput(), mc.level))
             {

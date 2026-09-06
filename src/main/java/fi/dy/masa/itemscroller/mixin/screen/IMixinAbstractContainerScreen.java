@@ -1,13 +1,14 @@
 package fi.dy.masa.itemscroller.mixin.screen;
 
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(net.minecraft.client.gui.screens.inventory.AbstractContainerScreen.class)
-public interface IMixinScreenWithHandler
+@Mixin(AbstractContainerScreen.class)
+public interface IMixinAbstractContainerScreen
 {
     @Invoker("getHoveredSlot")
     Slot itemscroller_getSlotAtPositionInvoker(double x, double y);

@@ -9,5 +9,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface IMixinRecipeBookWidget
 {
     @Accessor("lastRecipe")
-    RecipeDisplayId itemscroller_getSelectedRecipe();
+    RecipeDisplayId itemscroller_getLastRecipe();
+
+    @Accessor("lastPlacedRecipe")
+    RecipeDisplayId itemscroller_getLastPlacedRecipe();
 }

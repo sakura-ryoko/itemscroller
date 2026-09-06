@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.render.GuiContext;
+import fi.dy.masa.malilib.util.input.ScanCodes;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
 import fi.dy.masa.itemscroller.gui.ItemScrollerIcons;
@@ -88,23 +89,23 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
     }
 
     @Inject(method = "mouseClicked", at = @At("RETURN"), cancellable = true)
-    private void itemscroller_onMouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir)
+    private void itemscroller_onMouseClicked(MouseButtonEvent click, boolean doubleClick, CallbackInfoReturnable<Boolean> cir)
     {
         if (Configs.Toggles.VILLAGER_TRADE_FEATURES.getBooleanValue())
         {
-            int visibleIndex = this.getHoveredTradeButtonIndex(event.x(), event.y());
+            int visibleIndex = this.getHoveredTradeButtonIndex(click.x(), click.y());
             int realIndex = VillagerUtils.getRealTradeIndexFor(visibleIndex, this.menu);
 
             if (realIndex >= 0)
             {
                 // right click, trade everything with this trade
-                if (event.input() == 1)
+                if (click.input() == ScanCodes.OFFSET_MOUSE_BUTTON_3)
                 {
                     InventoryUtils.villagerTradeEverythingPossibleWithTrade(visibleIndex);
                     cir.setReturnValue(true);
                 }
                 // Middle click, toggle trade favorite
-                else if (event.input() == 2)
+                else if (click.input() == ScanCodes.OFFSET_MOUSE_BUTTON_2)
                 {
                     if (Hotkeys.MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE.getKeybind().isKeybindHeld())
                     {

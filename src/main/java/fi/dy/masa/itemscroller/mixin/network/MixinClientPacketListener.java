@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 
 @Mixin(ClientPacketListener.class)
-public class MixinClientPlayNetworkHandler
+public class MixinClientPacketListener
 {
     @Inject(method = "handleAwardStats", at = @At("RETURN"), cancellable = true)
     private void onPong(ClientboundAwardStatsPacket packet, CallbackInfo ci)

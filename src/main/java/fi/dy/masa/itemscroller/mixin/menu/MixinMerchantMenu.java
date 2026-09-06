@@ -1,4 +1,4 @@
-package fi.dy.masa.itemscroller.mixin.screen;
+package fi.dy.masa.itemscroller.mixin.menu;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -19,12 +19,12 @@ import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 @Mixin(MerchantMenu.class)
-public abstract class MixinMerchantScreenHandler extends AbstractContainerMenu implements IMerchantScreenHandler
+public abstract class MixinMerchantMenu extends AbstractContainerMenu implements IMerchantScreenHandler
 {
     @Shadow @Final private Merchant trader;
     @Unique @Nullable private MerchantOffers customList;
 
-    protected MixinMerchantScreenHandler(@Nullable MenuType<?> type, int syncId)
+    protected MixinMerchantMenu(@Nullable MenuType<?> type, int syncId)
     {
         super(type, syncId);
     }

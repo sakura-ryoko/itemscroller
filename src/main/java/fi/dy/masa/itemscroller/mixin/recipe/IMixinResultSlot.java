@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ResultSlot.class)
-public interface IMixinCraftingResultSlot
+public interface IMixinResultSlot
 {
     @Accessor("craftSlots")
     CraftingContainer itemscroller_getCraftingInventory();
