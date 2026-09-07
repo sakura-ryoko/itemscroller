@@ -99,13 +99,13 @@ public abstract class MixinMerchantScreen extends AbstractContainerScreen<Mercha
             if (realIndex >= 0)
             {
                 // right click, trade everything with this trade
-                if (click.input() == ScanCodes.OFFSET_MOUSE_BUTTON_3)
+                if (click.input() == ScanCodes.OFFSET_MOUSE_RIGHT)
                 {
                     InventoryUtils.villagerTradeEverythingPossibleWithTrade(visibleIndex);
                     cir.setReturnValue(true);
                 }
                 // Middle click, toggle trade favorite
-                else if (click.input() == ScanCodes.OFFSET_MOUSE_BUTTON_2)
+                else if (click.input() == ScanCodes.OFFSET_MOUSE_MIDDLE)
                 {
                     if (Hotkeys.MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE.getKeybind().isKeybindHeld())
                     {
