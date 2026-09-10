@@ -54,7 +54,7 @@ public class Hotkeys
     public static final ConfigHotkey MODIFIER_MOVE_STACK        = new ConfigHotkey("modifierMoveStack",      "LEFT_SHIFT", GUI_NO_ORDER).apply(HOTKEYS_KEY);
     public static final ConfigHotkey MODIFIER_TOGGLE_VILLAGER_GLOBAL_FAVORITE = new ConfigHotkey("modifierToggleVillagerGlobalFavorite", "LEFT_SHIFT", GUI_RELAXED).apply(HOTKEYS_KEY);
 
-    public static final ConfigHotkey SORT_INVENTORY             = new ConfigHotkey("sortInventory",         "R", GUI_NO_ORDER).apply(HOTKEYS_KEY);
+    public static final ConfigHotkey SORT_INVENTORY             = new ConfigHotkey("sortInventory",         "LEFT_CONTROL,R", GUI_NO_ORDER).apply(HOTKEYS_KEY);
 
     public static final List<ConfigHotkey> HOTKEY_LIST = ImmutableList.of(
             OPEN_CONFIG_GUI,
