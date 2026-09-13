@@ -237,6 +237,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                     // Too small of a grid; Cancel.
                     if (range.getSlotCount() < recipe.countRecipeItems())
                     {
+                        InventoryUtils.bufferInvUpdates = false;
                         return;
                     }
 
