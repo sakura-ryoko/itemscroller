@@ -257,46 +257,6 @@ public class RecipePattern
         return null;
     }
 
-//    @Deprecated(forRemoval = true)
-//    public boolean matchClientRecipeBookEntry(RecipeDisplayEntry entry, MinecraftClient mc)
-//    {
-//        if (mc.world == null || this.isEmpty())
-//        {
-//            return false;
-//        }
-//
-//        // Mojang breaks their own player recipe book.  Verifying the Category here can cause problems.
-//        /*
-//        if (this.getRecipeCategory() != null && !entry.category().equals(this.getRecipeCategory()))
-//        {
-//            return false;
-//        }
-//         */
-//        List<ItemStack> recipeStacks = Arrays.stream(this.getRecipeItems()).toList();
-//        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
-//
-//        //System.out.printf("matchClientRecipeBookEntry() --> [%s] vs [%s]\n", this.getResult().toString(), stacks.getFirst().toString());
-//
-//        if (stacks.isEmpty())
-//        {
-//            // And why would that be? *cries without essential data*
-//            ItemScroller.LOGGER.warn("matchClientRecipeBookEntry(): Failed receiving crafting stacks for NetworkRecipeId: [{}] -- is it even a valid recipe?", entry.id().index());
-//            return false;
-//        }
-//
-//        if (RecipeBookUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
-//        {
-//            if (entry.craftingRequirements().isPresent())
-//            {
-//                return RecipeUtils.compareStacksAndIngredients(recipeStacks, entry.craftingRequirements().get(), this.countRecipeItems(), RecipeUtils.Type.fromRecipeDisplay(entry.display()));
-//            }
-//
-//            return true;
-//        }
-//
-//        return false;
-//    }
-
     public void storeCraftingRecipe(Slot slot, AbstractContainerScreen<? extends AbstractContainerMenu> gui, boolean clearIfEmpty, boolean fromKeybind, Minecraft mc)
     {
         SlotRange range = CraftingHandler.getCraftingGridSlots(gui, slot);
@@ -325,14 +285,14 @@ public class RecipePattern
                 // Stop the mod from overwriting the correctly saved recipe with a button or nugget from the Grid clear
                 else if ((System.currentTimeMillis() - this.recipeSaveTime) < 4000L)
                 {
-                    System.out.printf("storeCraftingRecipe() SKIPPING InputHandler input result [%s] versus [%s]\n", this.result.toString(), slot.getItem().toString());
+//                    System.out.printf("storeCraftingRecipe() SKIPPING InputHandler input result [%s] versus [%s]\n", this.result.toString(), slot.getItem().toString());
                     this.recipeSaveTime = System.currentTimeMillis();
                     gui.getMenu().setCarried(ItemStack.EMPTY);
                     InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
                     return;
                 }
 
-                System.out.printf("storeCraftingRecipe() old result [%s] new [%s]\n", this.result.toString(), slot.getItem().toString());
+//                System.out.printf("storeCraftingRecipe() old result [%s] new [%s]\n", this.result.toString(), slot.getItem().toString());
 //                this.result = slot.getItem().copy();
 
                 if (this.result.isEmpty())
@@ -349,13 +309,14 @@ public class RecipePattern
 
                 InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
             }
-            else if (clearIfEmpty)
+            else if (fromKeybind && clearIfEmpty)
             {
                 this.clearRecipe();
             }
         }
     }
 
+    // This is kind of redundant / possibly broken.
     public void storeSelectedRecipeIdFromGui(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
     {
         Minecraft mc = Minecraft.getInstance();
@@ -377,8 +338,8 @@ public class RecipePattern
         }
 
         // DEBUG
-        RecipeBookUtils.toggleDebugLog(true);
-        RecipeBookUtils.toggleAnsiColorLog(true);
+//        RecipeBookUtils.toggleDebugLog(true);
+//        RecipeBookUtils.toggleAnsiColorLog(true);
 
         if (gui instanceof AbstractRecipeBookScreen<?> rbs)
         {
