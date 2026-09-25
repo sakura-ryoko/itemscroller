@@ -219,21 +219,31 @@ public class RenderEventHandler
                                    AbstractContainerScreen<?> gui)
     {
         ItemStack[] items = recipe.getRecipeItems();
-        final int recipeDimensions = (int) Math.ceil(Math.sqrt(Math.min(recipe.getRecipeLength(), 9)));
-        int x = -3 * 17 + 2;
+        if (items.length == 0) return;
+
+        final int cols = Math.min(items.length, 3);
+        final int rows = (int) Math.ceil((double) items.length / cols);
+        int x = -(cols * 17) + 2;
         int y = 3 * this.entryHeight;
 
-        for (int i = 0, row = 0; row < recipeDimensions; row++)
+        for (int i = 0, row = 0; row < rows; row++)
         {
-            for (int col = 0; col < recipeDimensions; col++, i++)
+            for (int col = 0; col < cols && i < items.length; col++, i++)
             {
-                //int xOff = col * 17;
-                //int yOff = row * 17;
-                int xOff = col > 0 ? col * 17 : 0;
-                int yOff = row > 0 ? row * 17 : 0;
+                int xOff = col * 17;
+                int yOff = row * 17;
 
                 this.renderStackAt(ctx, items[i], x + xOff, y + yOff, false);
             }
+        }
+
+        String displayText = recipe.getDisplayText();
+
+        if (displayText != null && !displayText.isEmpty())
+        {
+            Font font = this.mc.font;
+            int textY = y + rows * 17 + 2;
+            ctx.drawString(font, "\"" + displayText + "\"", x, textY, 0xFFC0C0C0, false);
         }
     }
 

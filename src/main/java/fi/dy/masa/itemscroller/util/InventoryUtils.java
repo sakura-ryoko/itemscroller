@@ -218,7 +218,36 @@ public class InventoryUtils
 
     public static boolean isCraftingSlot(AbstractContainerScreen<? extends AbstractContainerMenu> gui, @Nullable Slot slot)
     {
-        return slot != null && CraftingHandler.getCraftingGridSlots(gui, slot) != null;
+        if (slot == null)
+        {
+            return false;
+        }
+
+        if (CraftingHandler.isProcessingGui(gui))
+        {
+            // Processing GUI output slots only count when the feature toggle is enabled
+            return isProcessingEnabled(gui) && CraftingHandler.getCraftingGridSlots(gui, slot) != null;
+        }
+
+        return CraftingHandler.getCraftingGridSlots(gui, slot) != null;
+    }
+
+    /** Returns whether the processing features are enabled for the given GUI type */
+    public static boolean isProcessingEnabled(AbstractContainerScreen<?> gui)
+    {
+        if (gui instanceof StonecutterScreen)
+            return Configs.Toggles.STONECUTTER_FEATURES.getBooleanValue();
+        if (gui instanceof AnvilScreen)
+            return Configs.Toggles.ANVIL_FEATURES.getBooleanValue();
+        if (gui instanceof GrindstoneScreen)
+            return Configs.Toggles.GRINDSTONE_FEATURES.getBooleanValue();
+        if (gui instanceof LoomScreen)
+            return Configs.Toggles.LOOM_FEATURES.getBooleanValue();
+        if (gui instanceof SmithingScreen)
+            return Configs.Toggles.SMITHING_FEATURES.getBooleanValue();
+        if (gui instanceof EnchantmentScreen)
+            return Configs.Toggles.ENCHANTMENT_FEATURES.getBooleanValue();
+        return Configs.Toggles.CRAFTING_FEATURES.getBooleanValue();
     }
 
     /**
@@ -1482,6 +1511,9 @@ public class InventoryUtils
                     moveOneRecipeItemIntoCraftingGrid(gui, slotGridFirst, ingredientReference, targetSlots);
                 }
             }
+
+            // Hook for processing GUIs: select recipe / enchantment option / rename after filling
+            recipe.onGridFilled(gui);
         }
 
         return false;
@@ -1603,6 +1635,15 @@ public class InventoryUtils
     public static void craftEverythingPossibleWithCurrentRecipe(RecipePattern recipe,
                                                                 AbstractContainerScreen<? extends AbstractContainerMenu> gui)
     {
+        if (CraftingHandler.isProcessingGui(gui))
+        {
+            if (isProcessingEnabled(gui))
+            {
+                recipe.craftProcessingEverything(gui);
+            }
+            return;
+        }
+
         Slot slot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
 
         if (slot != null && isStackEmpty(recipe.getResult()) == false)
@@ -1885,7 +1926,7 @@ public class InventoryUtils
         return false;
     }
 
-    private static void moveItemsFromInventory(AbstractContainerScreen<? extends AbstractContainerMenu> gui,
+    public static void moveItemsFromInventory(AbstractContainerScreen<? extends AbstractContainerMenu> gui,
                                                int slotTo,
                                                Container invSrc,
                                                ItemStack stackTemplate,

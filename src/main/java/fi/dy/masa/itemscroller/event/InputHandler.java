@@ -3,6 +3,7 @@ package fi.dy.masa.itemscroller.event;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
@@ -18,6 +19,7 @@ import fi.dy.masa.malilib.util.input.ScanCodes;
 import fi.dy.masa.itemscroller.Reference;
 import fi.dy.masa.itemscroller.config.Configs;
 import fi.dy.masa.itemscroller.config.Hotkeys;
+import fi.dy.masa.itemscroller.recipes.RecipePattern;
 import fi.dy.masa.itemscroller.recipes.RecipeStorage;
 import fi.dy.masa.itemscroller.util.*;
 import fi.dy.masa.itemscroller.villager.VillagerDataStorage;
@@ -189,6 +191,25 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
                             InventoryUtils.handleRecipeClick(gui, mc, recipes, hoveredRecipeId, isAttack, isUse, isPickBlock, isShiftDown);
                             return true;
                         }
+                        // Pick-blocking over an enchantment button with the recipe view open, store the recipe with the enchantment option
+                        else if (isPickBlock && InputUtils.isRecipeViewOpen() && gui instanceof EnchantmentScreen)
+                        {
+                            int option = getEnchantmentButtonOption(gui, mouseX, mouseY);
+
+                            if (option >= 0)
+                            {
+                                Slot inputSlot = gui.getMenu().getSlot(0);
+
+                                if (inputSlot.hasItem())
+                                {
+                                    recipes.storeCraftingRecipeToCurrentSelection(inputSlot, gui, false, false, mc);
+                                    RecipePattern newRecipe = recipes.getSelectedRecipe();
+                                    newRecipe.setEnchantmentOption(option);
+                                }
+
+                                cancel = true;
+                            }
+                        }
                         // Pick-blocking over a crafting output slot with the recipe view open, store the recipe
                         else if (isPickBlock && InputUtils.isRecipeViewOpen() && InventoryUtils.isCraftingSlot(gui, slot))
                         {
@@ -268,5 +289,25 @@ public class InputHandler implements IKeybindProvider, IKeyboardInputHandler, IM
         ClickPacketBuffer.setShouldBufferClickPackets(false);
 
         return cancel;
+    }
+
+    /** Returns the enchantment table option index (0-2) under the mouse, or -1 */
+    private static int getEnchantmentButtonOption(AbstractContainerScreen<?> gui, int mouseX, int mouseY)
+    {
+        int guiLeft = AccessorUtils.getGuiLeft(gui);
+        int guiTop = AccessorUtils.getGuiTop(gui);
+
+        for (int i = 0; i < 3; i++)
+        {
+            int buttonY = guiTop + 14 + 19 * i;
+
+            if (mouseX >= guiLeft + 14 && mouseX <= guiLeft + 14 + 108 &&
+                mouseY >= buttonY && mouseY <= buttonY + 19)
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

@@ -136,7 +136,10 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         if (key == Hotkeys.CRAFT_EVERYTHING.getKeybind())
         {
             InventoryUtils.craftEverythingPossibleWithCurrentRecipe(recipes.getSelectedRecipe(), gui);
-            return true;
+            // Do NOT cancel (return false): cancelling a PRESS-type keybind makes isKeybindHeld()
+            // return false until the key is released, which would disable the continuous crafting
+            // in onClientTick while the key is held.
+            return false;
         }
         else if (key == Hotkeys.THROW_CRAFT_RESULTS.getKeybind())
         {
@@ -217,7 +220,8 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         if (GuiUtils.getCurrentScreen() instanceof AbstractContainerScreen<?> gui &&
             (GuiUtils.getCurrentScreen() instanceof CreativeModeInventoryScreen) == false &&
             Configs.GUI_BLACKLIST.contains(GuiUtils.getCurrentScreen().getClass().getName()) == false &&
-            (Hotkeys.MASS_CRAFT.getKeybind().isKeybindHeld() || Configs.Generic.MASS_CRAFT_HOLD.getBooleanValue()))
+            (Hotkeys.MASS_CRAFT.getKeybind().isKeybindHeld() || Configs.Generic.MASS_CRAFT_HOLD.getBooleanValue() ||
+             Hotkeys.CRAFT_EVERYTHING.getKeybind().isKeybindHeld()))
         {
             if (++this.massCraftTicker < Configs.Generic.MASS_CRAFT_INTERVAL.getIntegerValue())
             {
@@ -229,43 +233,76 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
 
             if (outputSlot != null)
             {
-                final CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
                 final RecipePattern recipe = RecipeStorage.getInstance().getSelectedRecipe();
-                final int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
 
-                if (!recipe.getResult().isEmpty() && range != null)
+                // Processing GUIs (stonecutter / anvil / grindstone / loom / smithing / enchantment)
+                if (CraftingHandler.isProcessingGui(gui))
                 {
-                    // Too small of a grid; Cancel.
-                    if (range.getSlotCount() < recipe.countRecipeItems())
+                    if (InventoryUtils.isProcessingEnabled(gui) && !recipe.getResult().isEmpty())
                     {
-                        InventoryUtils.bufferInvUpdates = false;
-                        return;
-                    }
-
-                    if (Configs.Generic.RATE_LIMIT_CLICK_PACKETS.getBooleanValue())
-                    {
-                        ClickPacketBuffer.setShouldBufferClickPackets(true);
-                    }
-
-                    if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
-                    {
-                        this.onTickRecipeBook(mc, gui, range, outputSlot, recipe, limit);
-
-                        if (this.badRecipeClicks < 0L)
+                        // MASS_CRAFT drops the output, CRAFT_EVERYTHING shift-clicks it into the inventory
+                        if (Hotkeys.MASS_CRAFT.getKeybind().isKeybindHeld() || Configs.Generic.MASS_CRAFT_HOLD.getBooleanValue())
                         {
-                            this.badRecipeClicks = 0L;
+                            recipe.craftProcessingAsManyAndKeep(gui);
+                        }
+                        else
+                        {
+                            recipe.craftProcessingAsMany(gui);
                         }
                     }
-                    else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
-                    {
-                        this.onTickSwapsOnly(mc, gui, range, outputSlot, recipe, limit);
-                    }
-                    else
-                    {
-                        this.onTickFallback(mc, gui, range, outputSlot, recipe, limit);
-                    }
+                }
+                else
+                {
+                    final CraftingHandler.SlotRange range = CraftingHandler.getCraftingGridSlots(gui, outputSlot);
+                    final int limit = Configs.Generic.MASS_CRAFT_ITERATIONS.getIntegerValue();
 
-                    ClickPacketBuffer.setShouldBufferClickPackets(false);
+                    if (!recipe.getResult().isEmpty() && range != null)
+                    {
+                        // Too small of a grid; Cancel.
+                        if (range.getSlotCount() < recipe.countRecipeItems())
+                        {
+                            InventoryUtils.bufferInvUpdates = false;
+                            return;
+                        }
+
+                        // CRAFT_EVERYTHING held (without MASS_CRAFT): single craft per tick,
+                        // shift-clicking the result into the inventory. This does not rely on
+                        // client-side prediction, so it works reliably on servers too.
+                        boolean isMassCraft = Hotkeys.MASS_CRAFT.getKeybind().isKeybindHeld() ||
+                                              Configs.Generic.MASS_CRAFT_HOLD.getBooleanValue();
+
+                        if (isMassCraft == false && Hotkeys.CRAFT_EVERYTHING.getKeybind().isKeybindHeld())
+                        {
+                            this.onTickCraftEverythingSingle(mc, gui, recipe);
+                        }
+                        else
+                        {
+                            if (Configs.Generic.RATE_LIMIT_CLICK_PACKETS.getBooleanValue())
+                            {
+                                ClickPacketBuffer.setShouldBufferClickPackets(true);
+                            }
+
+                            if (Configs.Generic.MASS_CRAFT_RECIPE_BOOK.getBooleanValue() && recipe.getNetworkRecipeId() != null)
+                            {
+                                this.onTickRecipeBook(mc, gui, range, outputSlot, recipe, limit);
+
+                                if (this.badRecipeClicks < 0L)
+                                {
+                                    this.badRecipeClicks = 0L;
+                                }
+                            }
+                            else if (Configs.Generic.MASS_CRAFT_SWAPS.getBooleanValue())
+                            {
+                                this.onTickSwapsOnly(mc, gui, range, outputSlot, recipe, limit);
+                            }
+                            else
+                            {
+                                this.onTickFallback(mc, gui, range, outputSlot, recipe, limit);
+                            }
+
+                            ClickPacketBuffer.setShouldBufferClickPackets(false);
+                        }
+                    }
                 }
             }
 
@@ -441,5 +478,28 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
                 InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.index, recipe.getResult());
             }
         }
+    }
+
+    /** CRAFT_EVERYTHING held: single craft per tick, shift-clicking the result into the inventory.
+     *  Does not rely on client-side prediction, so it works reliably on servers too. */
+    private void onTickCraftEverythingSingle(Minecraft mc,
+                                             final AbstractContainerScreen<?> gui,
+                                             final RecipePattern recipe)
+    {
+        InventoryUtils.tryClearCursor(gui);
+
+        Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
+
+        if (outputSlot != null && outputSlot.hasItem() &&
+            InventoryUtils.areStacksEqual(outputSlot.getItem(), recipe.getResult()))
+        {
+            InventoryUtils.shiftClickSlot(gui, outputSlot.index);
+        }
+
+        // Clear the grid and refill it every tick: the client-side prediction can leave
+        // stale items in the grid (the server has already consumed them), which makes the
+        // recipe not match and the crafting stop early with leftover items in the grid.
+        InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
+        InventoryUtils.tryMoveItemsToFirstCraftingGrid(recipe, gui, true);
     }
 }

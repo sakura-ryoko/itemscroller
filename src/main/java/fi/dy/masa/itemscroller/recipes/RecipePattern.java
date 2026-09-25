@@ -7,17 +7,30 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
+import net.minecraft.client.gui.screens.inventory.AnvilScreen;
+import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
+import net.minecraft.client.gui.screens.inventory.GrindstoneScreen;
+import net.minecraft.client.gui.screens.inventory.LoomScreen;
+import net.minecraft.client.gui.screens.inventory.SmithingScreen;
 import net.minecraft.client.gui.screens.inventory.StonecutterScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.GrindstoneMenu;
+import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.SmithingMenu;
+import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
@@ -31,6 +44,7 @@ import fi.dy.masa.itemscroller.ItemScroller;
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinClientRecipeBook;
 import fi.dy.masa.itemscroller.mixin.recipe.IMixinRecipeBookWidget;
 import fi.dy.masa.itemscroller.mixin.screen.IMixinAbstractRecipeBookScreen;
+import fi.dy.masa.itemscroller.mixin.screen.IMixinAnvilScreen;
 import fi.dy.masa.itemscroller.recipes.CraftingHandler.SlotRange;
 import fi.dy.masa.itemscroller.util.AccessorUtils;
 import fi.dy.masa.itemscroller.util.InventoryUtils;
@@ -42,6 +56,32 @@ public class RecipePattern
     public static final String RECIPE_LENGTH = "Length";
     public static final String RECIPE_SLOT = "Slot";
 
+    public enum RecipeType
+    {
+        CRAFTING("crafting"),
+        STONECUTTER("stonecutter"),
+        ANVIL("anvil"),
+        GRINDSTONE("grindstone"),
+        LOOM("loom"),
+        SMITHING("smithing"),
+        ENCHANTMENT("enchantment");
+
+        private final String id;
+
+        RecipeType(String id) { this.id = id; }
+        public String getId() { return this.id; }
+
+        @Nullable
+        public static RecipeType fromId(String id)
+        {
+            for (RecipeType t : values())
+            {
+                if (t.id.equals(id)) return t;
+            }
+            return null;
+        }
+    }
+
     private ItemStack result = InventoryUtils.EMPTY_STACK;
     private ItemStack[] recipe = new ItemStack[9];
     private RecipeHolder<?> vanillaRecipe;
@@ -50,6 +90,15 @@ public class RecipePattern
     private RecipeBookCategory category;
     private RecipeBookUtils.Type recipeType;
     private long recipeSaveTime;
+
+    // Processing GUI support (stonecutter / anvil / grindstone / loom / smithing / enchantment)
+    private RecipeType processingType = RecipeType.CRAFTING;
+    private ItemStack[] processingInputs = new ItemStack[0];
+    private int selectedRecipe = -1;      // stonecutter / loom selected recipe index
+    private int enchantmentOption = -1;   // enchantment table option (0-2)
+    private String renameText = "";       // anvil rename text
+    private boolean hasRename = false;    // anvil rename enabled
+    private boolean enchantClickPending = false; // enchantment table: waiting for server sync after clicking an option
 
     public RecipePattern()
     {
@@ -74,6 +123,13 @@ public class RecipePattern
         this.category = null;
         this.recipeType = null;
         this.recipeSaveTime = -1;
+        this.processingType = RecipeType.CRAFTING;
+        this.processingInputs = new ItemStack[0];
+        this.selectedRecipe = -1;
+        this.enchantmentOption = -1;
+        this.renameText = "";
+        this.hasRename = false;
+        this.enchantClickPending = false;
     }
 
     public void ensureRecipeSizeAndClearRecipe(int size)
@@ -113,7 +169,7 @@ public class RecipePattern
         if (mc.hasSingleplayerServer() && serverWorld != null)
         {
             CraftingInput input = CraftingInput.of(recipeSize, recipeSize, Arrays.asList(this.recipe));
-            Optional<RecipeHolder<CraftingRecipe>> opt = serverWorld.recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, serverWorld);
+            Optional<RecipeHolder<CraftingRecipe>> opt = serverWorld.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, serverWorld);
 
             if (opt.isPresent())
             {
@@ -257,18 +313,87 @@ public class RecipePattern
         return null;
     }
 
+//    @Deprecated(forRemoval = true)
+//    public boolean matchClientRecipeBookEntry(RecipeDisplayEntry entry, MinecraftClient mc)
+//    {
+//        if (mc.world == null || this.isEmpty())
+//        {
+//            return false;
+//        }
+//
+//        // Mojang breaks their own player recipe book.  Verifying the Category here can cause problems.
+//        /*
+//        if (this.getRecipeCategory() != null && !entry.category().equals(this.getRecipeCategory()))
+//        {
+//            return false;
+//        }
+//         */
+//        List<ItemStack> recipeStacks = Arrays.stream(this.getRecipeItems()).toList();
+//        List<ItemStack> stacks = entry.getStacks(SlotDisplayContexts.createParameters(mc.world));
+//
+//        //System.out.printf("matchClientRecipeBookEntry() --> [%s] vs [%s]\n", this.getResult().toString(), stacks.getFirst().toString());
+//
+//        if (stacks.isEmpty())
+//        {
+//            // And why would that be? *cries without essential data*
+//            ItemScroller.LOGGER.warn("matchClientRecipeBookEntry(): Failed receiving crafting stacks for NetworkRecipeId: [{}] -- is it even a valid recipe?", entry.id().index());
+//            return false;
+//        }
+//
+//        if (RecipeBookUtils.areStacksEqual(this.getResult(), stacks.getFirst()))
+//        {
+//            if (entry.craftingRequirements().isPresent())
+//            {
+//                return RecipeUtils.compareStacksAndIngredients(recipeStacks, entry.craftingRequirements().get(), this.countRecipeItems(), RecipeUtils.Type.fromRecipeDisplay(entry.display()));
+//            }
+//
+//            return true;
+//        }
+//
+//        return false;
+//    }
+
     public void storeCraftingRecipe(Slot slot, AbstractContainerScreen<? extends AbstractContainerMenu> gui, boolean clearIfEmpty, boolean fromKeybind, Minecraft mc)
     {
         SlotRange range = CraftingHandler.getCraftingGridSlots(gui, slot);
 
         if (range != null)
         {
-            if (slot.hasItem() && this.isEmpty())
+            if (slot.hasItem())
             {
                 int gridSize = range.getSlotCount();
 
-                if (slot instanceof ResultSlot rs) // fromKeybind ||
+                if (CraftingHandler.isProcessingGui(gui))
                 {
+                    this.storeProcessingRecipe(slot, gui, range);
+                }
+                else if (fromKeybind || slot instanceof ResultSlot rs || CraftingHandler.isCraftingGui(gui))
+                {
+                    // Double-trigger protection: the middle mouse button fires both the InputHandler
+                    // pick-block path and the STORE_RECIPE hotkey. The first call clears the grid,
+                    // so the second call would read empty inputs and overwrite the stored recipe.
+                    // Check BEFORE clearing, because clearRecipe() resets recipeSaveTime and result.
+                    if (this.isValid() && (System.currentTimeMillis() - this.recipeSaveTime) < 4000L)
+                    {
+                        boolean gridEmpty = true;
+                        int numSlotsCheck = gui.getMenu().slots.size();
+
+                        for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlotsCheck; i++, s++)
+                        {
+                            if (gui.getMenu().getSlot(s).hasItem())
+                            {
+                                gridEmpty = false;
+                                break;
+                            }
+                        }
+
+                        if (gridEmpty)
+                        {
+                            ItemScroller.debugLog("storeCraftingRecipe(): Skipping empty-input overwrite (double trigger), keeping existing recipe");
+                            return;
+                        }
+                    }
+
                     // Slots are only populated from the Keybinds Callback
                     int numSlots = gui.getMenu().slots.size();
                     this.ensureRecipeSizeAndClearRecipe(gridSize);
@@ -278,8 +403,6 @@ public class RecipePattern
                         Slot slotTmp = gui.getMenu().getSlot(s);
                         this.recipe[i] = slotTmp.hasItem() ? slotTmp.getItem().copy() : InventoryUtils.EMPTY_STACK;
                     }
-
-                    this.result = rs.getItem().copy();
                     this.recipeSaveTime = System.currentTimeMillis();
                 }
                 // Stop the mod from overwriting the correctly saved recipe with a button or nugget from the Grid clear
@@ -288,35 +411,414 @@ public class RecipePattern
 //                    System.out.printf("storeCraftingRecipe() SKIPPING InputHandler input result [%s] versus [%s]\n", this.result.toString(), slot.getItem().toString());
                     this.recipeSaveTime = System.currentTimeMillis();
                     gui.getMenu().setCarried(ItemStack.EMPTY);
-                    InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
                     return;
                 }
 
 //                System.out.printf("storeCraftingRecipe() old result [%s] new [%s]\n", this.result.toString(), slot.getItem().toString());
-//                this.result = slot.getItem().copy();
+                this.result = slot.getItem().copy();
 
-                if (this.result.isEmpty())
+                if (CraftingHandler.isProcessingGui(gui) == false)
                 {
-                    this.clearRecipe();
+                    this.lookupVanillaRecipe(mc.level);
+
+                    if (this.vanillaRecipe == null)
+                    {
+                        this.storeSelectedRecipeIdFromGui(gui);
+                    }
                 }
-
-                this.lookupVanillaRecipe(mc.level);
-
-                if (this.vanillaRecipe == null || this.result.isEmpty())
-                {
-                    this.storeSelectedRecipeIdFromGui(gui);
-                }
-
-                InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
             }
-            else if (fromKeybind && clearIfEmpty)
+            else if (clearIfEmpty)
             {
+                // Double-trigger protection: the middle mouse button fires both the InputHandler
+                // pick-block path and the STORE_RECIPE hotkey. The first call stores the recipe,
+                // the second call sees the (now empty) output slot and would clear the recipe.
+                if (this.isValid() && (System.currentTimeMillis() - this.recipeSaveTime) < 4000L)
+                {
+                    ItemScroller.debugLog("storeCraftingRecipe(): Skipping clearRecipe (double trigger), keeping existing recipe");
+                    return;
+                }
                 this.clearRecipe();
             }
         }
     }
 
-    // This is kind of redundant / possibly broken.
+    /** Store a recipe from a processing GUI (stonecutter / anvil / grindstone / loom / smithing / enchantment) */
+    private void storeProcessingRecipe(Slot slot, AbstractContainerScreen<? extends AbstractContainerMenu> gui, SlotRange range)
+    {
+        int numSlots = gui.getMenu().slots.size();
+        int gridSize = range.getSlotCount();
+
+        // Double-trigger protection (same as the crafting table): the middle mouse button fires
+        // both the InputHandler pick-block path and the STORE_RECIPE hotkey. The first call clears
+        // the input slots, so the second call would read empty inputs and overwrite the stored recipe.
+        if (this.isValid() && (System.currentTimeMillis() - this.recipeSaveTime) < 4000L)
+        {
+            boolean inputsEmpty = true;
+
+            for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlots; i++, s++)
+            {
+                if (gui.getMenu().getSlot(s).hasItem())
+                {
+                    inputsEmpty = false;
+                    break;
+                }
+            }
+
+            if (inputsEmpty)
+            {
+                ItemScroller.debugLog("storeProcessingRecipe(): Skipping empty-input overwrite (double trigger), keeping existing recipe");
+                return;
+            }
+        }
+
+        ItemStack[] inputs = new ItemStack[gridSize];
+        Arrays.fill(inputs, InventoryUtils.EMPTY_STACK);
+
+        for (int i = 0, s = range.getFirst(); i < gridSize && s < numSlots; i++, s++)
+        {
+            Slot slotTmp = gui.getMenu().getSlot(s);
+            inputs[i] = slotTmp.hasItem() ? slotTmp.getItem().copy() : InventoryUtils.EMPTY_STACK;
+        }
+
+        this.processingInputs = inputs;
+        this.result = slot.getItem().copy();
+        this.recipeSaveTime = System.currentTimeMillis();
+
+        if (gui instanceof StonecutterScreen && gui.getMenu() instanceof StonecutterMenu menu)
+        {
+            this.processingType = RecipeType.STONECUTTER;
+            this.selectedRecipe = menu.getSelectedRecipeIndex();
+        }
+        else if (gui instanceof AnvilScreen && gui.getMenu() instanceof AnvilMenu menu)
+        {
+            this.processingType = RecipeType.ANVIL;
+            EditBox nameField = ((IMixinAnvilScreen) gui).itemscroller_getNameField();
+            this.renameText = nameField != null ? nameField.getValue() : "";
+            this.hasRename = !this.renameText.isEmpty();
+        }
+        else if (gui instanceof GrindstoneScreen)
+        {
+            this.processingType = RecipeType.GRINDSTONE;
+        }
+        else if (gui instanceof LoomScreen && gui.getMenu() instanceof LoomMenu menu)
+        {
+            this.processingType = RecipeType.LOOM;
+            this.selectedRecipe = menu.getSelectedBannerPatternIndex();
+        }
+        else if (gui instanceof SmithingScreen)
+        {
+            this.processingType = RecipeType.SMITHING;
+        }
+        else if (gui instanceof EnchantmentScreen)
+        {
+            this.processingType = RecipeType.ENCHANTMENT;
+            this.enchantmentOption = 0;
+        }
+    }
+
+    public boolean isProcessingRecipe()
+    {
+        return this.processingType != RecipeType.CRAFTING;
+    }
+
+    public RecipeType getProcessingType()
+    {
+        return this.processingType;
+    }
+
+    public void setProcessingType(RecipeType type)
+    {
+        this.processingType = type;
+    }
+
+    public int getSelectedRecipe()
+    {
+        return this.selectedRecipe;
+    }
+
+    public int getEnchantmentOption()
+    {
+        return this.enchantmentOption;
+    }
+
+    public void setEnchantmentOption(int option)
+    {
+        this.enchantmentOption = option;
+    }
+
+    public String getRenameText()
+    {
+        return this.renameText;
+    }
+
+    public boolean hasRename()
+    {
+        return this.hasRename;
+    }
+
+    /** Extra display text shown under the recipe inputs in the recipe view (enchantment level / anvil rename) */
+    @Nullable
+    public String getDisplayText()
+    {
+        if (this.processingType == RecipeType.ENCHANTMENT && this.enchantmentOption >= 0)
+        {
+            return "Lv." + (this.enchantmentOption + 1);
+        }
+        if (this.processingType == RecipeType.ANVIL && this.hasRename)
+        {
+            return this.renameText;
+        }
+        return null;
+    }
+
+    /** Fill the processing GUI input slots from the player inventory, then select recipe / option / rename */
+    public void fillProcessingInputs(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
+    {
+        if (!this.isValid() || !CraftingHandler.isProcessingGui(gui)) return;
+
+        CraftingHandler.ProcessingGuiDef def = CraftingHandler.getProcessingGuiDef(gui);
+        if (def == null) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        for (int i = 0; i < this.processingInputs.length && i < def.inputCount(); i++)
+        {
+            int slotNum = def.inputFirst() + i;
+            if (slotNum >= gui.getMenu().slots.size()) break;
+
+            ItemStack template = this.processingInputs[i];
+            if (template.isEmpty()) continue;
+
+            Slot slot = gui.getMenu().getSlot(slotNum);
+
+            // Remove any non-matching item from the slot first, so the correct item can be moved in
+            if (slot.hasItem() && InventoryUtils.areStacksEqual(slot.getItem(), template) == false)
+            {
+                InventoryUtils.shiftClickSlot(gui, slotNum);
+            }
+
+            if (slot.hasItem() == false || InventoryUtils.areStacksEqual(slot.getItem(), template) == false)
+            {
+                InventoryUtils.tryClearCursor(gui);
+                InventoryUtils.moveItemsFromInventory(gui, slotNum, mc.player.getInventory(), template, true);
+            }
+        }
+
+        this.selectProcessingOptions(gui);
+    }
+
+    /** Clear the processing GUI input slots */
+    public void clearProcessingInputs(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
+    {
+        CraftingHandler.ProcessingGuiDef def = CraftingHandler.getProcessingGuiDef(gui);
+        if (def == null) return;
+
+        for (int i = 0; i < def.inputCount(); i++)
+        {
+            int slotNum = def.inputFirst() + i;
+            if (slotNum < gui.getMenu().slots.size())
+            {
+                Slot slot = gui.getMenu().getSlot(slotNum);
+                if (slot.hasItem())
+                {
+                    InventoryUtils.shiftClickSlot(gui, slotNum);
+                }
+            }
+        }
+    }
+
+    /** Select the stored recipe / enchantment option / rename text in the processing GUI */
+    private void selectProcessingOptions(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
+    {
+        Minecraft mc = Minecraft.getInstance();
+
+        switch (this.processingType)
+        {
+            case STONECUTTER ->
+            {
+                // Always click the button: the client-side selected index may not be synced yet,
+                // so comparing it can skip the click and leave the server on the wrong recipe,
+                // which makes the output slot never match the stored result.
+                if (gui.getMenu() instanceof StonecutterMenu menu && this.selectedRecipe >= 0)
+                {
+                    mc.gameMode.handleInventoryButtonClick(menu.containerId, this.selectedRecipe);
+                }
+            }
+            case LOOM ->
+            {
+                // Always click the button (same reason as STONECUTTER)
+                if (gui.getMenu() instanceof LoomMenu menu && this.selectedRecipe >= 0)
+                {
+                    mc.gameMode.handleInventoryButtonClick(menu.containerId, this.selectedRecipe);
+                }
+            }
+            case ENCHANTMENT ->
+            {
+                // The enchantment option click is handled by craftEnchantment() with sync-wait
+                // protection. Clicking here too would double-click (double XP cost) when
+                // fillProcessingInputs() is called from within craftEnchantment().
+            }
+            case ANVIL ->
+            {
+                if (gui instanceof AnvilScreen anvilScreen && this.hasRename)
+                {
+                    Slot leftSlot = gui.getMenu().getSlot(0);
+                    Slot rightSlot = gui.getMenu().getSlot(1);
+
+                    if (leftSlot.hasItem() == false) return;
+                    if (this.processingInputs.length > 1 && this.processingInputs[1].isEmpty() == false && rightSlot.hasItem() == false) return;
+
+                    EditBox nameField = ((IMixinAnvilScreen) anvilScreen).itemscroller_getNameField();
+                    if (nameField != null)
+                    {
+                        String currentName = nameField.getValue();
+                        if (!this.renameText.equals(currentName))
+                        {
+                            nameField.setValue(this.renameText);
+                        }
+                        nameField.setFocused(false);
+                    }
+                }
+            }
+            default -> { }
+        }
+    }
+
+    /** Hook called after the generic crafting grid fill logic has filled the input slots */
+    public void onGridFilled(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
+    {
+        if (this.isProcessingRecipe())
+        {
+            this.selectProcessingOptions(gui);
+        }
+    }
+
+    /** Mass craft in a processing GUI, shift-clicking the output into the player inventory.
+     *  Single craft per tick: the output slot update is server-synced with a delay (the
+     *  stonecutter has no client-side prediction), so a loop here would see an empty output
+     *  slot after the first shift-click and exit. The onClientTick handler calls this every
+     *  tick while the key is held. */
+    public void craftProcessingAsMany(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
+    {
+        if (!this.isValid() || !CraftingHandler.isProcessingGui(gui)) return;
+
+        Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
+        if (outputSlot == null) return;
+
+        if (this.processingType == RecipeType.ENCHANTMENT)
+        {
+            this.craftEnchantment(gui, outputSlot, false);
+            return;
+        }
+
+        // Make sure the input slots are filled (refill consumed items)
+        this.fillProcessingInputs(gui);
+
+        ItemStack resultStack = this.getResult();
+
+        if (outputSlot.hasItem() && InventoryUtils.areStacksEqual(outputSlot.getItem(), resultStack))
+        {
+            InventoryUtils.shiftClickSlot(gui, outputSlot.index);
+        }
+    }
+
+    /** Mass craft in a processing GUI, dropping the output (keeps items in the player inventory).
+     *  Single craft per tick (see craftProcessingAsMany). */
+    public void craftProcessingAsManyAndKeep(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
+    {
+        if (!this.isValid() || !CraftingHandler.isProcessingGui(gui)) return;
+
+        Slot outputSlot = CraftingHandler.getFirstCraftingOutputSlotForGui(gui);
+        if (outputSlot == null) return;
+
+        if (this.processingType == RecipeType.ENCHANTMENT)
+        {
+            this.craftEnchantment(gui, outputSlot, true);
+            return;
+        }
+
+        // Make sure the input slots are filled (refill consumed items)
+        this.fillProcessingInputs(gui);
+
+        ItemStack resultStack = this.getResult();
+
+        if (outputSlot.hasItem() && InventoryUtils.areStacksEqual(outputSlot.getItem(), resultStack))
+        {
+            InventoryUtils.dropStacksWhileHasItem(gui, outputSlot.index, resultStack);
+        }
+    }
+
+    /** Fill the inputs and mass craft in a processing GUI.
+     *  Note: no clearProcessingInputs() here - clearing and refilling in the same tick makes the
+     *  output slot disappear (server sync delay) and the craft loop sees an empty output slot.
+     *  fillProcessingInputs() already removes non-matching items from the input slots. */
+    public void craftProcessingEverything(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
+    {
+        if (!this.isValid() || !CraftingHandler.isProcessingGui(gui)) return;
+
+        this.fillProcessingInputs(gui);
+        this.craftProcessingAsMany(gui);
+    }
+
+    /** Enchantment table special handling: fill -> click option -> move enchanted item out -> repeat */
+    private void craftEnchantment(AbstractContainerScreen<? extends AbstractContainerMenu> gui, Slot outputSlot, boolean keep)
+    {
+        if (!(gui.getMenu() instanceof EnchantmentMenu menu)) return;
+
+        Slot inputSlot = menu.getSlot(0);
+        Slot lapisSlot = menu.getSlot(1);
+        Minecraft mc = Minecraft.getInstance();
+
+        if (!inputSlot.hasItem())
+        {
+            this.enchantClickPending = false;
+            // Refill the input slot with the next item so the mass enchanting can continue
+            this.fillProcessingInputs(gui);
+            return;
+        }
+
+        // Enchanted: move the item out and clear the pending flag
+        if (inputSlot.getItem().isEnchanted())
+        {
+            this.enchantClickPending = false;
+
+            if (keep)
+            {
+                InventoryUtils.dropStacksWhileHasItem(gui, inputSlot.index, inputSlot.getItem());
+            }
+            else
+            {
+                InventoryUtils.shiftClickSlot(gui, inputSlot.index);
+            }
+
+            // Refill the input slot with the next item so the mass enchanting can continue
+            this.fillProcessingInputs(gui);
+            return;
+        }
+
+        // After clicking an enchantment option, wait for the server to sync the result
+        // (the item becomes enchanted). Do NOT click again while waiting, otherwise the
+        // repeated clicks get rejected / double-charge and the GUI flickers without enchanting.
+        if (this.enchantClickPending)
+        {
+            return;
+        }
+
+        if (this.processingInputs.length > 0 &&
+            inputSlot.getItem().is(this.processingInputs[0].getItem()) &&
+            lapisSlot.hasItem() && lapisSlot.getItem().is(Items.LAPIS_LAZULI) &&
+            this.enchantmentOption >= 0 && this.enchantmentOption <= 2)
+        {
+            int[] powers = menu.costs;
+            if (this.enchantmentOption < powers.length && powers[this.enchantmentOption] > 0)
+            {
+                mc.gameMode.handleInventoryButtonClick(menu.containerId, this.enchantmentOption);
+                this.enchantClickPending = true;
+            }
+        }
+    }
+
     public void storeSelectedRecipeIdFromGui(AbstractContainerScreen<? extends AbstractContainerMenu> gui)
     {
         Minecraft mc = Minecraft.getInstance();
@@ -477,6 +979,49 @@ public class RecipePattern
 
             this.result = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registry, data.getCompound(RECIPE_RESULT));
         }
+
+        // Processing GUI recipe data
+        if (data.contains("ProcessingType", Constants.NBT.TAG_STRING))
+        {
+            RecipeType type = RecipeType.fromId(data.getString("ProcessingType"));
+
+            if (type != null && type != RecipeType.CRAFTING)
+            {
+                this.processingType = type;
+                this.processingInputs = new ItemStack[0];
+                this.selectedRecipe = -1;
+                this.enchantmentOption = -1;
+                this.renameText = "";
+                this.hasRename = false;
+
+                if (data.contains("ProcessingInputs", Constants.NBT.TAG_LIST))
+                {
+                    ListData tagInputs = data.getList("ProcessingInputs");
+                    int count = tagInputs.size();
+                    ItemStack[] inputs = new ItemStack[count];
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        inputs[i] = fi.dy.masa.malilib.util.InventoryUtils.fromDataOrEmpty(registry, tagInputs.getCompoundAt(i));
+                    }
+
+                    this.processingInputs = inputs;
+                }
+                if (data.contains("SelectedRecipe", Constants.NBT.TAG_INT))
+                {
+                    this.selectedRecipe = data.getInt("SelectedRecipe");
+                }
+                if (data.contains("EnchantmentOption", Constants.NBT.TAG_INT))
+                {
+                    this.enchantmentOption = data.getInt("EnchantmentOption");
+                }
+                if (data.contains("RenameText", Constants.NBT.TAG_STRING))
+                {
+                    this.renameText = data.getString("RenameText");
+                    this.hasRename = !this.renameText.isEmpty();
+                }
+            }
+        }
     }
 
     @Nonnull
@@ -491,19 +1036,48 @@ public class RecipePattern
 	        data.putInt(RECIPE_LENGTH, this.recipe.length);
 	        data.put(RECIPE_RESULT, tag);
 
-            ListData tagIngredients = new ListData();
-
-            for (int i = 0; i < this.recipe.length; i++)
+            if (this.isProcessingRecipe())
             {
-                if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
+                data.putString("ProcessingType", this.processingType.getId());
+
+                ListData tagInputs = new ListData();
+
+                for (ItemStack stack : this.processingInputs)
                 {
-	                tag = fi.dy.masa.malilib.util.InventoryUtils.toDataOrEmpty(this.recipe[i], registry);
-                    tag.putInt(RECIPE_SLOT, i);
-                    tagIngredients.add(tag);
+                    tagInputs.add(fi.dy.masa.malilib.util.InventoryUtils.toDataOrEmpty(stack, registry));
+                }
+
+                data.put("ProcessingInputs", tagInputs);
+
+                if (this.selectedRecipe >= 0)
+                {
+                    data.putInt("SelectedRecipe", this.selectedRecipe);
+                }
+                if (this.enchantmentOption >= 0)
+                {
+                    data.putInt("EnchantmentOption", this.enchantmentOption);
+                }
+                if (this.hasRename)
+                {
+                    data.putString("RenameText", this.renameText);
                 }
             }
+            else
+            {
+                ListData tagIngredients = new ListData();
 
-	        data.put(RECIPE_INGREDIENTS, tagIngredients);
+                for (int i = 0; i < this.recipe.length; i++)
+                {
+                    if (this.recipe[i].isEmpty() == false && InventoryUtils.isStackEmpty(this.recipe[i]) == false)
+                    {
+                        tag = fi.dy.masa.malilib.util.InventoryUtils.toDataOrEmpty(this.recipe[i], registry);
+                        tag.putInt(RECIPE_SLOT, i);
+                        tagIngredients.add(tag);
+                    }
+                }
+
+                data.put(RECIPE_INGREDIENTS, tagIngredients);
+            }
         }
 
         return data;
@@ -523,12 +1097,12 @@ public class RecipePattern
 
     public int getRecipeLength()
     {
-        return this.recipe.length;
+        return this.isProcessingRecipe() ? this.processingInputs.length : this.recipe.length;
     }
 
     public ItemStack[] getRecipeItems()
     {
-        return this.recipe;
+        return this.isProcessingRecipe() ? this.processingInputs : this.recipe;
     }
 
     public boolean isEmpty()
@@ -550,7 +1124,7 @@ public class RecipePattern
     {
         int count = 0;
 
-        for (ItemStack itemStack : this.recipe)
+        for (ItemStack itemStack : this.getRecipeItems())
         {
             if (!itemStack.isEmpty())
             {

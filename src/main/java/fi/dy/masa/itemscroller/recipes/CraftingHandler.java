@@ -16,10 +16,33 @@ public class CraftingHandler
     private static final Map<CraftingOutputSlot, SlotRange> CRAFTING_GRID_SLOTS = new HashMap<>();
     private static final Set<Class<? extends AbstractContainerScreen<?>>> CRAFTING_GUIS = new HashSet<>();
 
+    /** Processing GUI definitions: output slot number + input slot range (first, count) */
+    private static final Map<Class<? extends AbstractContainerScreen<?>>, ProcessingGuiDef> PROCESSING_GUIS = new HashMap<>();
+
+    public record ProcessingGuiDef(int outputSlot, int inputFirst, int inputCount) {}
+
     public static void clearDefinitions()
     {
         CRAFTING_GRID_SLOTS.clear();
         CRAFTING_GUIS.clear();
+        PROCESSING_GUIS.clear();
+    }
+
+    public static void registerProcessingGui(Class<? extends AbstractContainerScreen<?>> guiClass,
+                                             int outputSlot, int inputFirst, int inputCount)
+    {
+        PROCESSING_GUIS.put(guiClass, new ProcessingGuiDef(outputSlot, inputFirst, inputCount));
+    }
+
+    public static boolean isProcessingGui(Screen gui)
+    {
+        return gui instanceof AbstractContainerScreen<?> acs && PROCESSING_GUIS.containsKey(acs.getClass());
+    }
+
+    @Nullable
+    public static ProcessingGuiDef getProcessingGuiDef(AbstractContainerScreen<?> gui)
+    {
+        return PROCESSING_GUIS.get(gui.getClass());
     }
 
     @SuppressWarnings("unchecked")
@@ -46,7 +69,9 @@ public class CraftingHandler
 
     public static boolean isCraftingGui(Screen gui)
     {
-        return (gui instanceof AbstractContainerScreen) && CRAFTING_GUIS.contains(((AbstractContainerScreen<?>) gui).getClass());
+        return (gui instanceof AbstractContainerScreen) &&
+               (CRAFTING_GUIS.contains(((AbstractContainerScreen<?>) gui).getClass()) ||
+                PROCESSING_GUIS.containsKey(((AbstractContainerScreen<?>) gui).getClass()));
     }
 
     /**
@@ -59,7 +84,22 @@ public class CraftingHandler
     @Nullable
     public static SlotRange getCraftingGridSlots(AbstractContainerScreen<?> gui, Slot slot)
     {
-        return CRAFTING_GRID_SLOTS.get(CraftingOutputSlot.from(gui, slot));
+        SlotRange range = CRAFTING_GRID_SLOTS.get(CraftingOutputSlot.from(gui, slot));
+
+        if (range != null)
+        {
+            return range;
+        }
+
+        // Processing GUIs: the output slot maps to the input slot range
+        ProcessingGuiDef def = PROCESSING_GUIS.get(gui.getClass());
+
+        if (def != null && slot.index == def.outputSlot())
+        {
+            return new SlotRange(def.inputFirst(), def.inputCount());
+        }
+
+        return null;
     }
 
     @Nullable
@@ -74,6 +114,13 @@ public class CraftingHandler
                     return slot;
                 }
             }
+        }
+
+        ProcessingGuiDef def = PROCESSING_GUIS.get(gui.getClass());
+
+        if (def != null && def.outputSlot() < gui.getMenu().slots.size())
+        {
+            return gui.getMenu().getSlot(def.outputSlot());
         }
 
         return null;

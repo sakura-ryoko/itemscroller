@@ -280,6 +280,7 @@ public class RecipeStorage
                 RecipePattern entry = this.recipes[i];
                 CompoundData tag = entry.writeToData(registry);
                 tag.putByte(RECIPE_INDEX, (byte) i);
+                tag.putString("Type", entry.getProcessingType().getId());
 
                 if (entry.getRecipeCategory() != null)
                 {

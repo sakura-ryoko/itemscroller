@@ -19,6 +19,7 @@
         "screen.IMixinMerchantScreen",
         "screen.IMixinAbstractRecipeBookScreen",
         "screen.IMixinAbstractContainerScreen",
+        "screen.IMixinAnvilScreen",
         "menu.MixinCraftingMenu",
         "screen.MixinAbstractContainerScreen",
         "screen.MixinMerchantScreen",

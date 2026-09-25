@@ -12,8 +12,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
+import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
+import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
+import net.minecraft.client.gui.screens.inventory.GrindstoneScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.inventory.LoomScreen;
+import net.minecraft.client.gui.screens.inventory.SmithingScreen;
+import net.minecraft.client.gui.screens.inventory.StonecutterScreen;
 import net.minecraft.world.inventory.ResultSlot;
 
 import fi.dy.masa.malilib.config.ConfigUtils;
@@ -128,6 +134,12 @@ public class Configs implements IConfigHandler
     public static class Toggles
     {
         public static final ConfigBoolean CRAFTING_FEATURES         = new ConfigBoolean("enableCraftingFeatures",           true).apply(TOGGLES_KEY);
+        public static final ConfigBoolean STONECUTTER_FEATURES      = new ConfigBoolean("enableStonecutterFeatures",        false).apply(TOGGLES_KEY);
+        public static final ConfigBoolean ANVIL_FEATURES            = new ConfigBoolean("enableAnvilFeatures",              false).apply(TOGGLES_KEY);
+        public static final ConfigBoolean GRINDSTONE_FEATURES       = new ConfigBoolean("enableGrindstoneFeatures",         false).apply(TOGGLES_KEY);
+        public static final ConfigBoolean LOOM_FEATURES             = new ConfigBoolean("enableLoomFeatures",               false).apply(TOGGLES_KEY);
+        public static final ConfigBoolean SMITHING_FEATURES         = new ConfigBoolean("enableSmithingFeatures",           false).apply(TOGGLES_KEY);
+        public static final ConfigBoolean ENCHANTMENT_FEATURES      = new ConfigBoolean("enableEnchantmentFeatures",        false).apply(TOGGLES_KEY);
         public static final ConfigBoolean DROP_MATCHING             = new ConfigBoolean("enableDropkeyDropMatching",        true).apply(TOGGLES_KEY);
         public static final ConfigBoolean ITEM_MOVING_FALLBACK      = new ConfigBoolean("enableItemMovingFallback",         false).apply(TOGGLES_KEY);
         public static final ConfigBoolean RIGHT_CLICK_CRAFT_STACK   = new ConfigBoolean("enableRightClickCraftingOneStack", true).apply(TOGGLES_KEY);
@@ -142,6 +154,12 @@ public class Configs implements IConfigHandler
 
         public static final ImmutableList<@NotNull IConfigValue> OPTIONS = ImmutableList.of(
                 CRAFTING_FEATURES,
+                STONECUTTER_FEATURES,
+                ANVIL_FEATURES,
+                GRINDSTONE_FEATURES,
+                LOOM_FEATURES,
+                SMITHING_FEATURES,
+                ENCHANTMENT_FEATURES,
                 DROP_MATCHING,
                 ITEM_MOVING_FALLBACK,
                 RIGHT_CLICK_CRAFT_STACK,
@@ -193,8 +211,14 @@ public class Configs implements IConfigHandler
         CraftingHandler.addCraftingGridDefinition(CraftingScreen.class.getName(), ResultSlot.class.getName(), 0, new SlotRange(1, 9));
         //"net.minecraft.client.gui.inventory.PlayerInventoryScreen,net.minecraft.inventory.SlotCrafting,0,1-4", // vanilla player inventory crafting grid
         CraftingHandler.addCraftingGridDefinition(InventoryScreen.class.getName(), ResultSlot.class.getName(), 0, new SlotRange(1, 4));
-//        CraftingHandler.addCraftingGridDefinition(StonecutterScreen.class.getName(), Slot.class.getName(), 0, new SlotRange(1, 1));
-        // TODO FIXME -- Stonecutter Screen (Slot numbering, etc) --> Doesn't work the same as the crafting grid
+
+        // Processing GUIs: output slot + input slot range (first, count)
+        CraftingHandler.registerProcessingGui(StonecutterScreen.class, 1, 0, 1);
+        CraftingHandler.registerProcessingGui(AnvilScreen.class, 2, 0, 2);
+        CraftingHandler.registerProcessingGui(GrindstoneScreen.class, 2, 0, 2);
+        CraftingHandler.registerProcessingGui(LoomScreen.class, 3, 0, 3);
+        CraftingHandler.registerProcessingGui(SmithingScreen.class, 3, 0, 3);
+        CraftingHandler.registerProcessingGui(EnchantmentScreen.class, 0, 0, 2);
     }
 
     public static void saveToFile()
