@@ -152,6 +152,7 @@ public class KeybindCallbacks implements IHotkeyCallback, IClientTickHandler
         {
             if (InputUtils.isRecipeViewOpen() && InventoryUtils.isCraftingSlot(gui, slot))
             {
+                System.out.print("onKeyActionImpl()\n");
                 recipes.storeCraftingRecipeToCurrentSelection(slot, gui, true, true, mc);
                 return true;
             }

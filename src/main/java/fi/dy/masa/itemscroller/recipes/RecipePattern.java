@@ -303,11 +303,11 @@ public class RecipePattern
 
         if (range != null)
         {
-            if (slot.hasItem())
+            if (slot.hasItem() && this.isEmpty())
             {
                 int gridSize = range.getSlotCount();
 
-                if (fromKeybind || slot instanceof ResultSlot rs)
+                if (slot instanceof ResultSlot rs) // fromKeybind ||
                 {
                     // Slots are only populated from the Keybinds Callback
                     int numSlots = gui.getMenu().slots.size();
@@ -318,23 +318,31 @@ public class RecipePattern
                         Slot slotTmp = gui.getMenu().getSlot(s);
                         this.recipe[i] = slotTmp.hasItem() ? slotTmp.getItem().copy() : InventoryUtils.EMPTY_STACK;
                     }
+
+                    this.result = rs.getItem().copy();
                     this.recipeSaveTime = System.currentTimeMillis();
                 }
                 // Stop the mod from overwriting the correctly saved recipe with a button or nugget from the Grid clear
                 else if ((System.currentTimeMillis() - this.recipeSaveTime) < 4000L)
                 {
-//                    System.out.printf("storeCraftingRecipe() SKIPPING InputHandler input result [%s] versus [%s]\n", this.result.toString(), slot.getItem().toString());
+                    System.out.printf("storeCraftingRecipe() SKIPPING InputHandler input result [%s] versus [%s]\n", this.result.toString(), slot.getItem().toString());
                     this.recipeSaveTime = System.currentTimeMillis();
                     gui.getMenu().setCarried(ItemStack.EMPTY);
                     InventoryUtils.clearFirstCraftingGridOfAllItems(gui);
                     return;
                 }
 
-//                System.out.printf("storeCraftingRecipe() old result [%s] new [%s]\n", this.result.toString(), slot.getItem().toString());
-                this.result = slot.getItem().copy();
+                System.out.printf("storeCraftingRecipe() old result [%s] new [%s]\n", this.result.toString(), slot.getItem().toString());
+//                this.result = slot.getItem().copy();
+
+                if (this.result.isEmpty())
+                {
+                    this.clearRecipe();
+                }
+
                 this.lookupVanillaRecipe(mc.level);
 
-                if (this.vanillaRecipe == null)
+                if (this.vanillaRecipe == null || this.result.isEmpty())
                 {
                     this.storeSelectedRecipeIdFromGui(gui);
                 }
@@ -369,8 +377,8 @@ public class RecipePattern
         }
 
         // DEBUG
-//        RecipeBookUtils.toggleDebugLog(true);
-//        RecipeBookUtils.toggleAnsiColorLog(true);
+        RecipeBookUtils.toggleDebugLog(true);
+        RecipeBookUtils.toggleAnsiColorLog(true);
 
         if (gui instanceof AbstractRecipeBookScreen<?> rbs)
         {
