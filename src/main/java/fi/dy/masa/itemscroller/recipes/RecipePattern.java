@@ -66,6 +66,7 @@ public class RecipePattern
 
     public void clearRecipe()
     {
+        ItemScroller.debugLog("clearRecipe(): Was result: [{}]", this.result.toString());
         Arrays.fill(this.recipe, InventoryUtils.EMPTY_STACK);
         this.result = InventoryUtils.EMPTY_STACK;
         this.vanillaRecipe = null;
@@ -146,6 +147,8 @@ public class RecipePattern
             return;
         }
 
+        ItemScroller.debugLog("storeIdFromClientRecipeBook(): saved result: [{}], networkId: [{}]",
+                              this.result.toString(), pair.getLeft().index());
         this.storeNetworkRecipeId(pair.getLeft());
         this.storeRecipeCategory(pair.getRight().category());
         this.storeRecipeDisplayEntry(pair.getRight());
@@ -281,6 +284,7 @@ public class RecipePattern
 
                     this.result = rs.getItem().copy();
                     this.recipeSaveTime = System.currentTimeMillis();
+                    ItemScroller.debugLog("storeCraftingRecipe(): save result: [{}]", this.result.toString());
                 }
                 // Stop the mod from overwriting the correctly saved recipe with a button or nugget from the Grid clear
                 else if ((System.currentTimeMillis() - this.recipeSaveTime) < 4000L)
@@ -402,7 +406,7 @@ public class RecipePattern
 					                {
 						                if (RecipeBookUtils.compareStacksAndIngredients(Arrays.asList(this.getRecipeItems()), entry.craftingRequirements().get(), RecipeBookUtils.Type.fromRecipeDisplay(entry.display()), types))
 						                {
-							                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+							                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): Matched Ingredients for result stack [{}], networkId [{}]", this.getResult().toString(), id.index());
 							                this.storeNetworkRecipeId(id);
 							                this.storeRecipeCategory(entry.category());
 							                this.storeRecipeDisplayEntry(entry);
@@ -410,12 +414,12 @@ public class RecipePattern
 						                }
 						                else
 						                {
-							                ItemScroller.LOGGER.warn("storeSelectedRecipeIdFromGui(): failed to match Ingredients for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+							                ItemScroller.LOGGER.warn("storeSelectedRecipeIdFromGui(): failed to match Ingredients for result stack [{}], networkId [{}]", this.getResult().toString(), id.index());
 						                }
 					                }
 					                else
 					                {
-						                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): No craftingRequirements present, Saving Blindly for result stack [{}] networkId [{}]", this.getResult().toString(), id.index());
+						                ItemScroller.debugLog("storeSelectedRecipeIdFromGui(): No craftingRequirements present, Saving Blindly for result stack [{}], networkId [{}]", this.getResult().toString(), id.index());
 						                this.storeNetworkRecipeId(id);
 						                this.storeRecipeCategory(entry.category());
 						                this.storeRecipeDisplayEntry(entry);

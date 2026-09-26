@@ -20,7 +20,8 @@ public class ItemScroller implements ModInitializer
     {
         if (Configs.Generic.DEBUG_MESSAGES.getBooleanValue())
         {
-            LOGGER.info(key, args);
+            final String msg = "[DEBUG] "+key;
+            LOGGER.info(msg, args);
         }
     }
 }

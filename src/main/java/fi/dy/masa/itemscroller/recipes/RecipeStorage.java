@@ -197,7 +197,7 @@ public class RecipeStorage
 
                 if (RecipeBookUtils.matchClientRecipeBookEntry(recipe.getResult(), Arrays.asList(recipe.getRecipeItems()), entry, types, mc))
                 {
-                    ItemScroller.debugLog("onAddToRecipeBook(): Positive Match for result stack: [{}] networkId [{}]", recipe.getResult().toString(), entry.id().index());
+                    ItemScroller.debugLog("onAddToRecipeBook(): Positive Match for result stack: [{}], networkId [{}]", recipe.getResult().toString(), entry.id().index());
                     recipe.storeNetworkRecipeId(entry.id());
                     recipe.storeRecipeCategory(entry.category());
                     recipe.storeRecipeDisplayEntry(entry);
