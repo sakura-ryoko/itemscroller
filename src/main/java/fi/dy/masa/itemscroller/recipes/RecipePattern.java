@@ -66,7 +66,6 @@ public class RecipePattern
 
     public void clearRecipe()
     {
-        ItemScroller.debugLog("clearRecipe(): Was result: [{}]", this.result.toString());
         Arrays.fill(this.recipe, InventoryUtils.EMPTY_STACK);
         this.result = InventoryUtils.EMPTY_STACK;
         this.vanillaRecipe = null;
@@ -301,6 +300,7 @@ public class RecipePattern
 
                 if (this.result.isEmpty())
                 {
+                    ItemScroller.debugLog("storeCraftingRecipe(): Clear Recipe: was result: [{}]", this.result.toString());
                     this.clearRecipe();
                 }
 
@@ -315,6 +315,7 @@ public class RecipePattern
             }
             else if (fromKeybind && clearIfEmpty)
             {
+                ItemScroller.debugLog("storeCraftingRecipe(): Clear Recipe: was result: [{}]", this.result.toString());
                 this.clearRecipe();
             }
         }
